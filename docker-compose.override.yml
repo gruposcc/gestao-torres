@@ -1,0 +1,10 @@
+services:
+  postgres:
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+      
+    #environment:
+      #POSTGRES_HOST_AUTH_METHOD: trust  
+    volumes:
+      - /var/lib/postgresql
+

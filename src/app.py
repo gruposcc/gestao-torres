@@ -1,0 +1,62 @@
+from contextlib import asynccontextmanager
+from logging import getLogger
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
+
+from core.api import app as api_app
+from core.settings import BASE_DIR, TEMPLATES
+from core.utils.jinja import CommentExtension
+from routes.pages.router import router as pages_router
+
+TEMPLATES.env.add_extension(CommentExtension)
+LOGGER = getLogger("app")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        ...
+        yield
+    except:
+        raise
+
+
+app = FastAPI(lifespan=lifespan, docs=False)
+
+app.include_router(pages_router)
+
+# adiciona o app da api
+app.mount("/api", api_app, name="api")
+
+# estaticos
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "dist")), name="static")
+
+
+# REDIRECT / -> /home
+@app.get("/")
+async def root_redirect():
+    return RedirectResponse(url="/home", status_code=302)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "http://10.4.0.7:8000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+""" 
+@app.exception_handler(401)
+async def unauthorized_handler(request: Request, exc: HTTPException):
+    # só rotas que começam com /page/
+    # LOGGER.debug("REDIRECIONANDO PARA LOGIN")
+    return RedirectResponse("/page/login", status_code=302)
+ """
