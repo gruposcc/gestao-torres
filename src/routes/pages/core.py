@@ -2,10 +2,14 @@ import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, Request
+from fastapi.responses import HTMLResponse
 
+from core.database import get_db_session
 from core.settings import TEMPLATES
+from deps.auth import get_current_user
 from schemas.auth import UserAuthForm
 from schemas.user import UserIn
+from services.auth import AuthService
 
 logger = logging.getLogger("app.pages.core")
 logger.level = logging.DEBUG
@@ -15,18 +19,60 @@ router = APIRouter()
 
 
 @router.get("/home")
-async def home(request: Request):
-    context = {"request": request}
+async def home(request: Request, user=Depends(get_current_user)):
+    context = {"request": request, "user": user}
     return TEMPLATES.TemplateResponse("home.html", context)
 
 
 @router.get("/login")
 async def login_page(request: Request):
-    context = {"request": request}
+    context = {"request": request, "error": None}
     return TEMPLATES.TemplateResponse("login.html", context)
 
 
 @router.post("/login")
-async def login_post(request: Request, form: Annotated[UserAuthForm, Form()]):
-    context = {"request": request}
-    return form
+async def login_post(
+    request: Request,
+    form: Annotated[UserAuthForm, Form()],
+    dbSession=Depends(get_db_session),
+):
+    service = AuthService(dbSession)
+
+    success, payload = await service.login(form)
+    if not success:
+        # retorna fragmento de html com erro
+        context = {"request": request, "username": form.username, "error": payload}
+        return TEMPLATES.TemplateResponse(
+            "login.html", context, block_name="login_form"
+        )
+
+    response = HTMLResponse(status_code=200)
+    response.set_cookie(
+        "access-token",
+        payload.access_token,  # pyright: ignore[reportAttributeAccessIssue]
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        path="/",
+    )
+    response.set_cookie(
+        "refresh-token",
+        payload.refresh_token,  # pyright: ignore[reportAttributeAccessIssue]
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        path="",
+    )
+
+    response.headers["HX-Redirect"] = "/home"
+
+    return response
+
+
+@router.post("/logout", status_code=204)
+async def logout(request: Request):
+    response = HTMLResponse()
+    response.delete_cookie("access-token", path="/")
+    response.delete_cookie("refresh-token", path="/")
+    response.headers["HX-Redirect"] = "/login"
+    return response

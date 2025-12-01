@@ -17,9 +17,9 @@ class AuthService(AbstractBaseService):
         user_service = UserService(self.dbSession)
         user = await user_service.get_one_by(username=data.username)
         if not user:
-            return False, {"error": {"username": "Usuário não existe"}}
+            return False, {"username": "Usuário não existe"}
         if not verify_password(data.password, user.password):
-            return False, {"error": {"password": "Senha incorreta"}}
+            return False, {"password": "Senha incorreta"}
 
         # TEMPORARIO
         permissions = ["admin"]

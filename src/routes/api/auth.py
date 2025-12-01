@@ -2,6 +2,7 @@ import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Response
+from fastapi.responses import HTMLResponse
 
 from core.database import get_db_session
 from core.settings import TEMPLATES
@@ -18,14 +19,14 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/login", response_model=UserOut)
-async def login(
-    data: UserAuthForm, response: Response, dbSession=Depends(get_db_session)
-):
+async def login(data: UserAuthForm, dbSession=Depends(get_db_session)):
     service = AuthService(dbSession)
 
     success, payload = await service.login(data)
     if not success:
         raise HTTPException(401, payload)
+
+    response = HTMLResponse(status_code=200)
 
     response.set_cookie(
         "access-token",
@@ -45,7 +46,6 @@ async def login(
         path="",
     )
 
-    response.status_code = 200
     return response
 
 

@@ -1,19 +1,67 @@
 {% extends "base.html" %}
 
 {% block base_body %}
-<div class="login-container">
-    <h1>Login</h1>
-    
-    {% block login_form %}
-        <form hx-post="/login" hx-swap="outerHTML">
-            {% if error %}
-                <div style="color: red; font-weight: bold;">{{ error }}</div>
-            {% endif %}
-            
-            <input type="text" name="username" placeholder="Usuário" required>
-            <input type="password" name="password" placeholder="Senha" required>
-            <button type="submit">Entrar</button>
-        </form>
-    {% endblock %}
+<div class="login-container flex items-center justify-center min-h-screen bg-base-200 p-4">
+    <div class="hero-content flex flex-col items-center justify-center w-full max-w-xl">
+
+        <div class="card w-full shadow-2xl bg-base-100 rounded-xl">
+            <div class="card-body items-center p-8">
+
+                <h2 class="card-title text-3xl font-bold mb-6">Login</h2>
+                
+                {% block login_form %}
+                <form hx-post="/login" hx-swap="outerHTML" class="w-full">
+
+                    <fieldset class="form-control mb-4">
+                        <label class="label">
+                            <span class="label-text font-semibold">Nome de usuário</span>
+                        </label>
+                        <input type="text" 
+                            placeholder="Digite seu usuário"
+                            class="input input-bordered w-full 
+                            {% if error.username %}
+                                input-error
+                            {% endif %}"
+                            required
+                            value="{{username if username else ""}}"
+                            name="username"
+                        />
+                        <div class="h-6"> {% if error.username %}
+                                <p class="label text-error">{{error.username}}</p>
+                            {% endif %}
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="form-control mb-6">
+                        <label class="label">
+                            <span class="label-text font-semibold">Senha</span>
+                        </label>
+                        <input type="password"
+                            placeholder="Digite sua senha"
+                            class="input input-bordered w-full
+                            {% if error.password %}
+                                input-error
+                            {% endif %}"
+                            required
+                            name="password"
+                        />
+                         <div class="h-6"> {% if error.password %}
+                                <p class="label text-error">{{error.password}}</p>
+                            {% endif %}
+                        </div>
+                    </fieldset>
+
+                    <div class="form-control mt-6">
+                        <button type="submit" class="btn btn-primary text-lg font-bold w-full">Entrar</button>
+                    </div>
+                </form>
+                {% endblock %}
+                
+                <p class="text-sm mt-6">
+                    <a href="/register" class="link link-hover text-primary font-semibold">Esqueci minha senha</a>
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

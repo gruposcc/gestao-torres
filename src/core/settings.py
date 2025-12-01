@@ -3,6 +3,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi.templating import Jinja2Templates
+from jinja2_fragments.fastapi import Jinja2Blocks
 
 from .log import LOG_CONFIG  # noqa: F401
 
@@ -36,4 +37,4 @@ JWT_EXPIRE_MINUTES_REFRESH = 60 * 24 * 7  # 7 dias
 
 BASE_DIR = Path(__file__).parent.parent
 
-TEMPLATES = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+TEMPLATES = Jinja2Blocks(directory=str(BASE_DIR / "templates"))
