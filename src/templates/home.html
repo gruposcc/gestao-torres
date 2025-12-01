@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Bem-vindo, {{ username }}!</h1>
+    <p>Esta é uma área protegida.</p>
+    <button hx-post="/logout">Sair</button>
+{% endblock %}

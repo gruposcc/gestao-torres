@@ -38,7 +38,7 @@ DEV_LOGGERS = {
         "level": "INFO",
         "propagate": False,
     },
-    "app": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
+    "app.": {"handlers": ["console"], "level": LOG_LEVEL, "propagate": False},
 }
 
 LOG_CONFIG = {
@@ -46,6 +46,6 @@ LOG_CONFIG = {
     "disable_existing_loggers": False,
     "formatters": FORMATTERS,
     "handlers": HANDLERS,
-    "root": {"handlers": ["console"], "level": "CRITICAL"},
+    "root": {"handlers": ["console"], "level": "INFO"},
     "loggers": DEV_LOGGERS,
 }

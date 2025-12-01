@@ -14,6 +14,10 @@ for module_info in pkgutil.iter_modules(pages_path):
     if name == "router":
         continue
 
+    if module_info.ispkg:
+        # se for um pacote
+        continue
+
     module = importlib.import_module(f"routes.pages.{name}")
 
     if hasattr(module, "router"):
