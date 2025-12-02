@@ -1,14 +1,13 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
-from core.database import get_db_session
 from core.settings import TEMPLATES
 from deps.auth import get_current_user
+from deps.db import get_db
 from schemas.auth import UserAuthForm
-from schemas.user import UserIn
 from services.auth import AuthService
 
 logger = logging.getLogger("app.pages.core")
@@ -20,7 +19,12 @@ router = APIRouter()
 
 @router.get("/home")
 async def home(request: Request, user=Depends(get_current_user)):
-    context = {"request": request, "user": user}
+    page = {"title": "Home"}
+    context = {"request": request, "user": user, "page": page}
+
+    if request.headers.get("hx-request") == "true":
+        return TEMPLATES.TemplateResponse("home.html", context, block_name="content")
+
     return TEMPLATES.TemplateResponse("home.html", context)
 
 
@@ -34,8 +38,11 @@ async def login_page(request: Request):
 async def login_post(
     request: Request,
     form: Annotated[UserAuthForm, Form()],
-    dbSession=Depends(get_db_session),
+    dbSession=Depends(get_db),
 ):
+    if not request.headers.get("hx-request") == "true":
+        raise HTTPException(403)
+
     service = AuthService(dbSession)
 
     success, payload = await service.login(form)

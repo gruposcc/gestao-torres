@@ -1,14 +1,11 @@
 import logging
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import HTMLResponse
 
-from core.database import get_db_session
-from core.settings import TEMPLATES
-from deps.auth import get_current_user
+from deps.auth import get_current_user, get_db
 from schemas.auth import UserAuthForm, UserSession
-from schemas.user import UserIn, UserOut
+from schemas.user import UserOut
 from services.auth import AuthService
 
 logger = logging.getLogger("app.api.user")
@@ -19,7 +16,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/login", response_model=UserOut)
-async def login(data: UserAuthForm, dbSession=Depends(get_db_session)):
+async def login(data: UserAuthForm, dbSession=Depends(get_db)):
     service = AuthService(dbSession)
 
     success, payload = await service.login(data)

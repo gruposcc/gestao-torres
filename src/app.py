@@ -7,6 +7,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from core.api import app as api_app
+from core.database import sessionmanager
 from core.settings import BASE_DIR, TEMPLATES
 from core.utils.jinja import CommentExtension
 from routes.pages.router import router as pages_router
@@ -19,6 +20,7 @@ LOGGER = getLogger("app")
 async def lifespan(app: FastAPI):
     try:
         ...
+        sessionmanager.init_db()
         yield
     except:
         raise
@@ -62,11 +64,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-""" 
-@app.exception_handler(401)
-async def unauthorized_handler(request: Request, exc: HTTPException):
-    # só rotas que começam com /page/
-    # LOGGER.debug("REDIRECIONANDO PARA LOGIN")
-    return RedirectResponse("/page/login", status_code=302)
- """

@@ -2,8 +2,8 @@ import logging
 
 from fastapi import Depends, HTTPException, Security
 
-from core.database import get_db_session
 from core.security import access_cookie, decode_token
+from deps.db import get_db
 from schemas.auth import UserSession
 from services.user import UserService
 
@@ -11,7 +11,7 @@ logger = logging.getLogger("app.deps.auth")
 
 
 async def get_current_user(
-    cookie_token=Security(access_cookie), dbSession=Depends(get_db_session)
+    cookie_token=Security(access_cookie), dbSession=Depends(get_db)
 ):
     try:
         token_payload = decode_token(cookie_token)

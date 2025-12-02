@@ -1,0 +1,93 @@
+<div class="drawer-side z-20">
+    <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
+    
+    <div x-bind:class="isSidebarOpen ? 'w-64' : 'w-20'" class="flex flex-col min-h-full bg-base-200 text-base-content transition-all duration-300">
+      
+      <ul class="menu p-4 grow">
+        
+        <li x-bind:class="isSidebarOpen ? '' : 'hidden'" class="menu-title text-xl font-bold mb-4">
+          <span>App Dashboard</span>
+        </li>
+        
+        <li x-bind:class="isSidebarOpen ? 'hidden' : 'mb-4'"></li> 
+        
+        <li>
+          <a hx-get="/home"
+          hx-target="#content"
+          hx-swap="innerHTML"
+          hx-push-url="true"
+          href="/home"
+          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house w-5 h-5"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>            <span x-bind:class="isSidebarOpen ? '' : 'hidden'">Home</span>
+          </a>
+        </li>
+
+        <li>
+          <a hx-get="/user/list"
+          hx-target="#content"
+          hx-swap="innerHTML"
+          hx-push-url="true"
+          href="/user/list"
+          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-icon lucide-users w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg>
+            <span x-bind:class="isSidebarOpen ? '' : 'hidden'">Usuários</span>
+          </a>
+        </li>
+
+      </ul>
+
+      <div class="p-4 border-t border-base-300">
+          
+          {% comment %} <div class="flex items-center justify-between mb-4" x-bind:class="isSidebarOpen ? '' : 'justify-center'">
+             <span x-bind:class="isSidebarOpen ? '' : 'hidden'" class="text-sm font-semibold">Tema</span>
+             <label class="swap swap-rotate" x-data="{ theme: localStorage.getItem('theme') || 'light' }" @click="theme = theme === 'light' ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', theme); localStorage.setItem('theme', theme);">
+                
+                <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM18.36,17l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,18.36,17ZM20,11H19a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-1.56-5.64a1,1,0,0,0-1.41,0l-.71.71a1,1,0,0,0,1.41,1.41l.71-.71A1,1,0,0,0,18.44,5.36ZM12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14Z"/></svg>
+                
+                <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-7.22-7.22,1,1,0,0,0-.14-1.05l-.08-.06A1,1,0,0,0,12,2.36a10.38,10.38,0,0,0-5.83,5.82A10.6,10.6,0,0,0,12,22h.06l.08.06A1,1,0,0,0,13.64,21.64ZM12,7.5a4.5,4.5,0,1,1-4.5,4.5A4.5,4.5,0,0,1,12,7.5Z"/></svg>
+                
+             </label>
+          </div> {% endcomment %}
+
+      <label class="swap swap-rotate">
+        <!-- this hidden checkbox controls the state -->
+        <input type="checkbox" class="theme-controller" value="dark" />
+
+        <!-- sun icon -->
+        <svg
+          class="swap-off h-10 w-10 fill-current"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24">
+          <path
+            d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
+        </svg>
+
+        <!-- moon icon -->
+        <svg
+          class="swap-on h-10 w-10 fill-current"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24">
+          <path
+            d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
+        </svg>
+      </label>
+
+
+
+
+          
+          <div class="flex items-center space-x-3">
+              <div class="avatar">
+                  <div class="w-10 rounded-full">
+                      <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" alt="User Avatar" />
+                  </div>
+              </div>
+              
+              <div x-bind:class="isSidebarOpen ? '' : 'hidden'">
+                  <p class="font-semibold">{{user.username if user else ""}}</p>
+                  <a hx-post="/logout" class="text-xs text-error link link-hover">Sair</a>
+              </div>
+          </div>
+          </div>
+      </div>
+  </div>

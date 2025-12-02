@@ -1,0 +1,100 @@
+{% extends "template.html" %}
+
+{% block content %}
+{% block form %}
+<form hx-post="/user/create" 
+    hx-swap="outerHTML" 
+    class="card bg-base-100 shadow-2xl p-8 max-w-lg mx-auto">
+
+        
+        <h3 class="card-title text-2xl mb-6"> Novo Cadastro de Usuário</h3>
+
+        <div class="form-control w-full mb-4">
+            <label class="label">
+                <span class="label-text font-semibold">Nome de Usuário (Username)</span>
+                <span class="label-text-alt text-error">*</span>
+            </label>
+            <input type="text" 
+                   name="username" 
+                   placeholder="Ex: bernardo" 
+                   class="input input-bordered w-full" 
+                   required
+                   minlength="3"
+                   maxlength="50"
+                   pattern="^[a-zA-Z0-9_.-]+$"
+                   title="Aceita letras, números e os caracteres: _ . -"
+            />
+            <label class="label">
+                <span class="label-text-alt text-gray-500">Mín. 3 e Máx. 50 caracteres.</span>
+            </label>
+        </div>
+
+        <div class="form-control w-full mb-4">
+            <label class="label">
+                <span class="label-text font-semibold">Primeiro Nome</span>
+                <span class="label-text-alt text-error">*</span>
+            </label>
+            <input type="text" 
+                   name="first_name" 
+                   class="input input-bordered w-full" 
+                   required
+                   minlength="1"
+                   maxlength="120"
+            />
+        </div>
+
+        <div class="form-control w-full mb-4">
+            <label class="label">
+                <span class="label-text font-semibold">Sobrenome</span>
+                <span class="label-text-alt text-error">*</span>
+            </label>
+            <input type="text" 
+                   name="last_name" 
+                   class="input input-bordered w-full" 
+                   required
+                   minlength="1"
+                   maxlength="120"
+            />
+        </div>
+
+        <div class="form-control w-full mb-4">
+            <label class="label">
+                <span class="label-text font-semibold">Senha</span>
+                <span class="label-text-alt text-error">*</span>
+            </label>
+            <input type="password" 
+                   name="password" 
+                   class="input input-bordered w-full" 
+                   required
+                   minlength="8"
+                   maxlength="128"
+            />
+            <label class="label">
+                <span class="label-text-alt text-gray-500">Mínimo de 8 caracteres.</span>
+            </label>
+        </div>
+
+        <div class="form-control w-full mb-6">
+            <label class="label">
+                <span class="label-text font-semibold">Email (Opcional)</span>
+            </label>
+            <input type="email" 
+                   name="email" 
+                   class="input input-bordered w-full" 
+                   maxlength="254" 
+                   placeholder="email@exemplo.com"
+            />
+            <label class="label">
+                <span class="label-text-alt text-gray-500">Tipo `EmailStr` do Pydantic.</span>
+            </label>
+        </div>
+
+        <div class="card-actions justify-end">
+            <button type="submit" class="btn btn-success">
+                Registrar Usuário
+            </button>
+        </div>
+    </form>
+    
+{% endblock form %}
+{% endblock %}
