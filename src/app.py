@@ -10,6 +10,7 @@ from core.api import app as api_app
 from core.database import sessionmanager
 from core.settings import BASE_DIR, TEMPLATES
 from core.utils.jinja import CommentExtension
+from routes.htmx.router import router as htmx_router
 from routes.pages.router import router as pages_router
 
 TEMPLATES.env.add_extension(CommentExtension)
@@ -29,6 +30,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan, docs=False)
 
 app.include_router(pages_router)
+app.include_router(htmx_router)
+
 
 # adiciona o app da api
 app.mount("/api", api_app, name="api")
@@ -49,7 +52,7 @@ async def unauthorized_handler(request: Request, exc: HTTPException):
 
 # REDIRECT / -> /home
 @app.get("/")
-async def root_redirect():
+async def root_redirect(request: Request):
     return RedirectResponse(url="/home", status_code=302)
 
 
@@ -59,6 +62,7 @@ app.add_middleware(
         "http://127.0.0.1:8000",
         "http://localhost:8000",
         "http://10.4.0.7:8000",
+        "http://10.11.11.204:8000",
     ],
     allow_credentials=True,
     allow_methods=["*"],

@@ -15,9 +15,10 @@ from services.user import UserService
 class AuthService(AbstractBaseService):
     async def login(self, data: UserAuthForm):
         user_service = UserService(self.dbSession)
-        user = await user_service.get_one_by(username=data.username)
+
+        user = await user_service.get_one_by(email=data.email)
         if not user:
-            return False, {"username": "Usuário não existe"}
+            return False, {"email": "Email não existe"}
         if not verify_password(data.password, user.password):
             return False, {"password": "Senha incorreta"}
 

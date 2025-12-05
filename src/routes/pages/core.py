@@ -19,19 +19,22 @@ router = APIRouter()
 
 @router.get("/home")
 async def home(request: Request, user=Depends(get_current_user)):
+    template = "pages/home.html"
     page = {"title": "Home"}
+
     context = {"request": request, "user": user, "page": page}
 
     if request.headers.get("hx-request") == "true":
-        return TEMPLATES.TemplateResponse("home.html", context, block_name="content")
+        return TEMPLATES.TemplateResponse(template, context, block_name="content")
 
-    return TEMPLATES.TemplateResponse("home.html", context)
+    return TEMPLATES.TemplateResponse(template, context)
 
 
 @router.get("/login")
 async def login_page(request: Request):
+    template = "pages/login.html"
     context = {"request": request, "error": None}
-    return TEMPLATES.TemplateResponse("login.html", context)
+    return TEMPLATES.TemplateResponse(template, context)
 
 
 @router.post("/login")
@@ -43,15 +46,15 @@ async def login_post(
     if not request.headers.get("hx-request") == "true":
         raise HTTPException(403)
 
+    template = "pages/login.html"
     service = AuthService(dbSession)
 
     success, payload = await service.login(form)
+
     if not success:
         # retorna fragmento de html com erro
-        context = {"request": request, "username": form.username, "error": payload}
-        return TEMPLATES.TemplateResponse(
-            "login.html", context, block_name="login_form"
-        )
+        context = {"request": request, "email": form.email, "error": payload}
+        return TEMPLATES.TemplateResponse(template, context, block_name="login_form")
 
     response = HTMLResponse(status_code=200)
     response.set_cookie(

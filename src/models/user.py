@@ -16,8 +16,13 @@ if TYPE_CHECKING:
 class User(BaseSQLModel, StatusMixin, TimeStampMixin):
     __tablename__ = "user"
 
+    @property
+    def name(self):
+        return f"{self.first_name} {self.last_name}"
+
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
-    username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    # username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(100), index=True, unique=True)
 
     first_name: Mapped[str] = mapped_column(String(120), nullable=False)
     last_name: Mapped[str] = mapped_column(String(120), nullable=False)
@@ -26,13 +31,9 @@ class User(BaseSQLModel, StatusMixin, TimeStampMixin):
         String(255), nullable=False
     )  # set nullable para true
 
-    email: Mapped[str] = mapped_column(
-        String(100), nullable=True, index=True, unique=True
-    )
-
-    from_ad: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    # from_ad: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     """ groups: Mapped[list["Group"]] = relationship(
         "Group", secondary=group_members, back_populates="members", lazy="selectin"
     )
- """
+    """

@@ -1,0 +1,34 @@
+
+{% extends "base.html" %}
+
+{% block body %}
+ <div x-data class="relative flex w-full flex-col h-svh "> 
+
+    {% include "partials/header.html" %}
+
+    <div class="flex flex-row overflow-hidden grow bg-surface-alt dark:bg-surface-dark-alt pb-4 pr-4">
+
+    {% include "partials/sidebar.html" %}
+
+
+        <!--background-->
+        <div class="border border-outline rounded-radius w-full overflow-y-auto dark:border-outline-dark">
+
+
+        
+            {# moldura  #}
+            <div class="overflow-hidden w-full h-full rounded-radius bg-surface dark:bg-surface-dark">
+                
+                <div id="content" class="p-4 flex-col">
+                <!-- Add main content here  -->
+                {% block content %}
+                
+                {% endblock content %}
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

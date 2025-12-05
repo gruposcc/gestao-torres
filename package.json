@@ -1,6 +1,20 @@
 {
   "packageManager": "pnpm@10.24.0+sha512.01ff8ae71b4419903b65c60fb2dc9d34cf8bb6e06d03bde112ef38f7a34d6904c424ba66bea5cdcf12890230bf39f9580473140ed9c946fef328b6e5238a345a",
   "dependencies": {
-    "lucide": "^0.555.0"
+    "@alpinejs/focus": "^3.15.2",
+    "@alpinejs/persist": "^3.15.2",
+    "@tailwindcss/cli": "^4.1.17",
+    "alpinejs": "^3.15.2",
+    "concurrently": "^9.2.1",
+    "daisyui": "^5.5.5",
+    "esbuild": "^0.27.0",
+    "htmx.org": "^2.0.8",
+    "lucide": "^0.555.0",
+    "tailwindcss": "^4.1.17"
+  },
+  "scripts": {
+    "build.css": "pnpx @tailwindcss/cli -i ./src/static/css/app.css -o ./src/dist/css/app.css",
+    "build.js": "esbuild src/static/js/main.js --bundle --outdir=./src/dist/js --outbase=./src/static/js --format=esm --splitting=true",
+    "dev": " concurrently 'pnpm run build.css --watch' 'pnpm run build.js --watch'"
   }
 }

@@ -1,0 +1,133 @@
+{% extends "layout/template.html" %}
+
+{% block content %}
+<div class="flex flex-col gap-4 overflow-hidden w-full overflow-x-auto">
+
+
+    <span class="text-xl font-semibold">
+    <h2>
+    Novo Usuário
+    </h2>
+    </span>
+
+    {# adicionar divider #}
+    {% block form %}
+    <form hx-post="/user/create" 
+        hx-swap="outerHTML" 
+        class="space-y-6 px-4 flex flex-col w-xl"
+    >
+        
+            <div id="form-field" class="flex flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+                {% block field_email %}
+                <label for="email" class="w-fit pl-0.5 text-sm font-medium text-on-surface-strong dark:text-on-surface-dark-strong">
+                    Email
+                    <span class="text-danger">*</span>
+                </label>
+                
+                <input 
+                    hx-post="/htmx/user/email"
+                    hx-trigger="keyup changed delay:300ms"
+                    hx-swap="innerHTML"
+                    hx-target="#form-field"
+                    id="email"
+                    type="email" 
+                    name="email" 
+                    placeholder="Ex: email@exemplo.com.br" 
+                    class="w-full rounded-radius border px-3 py-2 text-base 
+                            bg-surface dark:bg-surface-dark border-outline dark:border-outline-dark
+                            focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-primary-dark"
+                    require
+                    value="
+                    {% if email and email.value %}
+                    {{ email.value }}
+                    {% endif %}
+                    "
+                />
+                <small id="email-feedback" class="gap 0 pl-0.5 text-xs
+
+                {% if email and email.error %}
+                    text-danger
+                {% else %}
+                dark:text-on-surface-dark/60 text-on-surface/60 invisible
+                {% endif %}
+
+                ">
+                    Email ja existe
+                </small>
+                {% endblock field_email %}
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+                    <label for="first_name" class="w-fit pl-0.5 text-sm font-medium text-on-surface-strong dark:text-on-surface-dark-strong">
+                        Primeiro Nome <span class="text-danger">*</span>
+                    </label>
+                    <input 
+                        id="first_name"
+                        type="text" 
+                        name="first_name" 
+                        class="w-full rounded-radius border px-3 py-2 text-base 
+                                bg-surface dark:bg-surface-dark border-outline dark:border-outline-dark
+                                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-primary-dark" 
+                        required
+                        minlength="1"
+                        maxlength="120"
+                    />
+                </div>
+
+                <div class="flex flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+                    <label for="last_name" class="w-fit pl-0.5 text-sm font-medium text-on-surface-strong dark:text-on-surface-dark-strong">
+                        Sobrenome <span class="text-danger">*</span>
+                    </label>
+                    <input 
+                        id="last_name"
+                        type="text" 
+                        name="last_name" 
+                        class="w-full rounded-radius border px-3 py-2 text-base 
+                                bg-surface dark:bg-surface-dark border-outline dark:border-outline-dark
+                                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-primary-dark" 
+                        required
+                        minlength="1"
+                        maxlength="120"
+                    />
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+                <label for="password" class="w-fit pl-0.5 text-sm font-medium text-on-surface-strong dark:text-on-surface-dark-strong">
+                    Senha <span class="text-danger">*</span>
+                </label>
+                <input 
+                    id="password"
+                    type="password" 
+                    name="password" 
+                    class="w-full rounded-radius border px-3 py-2 text-base 
+                            bg-surface dark:bg-surface-dark border-outline dark:border-outline-dark
+                            focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-primary-dark" 
+                    required
+                    minlength="8"
+                    maxlength="128"
+                />
+                <small class="gap 0 pl-0.5 text-on-surface/60 dark:text-on-surface-dark/60 text-xs">
+                    Mínimo de 8 caracteres.
+                </small>
+            </div>
+            
+            <div class="pt-4 flex justify-end">
+                <button type="submit"
+                    class="flex justify-center items-center gap-2 whitespace-nowrap rounded-radius
+                    bg-primary border border-primary dark:border-primary-dark
+                    px-6 py-2.5 text-base font-medium tracking-wide text-on-primary
+                    transition-transform hover:opacity-90 text-center
+                    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+                    dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark">
+                    <i data-lucide="user-plus" class="size-5"></i>
+                        Registrar Usuário
+                </button>
+            </div>
+            
+        </form>
+        {% endblock form %}
+    </div>
+</div>
+{% endblock content %}

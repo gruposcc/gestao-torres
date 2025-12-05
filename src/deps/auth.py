@@ -7,7 +7,7 @@ from deps.db import get_db
 from schemas.auth import UserSession
 from services.user import UserService
 
-logger = logging.getLogger("app.deps.auth")
+logger = logging.getLogger("app.dep.auth")
 
 
 async def get_current_user(

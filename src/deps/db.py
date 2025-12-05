@@ -20,6 +20,10 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
                 detail="O Banco de Dados está indisponível ou inacessível. (Connection Refused)",
             ) from cre
 
+        # NÃO capture HTTPException, pois ela deve ser propagada
+        except HTTPException:
+            raise  # Re-lança a HTTPException original (e.g., a 401) imediatamente
+
         except Exception as e:
             logger.error(e)
             raise HTTPException(

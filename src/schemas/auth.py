@@ -1,7 +1,7 @@
 from typing import Any
 from uuid import UUID
 
-from pydantic import Field, field_validator
+from pydantic import EmailStr, Field, field_validator
 
 from core.schema import BaseSchema, ModelSchema
 
@@ -24,7 +24,7 @@ class TokenBase(BaseSchema):
 
 
 class AccessTokenPayload(TokenBase):
-    permissions: list[str] | None = None
+    permissions: list[str]
     type: str = "access"
 
 
@@ -38,16 +38,16 @@ class EncodedTokenPair(BaseSchema):
 
 
 class UserAuthForm(BaseSchema):
-    username: str = Field(...)
+    email: EmailStr = Field(...)
     password: str = Field(...)
     # source: Literal["ldap"] | Literal["local"] = "local"
 
 
 class UserSession(ModelSchema):
     id: UUID
-    username: str
     email: str
     first_name: str
     last_name: str
+    name: str
     # groups
     permissions: list[str]
