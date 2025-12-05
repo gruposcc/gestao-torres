@@ -28,7 +28,7 @@
                     hx-post="/htmx/user/email"
                     hx-trigger="keyup changed delay:300ms"
                     hx-swap="innerHTML"
-                    hx-target="#form-field"
+                    hx-target="#email-feedback"
                     id="email"
                     type="email" 
                     name="email" 
@@ -37,11 +37,6 @@
                             bg-surface dark:bg-surface-dark border-outline dark:border-outline-dark
                             focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-primary-dark"
                     require
-                    value="
-                    {% if email and email.value %}
-                    {{ email.value }}
-                    {% endif %}
-                    "
                 />
                 <small id="email-feedback" class="gap 0 pl-0.5 text-xs
 
