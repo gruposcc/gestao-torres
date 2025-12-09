@@ -1,17 +1,20 @@
 from contextlib import asynccontextmanager
 from logging import getLogger
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from core.api import app as api_app
 from core.database import sessionmanager
+from core.notifier import Notifier, get_notifier
 from core.settings import BASE_DIR, TEMPLATES
 from core.utils.jinja import CommentExtension
+from deps.auth import get_user_session
 from routes.htmx.router import router as htmx_router
 from routes.pages.router import router as pages_router
+from schemas.auth import UserSession
 
 TEMPLATES.env.add_extension(CommentExtension)
 LOGGER = getLogger("app")
@@ -54,6 +57,23 @@ async def unauthorized_handler(request: Request, exc: HTTPException):
 @app.get("/")
 async def root_redirect(request: Request):
     return RedirectResponse(url="/home", status_code=302)
+
+
+# --- Rota SSE (Endpoint de Conexão) ---
+@app.get("/events")
+async def sse_endpoint(
+    request: Request,
+    # 💡 Usa sua dependência existente para autenticar e obter o objeto UserSession
+    user_session: UserSession = Depends(get_user_session),
+    notifier: Notifier = Depends(get_notifier),
+):
+    """Endpoint para a conexão Server-Sent Events, roteado pelo user_id autenticado."""
+    # Extrai o ID do usuário autenticado para roteamento unicast
+    user_id = user_session.id
+
+    return StreamingResponse(
+        notifier.subscribe(request, user_id), media_type="text/event-stream"
+    )
 
 
 app.add_middleware(

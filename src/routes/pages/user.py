@@ -1,12 +1,14 @@
+import json
 import logging
-from typing import Annotated, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from pydantic import ValidationError
 
+from core.notifier import Notifier, get_notifier
 from core.settings import TEMPLATES
-from deps.auth import get_current_user
+from deps.auth import get_user_session
 from deps.db import get_db
 from schemas.auth import UserAuthForm
 from schemas.user import UserIn, UserOut
@@ -21,7 +23,9 @@ router = APIRouter(prefix="/user")
 
 @router.get("/")
 async def list_page(
-    request: Request, user=Depends(get_current_user), dbSession=Depends(get_db)
+    request: Request,
+    user=Depends(get_user_session),
+    dbSession=Depends(get_db),
 ):
     template = "pages/user/list.html"
     page = {"title": "Usuários"}
@@ -42,7 +46,7 @@ async def list_post(request: Request, dbSession=Depends(get_db)):
     service = UserService(dbSession)
     users = await service.get_all(response_schema=UserOut)
 
-    logger.debug(users)
+    # logger.debug(users)
     template = "pages/user/list.html"
     context = {"request": request, "users": users}
 
@@ -52,7 +56,7 @@ async def list_post(request: Request, dbSession=Depends(get_db)):
 
 
 @router.get("/create")
-async def create_page(request: Request, user=Depends(get_current_user)):
+async def create_page(request: Request, user=Depends(get_user_session)):
     template = "pages/user/create.html"
     page = {"title": "Novo usuário"}
     context = {"request": request, "user": user, "page": page}
@@ -67,8 +71,11 @@ async def create_page(request: Request, user=Depends(get_current_user)):
 async def create_post(
     request: Request,
     # form: Annotated[UserIn, Form()],
-    user=Depends(get_current_user),
+    user_session=Depends(
+        get_user_session
+    ),  # preciso estar autenticado para criar um user
     dbSession=Depends(get_db),
+    notifier: Notifier = Depends(get_notifier),
 ):
     if not request.headers.get("hx-request") == "true":
         raise HTTPException(403)
@@ -77,7 +84,7 @@ async def create_post(
 
     context = {"request": request}
     errors = {}
-    template = "user/create.html"
+    template = "pages/user/create.html"
 
     try:
         v_form = UserIn.model_validate(data)
@@ -90,17 +97,53 @@ async def create_post(
         v_form = None
 
     if errors:
-        return TEMPLATES.TemplateResponse(template, context, block_name="content")
+        return TEMPLATES.TemplateResponse(template, context, block_name="form")
     if not v_form:
         raise
 
     service = UserService(dbSession)
-    exists, user = await service.get_or_create(v_form)
+    exists = await service.email_exists(v_form.email)
+    if exists:
+        context = {
+            "request": request,
+            "email": {"value": v_form.email, "error": "Email em uso"},
+            "first_name": {"value": v_form.first_name},
+            "last_name": {"value": v_form.last_name},
+        }
+        return TEMPLATES.TemplateResponse(template, context, block_name="form")
 
-    ...
-    # validar manualmente
-    # sanitizar
-    # TODO extrair o metodo para tornar reutilizavel
+    try:
+        new_user = await service.create(v_form)
+
+        # Dispara a notificação de sucesso ANTES do redirecionamento
+        await notifier.push_to_user(
+            user_session.id,
+            level="success",
+            title="Usuário Criado!",
+            message=f"Bem-vindo, {new_user.first_name}! foi criado com sucesso.",
+        )
+
+        # Prepara o redirecionamento via HTMX
+        response = Response(status_code=200)
+        response.headers["HX-Location"] = json.dumps(
+            {
+                "path": "/user",
+                "target": "#content",
+                "swap": "innerHTML",
+            }
+        )
+        return response
+
+    except Exception as e:
+        # Erro genérico na criação (ex: erro de DB)
+        await notifier.push_to_user(
+            user_session.id,
+            level="danger",
+            title="Erro Interno",
+            message="Ocorreu um erro ao criar o usuário. Tente novamente mais tarde.",
+        )
+        logger.warning(e)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 @router.post("/create/validate-username")

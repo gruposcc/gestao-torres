@@ -10,17 +10,21 @@ from services.user import UserService
 logger = logging.getLogger("app.dep.auth")
 
 
-async def get_current_user(
+async def get_user_session(
     cookie_token=Security(access_cookie), dbSession=Depends(get_db)
-):
+) -> UserSession:
+    """returns UserSession Schema or raises 401"""
+
     try:
         token_payload = decode_token(cookie_token)
     except Exception as e:
         logger.exception(f"Erro decodificando token: {e}")
         raise HTTPException(401, "Token inválido")
 
+    # Busca user no db pelo id codificado no token
     user_service = UserService(dbSession)
     user = await user_service.get_one_by(id=token_payload.sub)
+
     if not user:
         raise HTTPException(401)
 

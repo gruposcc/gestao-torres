@@ -35,6 +35,7 @@ class JsonUserIn(UserIn): ...
 class UserOut(ModelSchema):
     id: UUID
     email: str
+    name: str
     first_name: str
     last_name: str
     # groups

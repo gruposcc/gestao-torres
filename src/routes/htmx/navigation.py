@@ -3,7 +3,6 @@ import logging
 from fastapi import APIRouter, Request
 
 from core.settings import TEMPLATES
-from deps.auth import get_current_user
 from deps.db import get_db
 from schemas.auth import UserAuthForm
 from services.auth import AuthService

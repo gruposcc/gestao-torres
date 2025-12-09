@@ -28,7 +28,7 @@
         hover:opacity-75
         hover:shadow-md 
         text-center focus-visible:outline 
-        focus-visible:outline-2 focus-visible:outline-offset-2
+        focus-visible:outline-offset-2
         focus-visible:outline-primary  dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark
         max-w-30
     "   
@@ -37,25 +37,29 @@
     Novo
 </button>
 
-
-
 <div class="overflow-hidden w-full overflow-x-auto rounded-radius border border-outline dark:border-outline-dark">
     <table class="w-full text-left text-sm text-on-surface dark:text-on-surface-dark">
         <thead class="border-b border-outline bg-surface-alt text-sm text-on-surface-strong dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark-strong">
             <tr>
-                <th scope="col" class="p-4">ID</th>
-                <th scope="col" class="p-4">Name</th>
+                <th scope="col" class="p-4">#</th>
+                <th scope="col" class="p-4">Nome</th>
                 <th scope="col" class="p-4">Email</th>
-                <th scope="col" class="p-4">Membership</th>
+                {# <th scope="col" class="p-4">Membership</th> #}
             </tr>
         </thead>
         <tbody 
         id="user-table-body" hx-post="/user/list" hx-trigger="load once" hx-target="this" hx-swap="innerHTML"
         class="divide-y divide-outline dark:divide-outline-dark">
+        
             {% block user_list %}
                 {% if users %}
                     {% for user in users %}
-                        {% include "pages/user/item.html" %}
+                        <tr>
+                            <td class="p-4">{{loop.index}}</td>
+                            <td class="p-4">{{user.name}}</td>
+                            <td class="p-4">{{user.email}}</td>
+                            {# <td class="p-4">Gold</td> #}
+                        </tr>
                     {% endfor %}
                 {% endif %}
             {% endblock user_list %}
@@ -63,4 +67,9 @@
     </table>
 </div>
 </div>
+
 {% endblock %} 
+
+{% block end_body %}
+{% include "partials/notification.html" %}
+{% endblock end_body %}

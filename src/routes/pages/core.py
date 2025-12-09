@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
 from core.settings import TEMPLATES
-from deps.auth import get_current_user
+from deps.auth import get_user_session
 from deps.db import get_db
 from schemas.auth import UserAuthForm
 from services.auth import AuthService
@@ -18,7 +18,7 @@ router = APIRouter()
 
 
 @router.get("/home")
-async def home(request: Request, user=Depends(get_current_user)):
+async def home(request: Request, user=Depends(get_user_session)):
     template = "pages/home.html"
     page = {"title": "Home"}
 

@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import HTMLResponse
 
-from deps.auth import get_current_user, get_db
+from deps.auth import get_db, get_user_session
 from schemas.auth import UserAuthForm, UserSession
 from schemas.user import UserOut
 from services.auth import AuthService
@@ -47,5 +47,5 @@ async def login(data: UserAuthForm, dbSession=Depends(get_db)):
 
 
 @router.get("/me", response_model=UserSession)
-async def me(response: Response, user=Depends(get_current_user)):
+async def me(response: Response, user=Depends(get_user_session)):
     return user

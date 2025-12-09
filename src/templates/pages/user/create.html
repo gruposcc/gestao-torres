@@ -26,8 +26,8 @@
                 
                 <input 
                     hx-post="/htmx/user/email"
-                    hx-trigger="keyup changed delay:300ms"
-                    hx-swap="innerHTML"
+                    hx-trigger="keyup changed delay:1300ms"
+                    hx-swap="outerHTML"
                     hx-target="#email-feedback"
                     id="email"
                     type="email" 
@@ -36,23 +36,30 @@
                     class="w-full rounded-radius border px-3 py-2 text-base 
                             bg-surface dark:bg-surface-dark border-outline dark:border-outline-dark
                             focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-primary-dark"
-                    require
+                    required
+                    {%if email and email.value%}
+                        value = "{{email.value}}""
+                    {%endif%}
                 />
+                {% block email_feedback %}
                 <small id="email-feedback" class="gap 0 pl-0.5 text-xs
-
-                {% if email and email.error %}
-                    text-danger
-                {% else %}
-                dark:text-on-surface-dark/60 text-on-surface/60 invisible
-                {% endif %}
-
+                    {% if email and email.error %}
+                        text-danger
+                    {% else %}
+                        invisible
+                    {% endif %}
                 ">
-                    Email ja existe
+                    {% if email and email.error %}
+                        {{email.error}}
+                    {% endif %}
                 </small>
+                {% endblock email_feedback %}
+
+
                 {% endblock field_email %}
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div class="flex flex-col gap-1 text-on-surface dark:text-on-surface-dark">
                     <label for="first_name" class="w-fit pl-0.5 text-sm font-medium text-on-surface-strong dark:text-on-surface-dark-strong">
                         Primeiro Nome <span class="text-danger">*</span>
@@ -67,7 +74,15 @@
                         required
                         minlength="1"
                         maxlength="120"
+                        {% if first_name and first_name.value %}
+                            value="{{first_name.value}}"
+                        {%endif%}
+
                     />
+                    <small class="gap 0 
+                        dark:text-on-surface-dark/60 text-on-surface/60 invisible
+                    ">
+                    </small>
                 </div>
 
                 <div class="flex flex-col gap-1 text-on-surface dark:text-on-surface-dark">
@@ -84,6 +99,9 @@
                         required
                         minlength="1"
                         maxlength="120"
+                        {% if last_name and last_name.value %}
+                            value="{{last_name.value}}"
+                        {%endif%}
                     />
                 </div>
             </div>
@@ -126,3 +144,7 @@
     </div>
 </div>
 {% endblock content %}
+
+{% block end_body %}
+
+{% endblock end_body %}
