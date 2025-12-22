@@ -1,0 +1,12 @@
+[app.hmtx.address] -  {'place_id': 6890806, 'licence': 'Data
+[ BACKEND]                     © OpenStreetMap contributors, ODbL 1.0.
+[ BACKEND]                     http://osm.org/copyright', 'osm_type': 'relation', 'osm_id':
+[ BACKEND]                     296584, 'lat': '-27.0628367', 'lon': '-51.1149650', 'class':
+[ BACKEND]                     'boundary', 'type': 'administrative', 'place_rank': 8,
+[ BACKEND]                     'importance': 0.6593061203325097, 'addresstype': 'state',
+[ BACKEND]                     'name': 'Santa Catarina', 'display_name': 'Santa Catarina,
+[ BACKEND]                     Região Sul, Brasil', 'address': {'state': 'Santa Catarina',
+[ BACKEND]                     'ISO3166-2-lvl4': 'BR-SC', 'region': 'Região Sul',
+[ BACKEND]                     'country': 'Brasil', 'country_code': 'br'}, 'boundingbox':
+[ BACKEND]                     ['-29.4409127', '-25.9557195', '-53.8373481',
+[ BACKEND]                     '-48.1021068']}

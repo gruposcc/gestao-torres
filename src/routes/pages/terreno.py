@@ -23,15 +23,29 @@ router = APIRouter(prefix="/terreno")
 @router.get("/")
 async def list_page(
     request: Request,
-    user=Depends(get_user_session),
+    session=Depends(get_user_session),
     dbSession=Depends(get_db),
 ):
     template = "pages/terreno/list.html"
     page = {"title": "Terrenos"}
 
-    context = {"request": request, "user": user, "page": page}
+    context = {"request": request, "user": session, "page": page}
 
     if request.headers.get("hx-request") == "true":
         return TEMPLATES.TemplateResponse(template, context, block_name="content")
+
+    return TEMPLATES.TemplateResponse(template, context)
+
+
+@router.get("/create")
+async def create(request: Request, session=Depends(get_user_session)):
+    template = "pages/terreno/create.html"
+    page = {"title": "Novo Terreno"}
+    context = {"request": request, "user": session, "page": page}
+
+    if request.headers.get("hx-request") == "true":
+        return TEMPLATES.TemplateResponse(
+            template, context, block_name="content"
+        )
 
     return TEMPLATES.TemplateResponse(template, context)

@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from core.api import app as api_app
 from core.database import sessionmanager
+from core.geocode import stop_geocoder
 from core.notifier import Notifier, get_notifier
 from core.settings import BASE_DIR, TEMPLATES
 from core.utils.jinja import CommentExtension
@@ -27,6 +28,7 @@ async def lifespan(app: FastAPI):
         sessionmanager.init_db()
         yield
     except:
+        await stop_geocoder()
         raise
 
 

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import AsyncGenerator, Optional
 
-from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,

@@ -1,5 +1,15 @@
+#SHELL := /bin/bash
+
 dev:
-	@uv run --env-file .env scripts/dev.py
+	@pnpm exec concurrently \
+		--names 'FRONTEND, BACKEND' \
+		--prefix-colors 'blue, green' \
+		--kill-others-on-fail \
+		'pnpm run dev' \
+		'uv run --env-file .env scripts/dev.py'
+
+create_superuser:
+	@uv run --env-file .env scripts/create_superuser.py
 
 migration:
 	@uv run --env-file .env alembic revision --autogenerate -m initial  
@@ -7,5 +17,5 @@ migration:
 migrate:
 	@uv run --env-file .env alembic upgrade head 
 
-.PHONY: dev
+.PHONY: dev migrate migration create_superuser
 

@@ -1,0 +1,133 @@
+{% extends "layout/template.html" %}
+
+{% block content %}
+<div class="flex flex-col gap-4 p-4 w-full">
+    <h2 class="text-xl font-semibold">Novo Terreno</h2>
+
+    <div x-data="addressForm()" x-init="initMap()">
+        
+        <div class="relative mb-4">
+            <label class="block text-sm font-medium text-gray-700">Pesquisar Endereço:</label>
+            <input 
+                type="text" 
+                name="q" 
+                x-model="searchQuery"
+                placeholder="Digite a rua, cidade ou CEP..."
+                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                
+                hx-get="/htmx/address/search" 
+                hx-trigger="input changed delay:500ms" 
+                hx-target="#search-results" 
+                @input="openResults = true"
+            >
+            
+            <ul id="search-results" 
+                x-show="openResults" 
+                @click.away="openResults = false"
+                class="absolute z-[1000] w-full bg-white border shadow-xl max-h-60 overflow-y-auto mt-1 rounded-md">
+            </ul>
+        </div>
+
+        <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+            <label for="country" class="w-fit pl-0.5 text-sm">Country</label>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="absolute pointer-events-none right-4 top-8 size-5">
+                <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+            </svg>
+            <select id="country" name="country" autocomplete="country"  class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+                <option selected>Please Select</option>
+                <option value="Yemen">Yemen</option>
+                <option value="Zambia">Zambia</option>
+                <option value="Zimbabwe">Zimbabwe</option>
+            </select>
+        </div>
+
+
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="text-xs text-gray-500">Latitude</label>
+                <input type="text" name="latitude" x-model="lat" readonly class="w-full bg-gray-50 border-none text-sm">
+            </div>
+            <div>
+                <label class="text-xs text-gray-500">Longitude</label>
+                <input type="text" name="longitude" x-model="lng" readonly class="w-full bg-gray-50 border-none text-sm">
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700">Endereço Selecionado:</label>
+            <textarea x-model="addressText" readonly class="w-full border-gray-200 rounded text-sm bg-gray-50" rows="2"></textarea>
+        </div>
+
+        <div id="map" class="w-full h-96 rounded-lg border shadow-inner mb-4" style="z-index: 1;"></div>
+        
+        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
+            Salvar Terreno
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('addressForm', () => ({
+            map: null,
+            marker: null,
+            lat: -23.5505,
+            lng: -46.6333,
+            addressText: '',
+            searchQuery: '',
+            openResults: false,
+
+            initMap() {
+                // Criar o mapa
+                this.map = L.map('map').setView([this.lat, this.lng], 12);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(this.map);
+
+                // Marcador inicial
+                this.marker = L.marker([this.lat, this.lng], { draggable: true }).addTo(this.map);
+
+                // Evento: Arrastar marcador
+                this.marker.on('dragend', (e) => {
+                    const pos = e.target.getLatLng();
+                    this.updateFromCoords(pos.lat, pos.lng);
+                });
+
+                // Evento: Clicar no mapa
+                this.map.on('click', (e) => {
+                    this.updateFromCoords(e.latlng.lat, e.latlng.lng);
+                });
+            },
+
+            // Chamado quando o usuário clica num resultado da busca Nominatim
+            selectAddress(data) {
+                this.lat = data.lat;
+                this.lng = data.lng;
+                this.addressText = data.address;
+                this.searchQuery = data.address; // Opcional: preenche o input com o selecionado
+                this.openResults = false;
+
+                // Move o mapa e o marcador
+                this.map.setView([this.lat, this.lng], 16);
+                this.marker.setLatLng([this.lat, this.lng]);
+            },
+
+            // Chamado quando interage diretamente com o mapa (clique ou arraste)
+            async updateFromCoords(newLat, newLng) {
+                this.lat = newLat;
+                this.lng = newLng;
+                this.marker.setLatLng([newLat, newLng]);
+
+                // Opcional: Geocoding reverso para preencher o texto do endereço
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}`);
+                    const data = await response.json();
+                    this.addressText = data.display_name;
+                } catch (e) {
+                    this.addressText = `Lat: ${newLat.toFixed(4)}, Lng: ${newLng.toFixed(4)}`;
+                }
+            }
+        }));
+    });
+</script>
+{% endblock content %}
