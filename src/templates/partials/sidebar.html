@@ -4,7 +4,7 @@
 <!-- dark overlay for when the sidebar is open on smaller screens  -->
 {# <div class="fixed inset-0 z-10 bg-surface-dark/10 backdrop-blur-xs md:hidden" aria-hidden="true" x-on:click="showSidebar = false" x-transition.opacity></div> #}
 
-    <nav 
+<nav 
     class="
         fixed left-0 z-20
         flex shrink-0 flex-col
@@ -18,19 +18,17 @@
     { 'w-60': $store.sidebar.isSidebarOpen, 'w-15' : !$store.sidebar.isSidebarOpen}"
     aria-label="sidebar navigation"
 >
-  
+    <!-- sidebar links  -->
+    <div class="flex flex-col gap-2.5 items-center ">
 
-  <!-- sidebar links  -->
-
-
-  <div class="flex flex-col gap-2.5 items-center ">
-
-    <a hx-get="/home"
-    hx-target="#content"
-    hx-swap="innerHTML"
-    hx-push-url="true"
-    href="/home"
-    class="
+        <!--home-->
+        <a 
+        hx-get="/home"
+        hx-target="#content"
+        hx-swap="innerHTML"
+        hx-push-url="true"
+        href="/home"
+        class="
         flex items-center
         rounded-radius 
 
@@ -45,16 +43,15 @@
 
 
         "
-    :class="{
-    'justify-center w-10': !$store.sidebar.isSidebarOpen,
-    'justify-start w-full pl-2.5': $store.sidebar.isSidebarOpen,
-    '!text-primary dark:!text-primary-dark !bg-primary/10 dark:!bg-primary-dark/10': $store.sidebar.currentPath === '/home'
-    }"
-    >
+        :class="{
+            'justify-center w-10': !$store.sidebar.isSidebarOpen,
+            'justify-start w-full pl-2.5': $store.sidebar.isSidebarOpen,
+            '!text-primary dark:!text-primary-dark !bg-primary/10 dark:!bg-primary-dark/10': $store.sidebar.currentPath === '/home'
+        }"
+        >
         <i data-lucide="house" class="size-5 shrink-0"></i>
         <span x-cloak
             class="
-            
                 whitespace-nowrap
                 transition-opacity 
                 duration-300
@@ -67,53 +64,99 @@
         >
             Home
         </span>
-    </a>
+        </a>
 
-    <a hx-get="/user" 
-    hx-target="#content"
-    hx-swap="innerHTML"
-    hx-push-url="true"
-    href="/user" 
-    class="
-        flex items-center
-        rounded-radius 
-
-        align-center
-        text-sm font-medium
-        h-10
-        text-on-surface dark:text-on-surface-dark
-        underline-offset-2
-        focus-visible:underline focus:outline-hidden
-        dark:hover:bg-primary-dark/5 hover:bg-primary/5
-        dark:hover:text-on-surface-dark-strong hover:text-on-surface-strong 
-
-
-        "
-    :class="{
-        'justify-center w-10': !$store.sidebar.isSidebarOpen,
-        'justify-start w-full pl-2.5': $store.sidebar.isSidebarOpen,
-        '!text-primary dark:!text-primary-dark !bg-primary/10 dark:!bg-primary-dark/10': $store.sidebar.currentPath.startsWith('/user')
-    }"
-    >
-        <i data-lucide="users-round" class="size-5 shrink-0"></i>
-        <span x-cloak
+        <!-- user -->
+        <a 
+            hx-get="/user" 
+            hx-target="#content"
+            hx-swap="innerHTML"
+            hx-push-url="true"
+            href="/user" 
             class="
-                whitespace-nowrap
-                transition-opacity 
-                duration-300
-                ease-in-out
-            "
-            :class="{ 
-                'opacity-100 w-auto pl-2': $store.sidebar.isSidebarOpen, 
-                'opacity-0 w-0 overflow-hidden': !$store.sidebar.isSidebarOpen 
+                flex items-center
+                rounded-radius 
+
+                align-center
+                text-sm font-medium
+                h-10
+                text-on-surface dark:text-on-surface-dark
+                underline-offset-2
+                focus-visible:underline focus:outline-hidden
+                dark:hover:bg-primary-dark/5 hover:bg-primary/5
+                dark:hover:text-on-surface-dark-strong hover:text-on-surface-strong 
+
+
+                "
+            :class="{
+                'justify-center w-10': !$store.sidebar.isSidebarOpen,
+                'justify-start w-full pl-2.5': $store.sidebar.isSidebarOpen,
+                '!text-primary dark:!text-primary-dark !bg-primary/10 dark:!bg-primary-dark/10': $store.sidebar.currentPath.startsWith('/user')
             }"
         >
-            Usuários
-        </span>
-    </a>
-  </div>
+            <i data-lucide="users-round" class="size-5 shrink-0"></i>
+            <span x-cloak
+                class="
+                    whitespace-nowrap
+                    transition-opacity 
+                    duration-300
+                    ease-in-out
+                "
+                :class="{ 
+                    'opacity-100 w-auto pl-2': $store.sidebar.isSidebarOpen, 
+                    'opacity-0 w-0 overflow-hidden': !$store.sidebar.isSidebarOpen 
+                }"
+            >
+                Usuários
+            </span>
+        </a>
 
-  
+        <!-- terreno -->
+        <a 
+            hx-get="/terreno" 
+            hx-target="#content"
+            hx-swap="innerHTML"
+            hx-push-url="true"
+            href="/terreno" 
+            class="
+                flex items-center
+                rounded-radius 
+                align-center
+                text-sm font-medium
+                h-10
+                text-on-surface dark:text-on-surface-dark
+                underline-offset-2
+                focus-visible:underline focus:outline-hidden
+                dark:hover:bg-primary-dark/5 hover:bg-primary/5
+                dark:hover:text-on-surface-dark-strong hover:text-on-surface-strong 
+                "
+            :class="{
+                'justify-center w-10': !$store.sidebar.isSidebarOpen,
+                'justify-start w-full pl-2.5': $store.sidebar.isSidebarOpen,
+                '!text-primary dark:!text-primary-dark !bg-primary/10 dark:!bg-primary-dark/10': $store.sidebar.currentPath.startsWith('/terreno')
+            }"
+        >
+            <i data-lucide="land-plot" class="size-5 shrink-0"></i>
+            <span x-cloak
+                class="
+                    whitespace-nowrap
+                    transition-opacity 
+                    duration-300
+                    ease-in-out
+                "
+                :class="{ 
+                    'opacity-100 w-auto pl-2': $store.sidebar.isSidebarOpen, 
+                    'opacity-0 w-0 overflow-hidden': !$store.sidebar.isSidebarOpen 
+                }"
+            >
+                Terrenos
+            </span>
+        </a>
+
+
+
+
+  </div>
   {% include "partials/user_sidebar.html" %}
 
     {# <button

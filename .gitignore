@@ -13,7 +13,7 @@ wheels/
 src/migrations/versions/*
 !src/migrations/versions/.gitkeep
 src/dist/
-!src/dist/.gitkeep
+!src/dist/.gitkeepouço
 
 #node
 node_modules

@@ -1,0 +1,73 @@
+{% extends "layout/template.html" %}
+
+{% block content %}
+
+
+<div class="flex flex-col gap-4">
+
+
+<button
+    hx-get="/terreno/create"
+    hx-target="#content"
+    hx-swap="innerHTML"
+    hx-push-url="true"
+    href="/terreno/create"
+    type="button" 
+    class="inline-flex 
+        justify-center 
+        items-center gap-2 
+        whitespace-nowrap 
+        rounded-radius
+        bg-primary border border-primary dark:border-primary-dark 
+        px-4 py-2 
+        text-sm font-medium 
+        tracking-wide
+        text-on-primary 
+        cursor-pointer
+        transition
+        hover:opacity-75
+        hover:shadow-md 
+        text-center focus-visible:outline 
+        focus-visible:outline-offset-2
+        focus-visible:outline-primary  dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark
+        max-w-30
+    "   
+>
+<i data-lucide="circle-plus" class="size-5"></i>
+    Novo
+</button>
+
+<div class="overflow-hidden w-full overflow-x-auto rounded-radius border border-outline dark:border-outline-dark">
+    <table class="w-full text-left text-sm text-on-surface dark:text-on-surface-dark">
+        <thead class="border-b border-outline bg-surface-alt text-sm text-on-surface-strong dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark-strong">
+            <tr>
+                <th scope="col" class="p-4">#</th>
+                <th scope="col" class="p-4">Nome</th>
+                {# <th scope="col" class="p-4">Email</th> #}
+                {# <th scope="col" class="p-4">Membership</th> #}
+            </tr>
+        </thead>
+        <tbody 
+        id="user-table-body" {# hx-post="/terreno/list" hx-trigger="load once" #} hx-target="this" hx-swap="innerHTML"
+        class="divide-y divide-outline dark:divide-outline-dark">
+        
+            {% block table %}
+                {% if items %}
+                    {% for item in items %}
+                        <tr>
+                            {% include "pages/terreno/item.html" %}
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            {% endblock table %}
+            
+        </tbody>
+    </table>
+</div>
+</div>
+
+{% endblock %} 
+
+{% block end_body %}
+{% include "partials/notification.html" %}
+{% endblock end_body %}
