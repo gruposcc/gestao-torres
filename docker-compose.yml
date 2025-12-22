@@ -1,9 +1,12 @@
 services:
   postgres:
-    image: postgis/postgis:18-3.6
-    container_name: pg_db
+    image: postgis/postgis:17-3.5
+    container_name: torres_db
     restart: unless-stopped
     env_file: .env
+
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
 
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -16,8 +19,14 @@ services:
       timeout: 3s
       retries: 5
 
+    volumes:
+      - torres_db_data:/var/lib/posgresql/data
+
     networks:
       - backend
+
+volumes:
+  torres_db_data:
 
 networks:
   backend:

@@ -62,6 +62,13 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+def include_name(name, type_, parent_names):
+    if type_ == "schema":
+        return False
+    else:
+        return True
+
+
 def do_run_migrations(connection: Connection) -> None:
     context.configure(
         connection=connection,
@@ -69,6 +76,7 @@ def do_run_migrations(connection: Connection) -> None:
         include_object=alembic_helpers.include_object,
         process_revision_directives=alembic_helpers.writer,
         render_item=alembic_helpers.render_item,
+        include_name=include_name,
     )
 
     with context.begin_transaction():

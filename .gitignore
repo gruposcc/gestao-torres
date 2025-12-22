@@ -12,8 +12,7 @@ wheels/
 !.env.example
 src/migrations/versions/*
 !src/migrations/versions/.gitkeep
-src/dist/
-!src/dist/.gitkeepouço
+
 
 #node
 node_modules
