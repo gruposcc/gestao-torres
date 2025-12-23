@@ -5,10 +5,12 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from geopy.adapters import AioHTTPAdapter
+from geopy.geocoders import Nominatim
 
 from core.api import app as api_app
 from core.database import sessionmanager
-from core.geocode import stop_geocoder
+from core.geocode_old import stop_geocoder
 from core.notifier import Notifier, get_notifier
 from core.settings import BASE_DIR, TEMPLATES
 from core.utils.jinja import CommentExtension
@@ -25,7 +27,11 @@ LOGGER = getLogger("app")
 async def lifespan(app: FastAPI):
     try:
         ...
-        sessionmanager.init_db()
+        geocoder = Nominatim(user_agent="scctorres_v1", adapter_factory=AioHTTPAdapter)
+        sessionmanager.init_db()  #
+        # posso transformar a dependencia do db em um app.state tambem
+        app.state.geocoder = geocoder
+
         yield
     except:
         await stop_geocoder()

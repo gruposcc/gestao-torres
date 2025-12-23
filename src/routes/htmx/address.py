@@ -1,22 +1,16 @@
 import logging
 
 from fastapi import APIRouter, Depends, Query, Request
+from fastapi.responses import HTMLResponse
 from geopy.geocoders import Nominatim
 
-from core.geocode import get_geocoder
-from core.settings import TEMPLATES
-from deps.db import get_db
-from schemas.auth import UserAuthForm
-from services.auth import AuthService
+from deps.geocoder import get_geocoder
 
 logger = logging.getLogger("app.hmtx.address")
 logger.level = logging.DEBUG
 
 
 router = APIRouter(prefix="/address")
-
-
-from fastapi.responses import HTMLResponse
 
 
 @router.get("/search")
@@ -35,6 +29,7 @@ async def search(
             timeout=10,
             country_codes="br",
             language="pt-BR",
+            # geometry="geojson",
         )
 
         if not locations:
@@ -45,7 +40,7 @@ async def search(
 
         html_output = ""
         for loc in locations:
-            logger.debug(loc)
+            logger.debug(loc.raw)
 
             lat = loc.latitude
             lng = loc.longitude

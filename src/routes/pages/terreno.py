@@ -1,17 +1,10 @@
-import json
 import logging
-from typing import Optional
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
-from pydantic import ValidationError
+from fastapi import APIRouter, Depends, Request
 
-from core.notifier import Notifier, get_notifier
 from core.settings import TEMPLATES
 from deps.auth import get_user_session
 from deps.db import get_db
-from schemas.user import UserIn, UserOut
-from services.user import UserService
 
 logger = logging.getLogger("app.pages.core")
 logger.level = logging.DEBUG
@@ -44,8 +37,6 @@ async def create(request: Request, session=Depends(get_user_session)):
     context = {"request": request, "user": session, "page": page}
 
     if request.headers.get("hx-request") == "true":
-        return TEMPLATES.TemplateResponse(
-            template, context, block_name="content"
-        )
+        return TEMPLATES.TemplateResponse(template, context, block_name="content")
 
     return TEMPLATES.TemplateResponse(template, context)
