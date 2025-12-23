@@ -10,3 +10,73 @@
 [ BACKEND]                     'country': 'Brasil', 'country_code': 'br'}, 'boundingbox':
 [ BACKEND]                     ['-29.4409127', '-25.9557195', '-53.8373481',
 [ BACKEND]                     '-48.1021068']}
+
+
+[ BACKEND] [19:06:01] DEBUG    [app.hmtx.address] -  {'place_id': 6910032, 'licence': 'Data
+[ BACKEND]                     © OpenStreetMap contributors, ODbL 1.0.                     
+[ BACKEND]                     http://osm.org/copyright', 'osm_type': 'node', 'osm_id':    
+[ BACKEND]                     4210614918, 'lat': '-27.1557691', 'lon': '-49.5868425',     
+[ BACKEND]                     'class': 'natural', 'type': 'peak', 'place_rank': 18,       
+[ BACKEND]                     'importance': 0.16005644235904476, 'addresstype': 'peak',   
+[ BACKEND]                     'name': 'Morro do Funil', 'display_name': 'Morro do Funil,  
+[ BACKEND]                     Rio do Sul, Região Geográfica Imediata de Rio do Sul, Região
+[ BACKEND]                     Geográfica Intermediária de Blumenau, Santa Catarina, Região
+[ BACKEND]                     Sul, 89162-220, Brasil', 'address': {'peak': 'Morro do      
+[ BACKEND]                     Funil', 'town': 'Rio do Sul', 'municipality': 'Região       
+[ BACKEND]                     Geográfica Imediata de Rio do Sul', 'region': 'Região       
+[ BACKEND]                     Geográfica Intermediária de Blumenau', 'state': 'Santa      
+[ BACKEND]                     Catarina', 'ISO3166-2-lvl4': 'BR-SC', 'postcode':           
+[ BACKEND]                     '89162-220', 'country': 'Brasil', 'country_code': 'br'},    
+[ BACKEND]                     'boundingbox': ['-27.1558191', '-27.1557191', '-49.5868925',
+[ BACKEND]                     '-49.5867925']}         
+
+[ BACKEND] [19:13:38] DEBUG    [app.hmtx.address] -  {'place_id': 7250161, 'licence': 'Data
+[ BACKEND]                     © OpenStreetMap contributors, ODbL 1.0.                     
+[ BACKEND]                     http://osm.org/copyright', 'osm_type': 'relation', 'osm_id':
+[ BACKEND]                     296771, 'lat': '-27.8165664', 'lon': '-50.3258830', 'class':
+[ BACKEND]                     'boundary', 'type': 'administrative', 'place_rank': 16,     
+[ BACKEND]                     'importance': 0.5159801818586015, 'addresstype':            
+[ BACKEND]                     'municipality', 'name': 'Lages', 'display_name': 'Lages,    
+[ BACKEND]                     Região Geográfica Imediata de Lages, Região Geográfica      
+[ BACKEND]                     Intermediária de Lages, Santa Catarina, Região Sul, Brasil',
+[ BACKEND]                     'address': {'municipality': 'Lages', 'region': 'Região      
+[ BACKEND]                     Geográfica Intermediária de Lages', 'state': 'Santa         
+[ BACKEND]                     Catarina', 'ISO3166-2-lvl4': 'BR-SC', 'country': 'Brasil',  
+[ BACKEND]                     'country_code': 'br'}, 'boundingbox': ['-28.4333434',       
+[ BACKEND]                     '-27.5690810', '-50.6964052', '-49.9982107']}  
+
+CKEND]                     © OpenStreetMap contributors, ODbL 1.0.                     
+[ BACKEND]                     http://osm.org/copyright', 'osm_type': 'relation', 'osm_id':
+[ BACKEND]                     296750, 'lat': '-27.4832304', 'lon': '-50.1195204', 'class':
+[ BACKEND]                     'boundary', 'type': 'administrative', 'place_rank': 16,     
+[ BACKEND]                     'importance': 0.47644816154704966, 'addresstype':           
+[ BACKEND]                     'municipality', 'name': 'Otacílio Costa', 'display_name':   
+[ BACKEND]                     'Otacílio Costa, Região Geográfica Imediata de Lages, Região
+[ BACKEND]                     Geográfica Intermediária de Lages, Santa Catarina, Região   
+[ BACKEND]                     Sul, 88540-000, Brasil', 'address': {'municipality':        
+[ BACKEND]                     'Otacílio Costa', 'region': 'Região Geográfica Intermediária
+[ BACKEND]                     de Lages', 'state': 'Santa Catarina', 'ISO3166-2-lvl4':     
+[ BACKEND]                     'BR-SC', 'postcode': '88540-000', 'country': 'Brasil',      
+[ BACKEND]                     'country_code': 'br'}, 'boundingbox': ['-27.6921811',       
+[ BACKEND]                     '-27.3032684', '-50.1820651', '-49.7302596']}               
+[ BACKEND]            INFO     [uvicorn.access] -  127.0.0.1:60878 - "GET                  
+[ BACKEND]                     /htmx/address/search?q=otacilio%20costa%20SC HTTP/1.1" 200  
+
+[ BACKEND] [19:53:22] DEBUG    [app.hmtx.address] -  {'place_id': 7229729, 'licence': 'Data
+[ BACKEND]                     © OpenStreetMap contributors, ODbL 1.0.                     
+[ BACKEND]                     http://osm.org/copyright', 'osm_type': 'way', 'osm_id':     
+[ BACKEND]                     235759853, 'lat': '-27.8287220', 'lon': '-50.3320865',      
+[ BACKEND]                     'class': 'highway', 'type': 'residential', 'place_rank': 26,
+[ BACKEND]                     'importance': 0.05339211184863047, 'addresstype': 'road',   
+[ BACKEND]                     'name': 'Rua Nossa Senhora Aparecida', 'display_name': 'Rua 
+[ BACKEND]                     Nossa Senhora Aparecida, Santa Rita, Lages, Região          
+[ BACKEND]                     Geográfica Imediata de Lages, Região Geográfica             
+[ BACKEND]                     Intermediária de Lages, Santa Catarina, Região Sul,         
+[ BACKEND]                     88501-203, Brasil', 'address': {'road': 'Rua Nossa Senhora  
+[ BACKEND]                     Aparecida', 'suburb': 'Santa Rita', 'city': 'Lages',        
+[ BACKEND]                     'municipality': 'Região Geográfica Imediata de Lages',      
+[ BACKEND]                     'region': 'Região Geográfica Intermediária de Lages',       
+[ BACKEND]                     'state': 'Santa Catarina', 'ISO3166-2-lvl4': 'BR-SC',       
+[ BACKEND]                     'postcode': '88501-203', 'country': 'Brasil',               
+[ BACKEND]                     'country_code': 'br'}, 'boundingbox': ['-27.8302970',       
+[ BACKEND]                     '-27.8271993', '-50.3324976', '-50.3319790']}         
