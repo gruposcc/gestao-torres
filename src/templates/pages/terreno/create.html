@@ -187,7 +187,12 @@ Alpine.data("newTerrenoForm", () => ({
     </div> <!--END Coluna Formulário-->
 
     <!-- Coluna mapa -->
-    <div class=" flex-1 flex h-full flex-col">
+    <div class=" flex-1 flex h-full flex-col"
+
+        x-on:htmx:before-request="show_results = false"
+        x-on:htmx:after-swap="show_results = true"
+
+    >
 
         {# SearchBar COntainer #}
         <div id="pesquisaEndereco"
@@ -201,13 +206,20 @@ Alpine.data("newTerrenoForm", () => ({
                 <input id="pesquisaEnderecoInput" 
                     name="address_query" 
                     type="text"
+                    placeholder="Pesquiar endereço" aria-label="pesquisar endereco"
+
+                    x-model="search_query"
                     hx-get="/htmx/address/search" 
                     hx-trigger="keyup changed delay:400ms"
-                    {# @htmx:after-swap="show_results = true" #}
                     hx-swap="innerHTML" 
                     hx-target="#search-results" 
-                    @input="show_results = true"
-                    x-model="search_query"
+                    
+                    @mousedown="
+                        if ($refs.searchResults?.children.length > 0) {
+                            show_results = true
+                        }
+                    "
+
                     class="
                         w-full
                         rounded-radius 
@@ -218,7 +230,6 @@ Alpine.data("newTerrenoForm", () => ({
                         focus-visible:outline focus-visible:outline-offset-1
                         focus-visible:outline-dark dark:focus-visible:outline                    
                     " 
-                    placeholder="Pesquiar endereço" aria-label="pesquisar endereco"
                 />
 
                 <i data-lucide="search" class="size-5 absolute left-2.5 top-1/2 -translate-y-1/2  text-on-surface/50 dark:text-on-surface-dark/50"></i>
@@ -227,53 +238,24 @@ Alpine.data("newTerrenoForm", () => ({
 
         <div class="relative">
         
-        {# result container #}
-            <div class="absolute w-full z-1001 top-full"
+            {# result container #}
+            <div 
+                class="absolute px-2 w-full z-1001 top-full flex flex-col "
                 style="margin-top: 6px;"
             >
                 <ul id="search-results" 
-                    @click.away="show_results = false"
+                    @mousedown.away="show_results = false"
                     x-show="show_results"
+                    x-ref="searchResults"
                     class=" 
-                        
                         bg-surface-alt dark:bg-surface-dark-alt
                         border border-outline dark:border-outline-dark 
                         shadow-2xl
-                        flex flex-col
                         rounded-radius
                     "
                 >
 
-                    {# RESULTADOS #}
-                    {# <li 
-                        class="
-                        group 
-                        p-2
-                        hover:bg-on-surface-dark
-                        cursor-pointer
-                        border-b border-outline dark:border-outline-dark last:border-0 
-                        transition-colors"
-                    >
-
-                            <div class="flex items-start gap-3">
-                                <div class="mt-1 text-gray-400 group-hover:text-indigo-600">
-                                    <i data-lucide="map-pin" class="size-5"></i>
-                                </div>
-
-                                <div class="flex flex-col">
-                                    <span class="font-medium text-gray-900 text-sm leading-tight">
-                                        Endereço
-                                    </span>
-                                    <span class="text-xs text-gray-500 truncate max-w-[300px]">
-                                        alguma otra coisa
-                                    </span>
-                                </div>
-                            </div>
-
-                        </li> #}
-
-
-                    </ul>
+                </ul>
                 
             </div> 
         
