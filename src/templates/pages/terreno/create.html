@@ -1,162 +1,298 @@
 {% extends "layout/template.html" %}
 
 {% block content %}
-<div class="flex flex-col gap-4 p-4 w-full">
-    <h2 class="text-xl font-semibold">Novo Terreno</h2>
-
-<form hx-post="/api/terrenos" x-data="addressForm()" x-init="initMap()">
-        
-        <div class="relative mb-4">
-            <label class="block text-sm font-medium text-gray-700">Pesquisar Endereço:</label>
-            <input 
-                type="text" 
-                name="q" 
-                x-model="searchQuery"
-                placeholder="Digite a rua, cidade ou CEP..."
-                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                
-                hx-get="/htmx/address/search" 
-                hx-trigger="input changed delay:500ms" 
-                hx-target="#search-results" 
-                @input="openResults = true"
-            >
-            
-            <ul id="search-results" 
-                x-show="openResults" 
-                @click.away="openResults = false"
-                class="absolute z-[1000] w-full bg-white border shadow-xl max-h-60 overflow-y-auto mt-1 rounded-md">
-            </ul>
-        </div>
-
-
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div>
-                <label class="text-xs text-gray-500">Latitude</label>
-                <input 
-                    type="text" 
-                    name="latitude" 
-                    x-model="lat" 
-                    @blur="updateFromCoords(lat, lng, true)"
-                    class="w-full border-gray-300 rounded text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                >
-            </div>
-            <div>
-                <label class="text-xs text-gray-500">Longitude</label>
-                <input 
-                    type="text" 
-                    name="longitude" 
-                    x-model="lng" 
-                    @blur="updateFromCoords(lat, lng, true)"
-                    class="w-full border-gray-300 rounded text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                >
-            </div>
-        </div>
-
-        <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700">Endereço Selecionado:</label>
-            <textarea name="endereco_completo" x-model="addressText" readonly class="w-full border-gray-200 rounded text-sm bg-gray-50" rows="2"></textarea>
-        </div>
-
-        <div id="map" class="w-full h-96 rounded-lg border shadow-inner mb-4" style="z-index: 1;"></div>
-        
-        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
-            Salvar Terreno
-        </button>
-    </form>
-</div>
-</div>
 
 <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('addressForm', () => ({
-            map: null,
-            marker: null,
-            lat: -23.5505,
-            lng: -46.6333,
-            addressText: '',
-            searchQuery: '',
-            openResults: false,
+document.addEventListener("alpine:init", () => { 
+Alpine.data("newTerrenoForm", () => ({
+    map: null,
+    marker: null,
 
-            initMap() {
-                // Criar o mapa
-                this.map = L.map('map').setView([this.lat, this.lng], 12);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
-                }).addTo(this.map);
+    //posição inicial lages
 
-                // Marcador inicial
-                this.marker = L.marker([this.lat, this.lng], { draggable: true }).addTo(this.map);
+    lat: -27.81525134808175,
+    lng: -50.329919457435615,
+    zoom_level: 10,
 
-                // Evento: Arrastar marcador
-                this.marker.on('dragend', (e) => {
-                    const pos = e.target.getLatLng();
-                    // O terceiro parâmetro é 'false' (ou omitido) porque não é uma atualização manual
-                    this.updateFromCoords(pos.lat, pos.lng); 
-                });
+    search_query: '',
+    s_addr_txt: '',
+    show_results: false,
 
-                // Evento: Clicar no mapa
-                this.map.on('click', (e) => {
-                    this.updateFromCoords(e.latlng.lat, e.latlng.lng);
-                });
-            },
+    init() {
+        this.initMap();
+    },
 
-            // quando o usuário clica num resultado da busca Nominatim (via HTMX)
-            selectAddress(data) {
-                this.lat = parseFloat(data.lat);
-                this.lng = parseFloat(data.lng);
-                this.addressText = data.address;
-                this.searchQuery = data.address;
-                this.openResults = false;
+    initMap() {
+        this.map = L.map('map')
+            .setView([this.lat, this.lng], this.zoom_level);
 
-                // Move o mapa e o marcador
-                this.map.setView([this.lat, this.lng], 16);
-                this.marker.setLatLng([this.lat, this.lng]);
-            },
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+            .addTo(this.map);
 
-            // quando interage com o mapa (clique/arrastar) 
-            // OU quando o usuário edita as coordenadas manualmente
-            async updateFromCoords(newLat, newLng, isManual = false) {
-                // Converte para float e valida
-                const parsedLat = parseFloat(newLat);
-                const parsedLng = parseFloat(newLng);
+        this.marker = L.marker([this.lat, this.lng], {draggable: true})
+            .addTo(this.map);
 
-                if (isNaN(parsedLat) || isNaN(parsedLng)) {
-                    // Evita mover o mapa com coordenadas inválidas
-                    console.error("Coordenadas inválidas. Por favor, insira números.");
-                    return; 
-                }
+        // Atualiza o zoom_level sempre que o usuário interagir com o zoom
+        this.map.on('zoomend', () => {
+            this.zoom_level = this.map.getZoom();
+        });
 
-                this.lat = parsedLat;
-                this.lng = parsedLng;
-                
-                // Move o mapa e o marcador
-                if (this.map && this.marker) {
-                    this.map.setView([this.lat, this.lng], 16); 
-                    this.marker.setLatLng([this.lat, this.lng]);
-                }
 
-                // Geocoding reverso para preencher o texto do endereço
-                try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${this.lat}&lon=${this.lng}&zoom=18&addressdetails=1&extratags=1&accept-language=pt-BR`);
-                    const data = await response.json();
-                    
-                    // O Nominatim geralmente retorna o nome completo em 'display_name'
-                    const newAddressText = data.display_name || `Lat: ${this.lat.toFixed(4)}, Lng: ${this.lng.toFixed(4)}`;
+        //evento arrastar marcador
+        this.marker.on('dragend', (e) => {
+            const {lat, lng} = e.target.getLatLng();
+            this.updateFromCoords(lat, lng)
+        });
 
-                    // Atualiza os campos de texto
-                    this.addressText = newAddressText;
+        //evento clicar no mapa
+        this.map.on('click', (e) => {
+            this.updateFromCoords(e.latlng.lat, e.latlng.lng);
+        });
+    },
+    
+    async updateFromCoords(n_lat, n_lng, m=false) {
+        const p_lat = parseFloat(n_lat);
+        const p_lng = parseFloat(n_lng);
 
-                    // Se for edição manual, preenche o campo de pesquisa para refletir o endereço
-                    if (isManual) {
-                        this.searchQuery = newAddressText;
-                    }
+        if (isNaN(p_lat) || isNaN(p_lng)) {
+            console.error("erro nas coordenadas");
+            return;
+        };
 
-                } catch (e) {
-                    this.addressText = `Lat: ${this.lat.toFixed(4)}, Lng: ${this.lng.toFixed(4)} (Não foi possível obter o endereço)`;
-                    console.error("Erro no Geocoding Reverso:", e);
-                }
+        this.lat = p_lat;
+        this.lng = p_lng;
+
+        //mover o mapa e o marcador
+        if (this.map && this.marker) {
+            this.map.setView([this.lat, this.lng], this.zoom_level);
+            
+            this.marker.setLatLng([this.lat, this.lng]);
+
+            try {
+                //geocoding reverso para atualizar o texto 
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${this.lat}&lon=${this.lng}&zoom=${this.zoom_level}&addressdetails=1&extratags=1&accept-language=pt-BR`);
+
+                const data = await response.json();
+
+                //console.log(`geocode reverse response ${data}`);
+                const new_addr = data.display_name || `Lat: ${this.lat.toFixed(6)}, Long: ${this.lng.toFixed(6)}`;
+
+                this.s_addr_txt = new_addr;
+
+                //se editar as coordenadas manualmente, atualiza o campo de pesquisa
+                //if (manual) {
+                //    this.searchQuery = newAddressText;
+                //}
+
+            } catch (e) {
+                this.s_addr_txt = `Lat: ${this.lat.toFixed(6)}, Lng: ${this.lng.toFixed(6)} (Não foi possível obter o endereço)`;
+                console.error("Erro no Geocoding Reverso:", e);
             }
-        }));
-    });
+        }
+    },
+
+    select_addr(data) {
+        this.lat = parseFloat(data.lat);
+        this.lng = parseFloat(data.lng);
+
+        this.s_addr_txt = data.selectedAddress;
+        this.search_query = data.selectSearchAddress;
+
+        this.map.setView([this.lat, this.lng], this.zoom_level);
+        this.marker.setLatLng([this.lat, this.lng]);
+
+    },
+
+}))
+}); 
 </script>
+
+
+<div 
+    x-data="newTerrenoForm()"
+    class="flex flex-row h-full overflow-x-auto {# gap-4 #} p-2"
+>
+
+    <!-- Coluna do formulário -->
+    <div class="flex flex-col flex-1 gap-4 ">
+        <span class="text-xl font-semibold">
+            <h2>
+                Novo Terreno
+            </h2>
+        </span>
+
+        {% block form %}
+
+        <form hx-post="/api/terrenos"
+            class="space-y-6 px-4 flex flex-col flex-1 gap-4"
+        >       
+
+            <div class="flex-row flex flex-1 w-full gap-4">
+
+                <div class="flex flex-1 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+                    <label for="textInputDefault" class="w-fit pl-0.5 text-sm">Latitude</label>
+                    <input id="textInputDefault" type="text" class="w-full rounded-radius border border-outline bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark" name="name" placeholder="Enter your name" autocomplete="name"/>
+                </div>
+
+                <div class="flex flex-1 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+                    <label for="textInputDefault" class="w-fit pl-0.5 text-sm">Longitude</label>
+                    <input id="textInputDefault" type="text" class="w-full rounded-radius border border-outline bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark" name="name" placeholder="Enter your name" autocomplete="name"/>
+                </div>
+
+            </div>
+
+            <div class="flex-row flex flex-1 w-full gap-4">
+
+                <div class="flex flex-1 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+                    <label for="textInputDefault" class="w-fit pl-0.5 text-sm">Latitude</label>
+                    <input id="textInputDefault" type="text" class="w-full rounded-radius border border-outline bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark" name="name" placeholder="Enter your name" autocomplete="name"/>
+                </div>
+
+                <div class="flex flex-1 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+                    <label for="textInputDefault" class="w-fit pl-0.5 text-sm">Longitude</label>
+                    <input id="textInputDefault" type="text" class="w-full rounded-radius border border-outline bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark" name="name" placeholder="Enter your name" autocomplete="name"/>
+                </div>
+                
+            </div>
+
+            <div class="flex-row flex flex-1 w-full gap-4">
+                <div class="flex flex-1 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+                    <label for="textInputDefault" class="w-fit pl-0.5 text-sm">Latitude</label>
+                    <input id="textInputDefault" type="text" class="w-full rounded-radius border border-outline bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark" name="name" placeholder="Enter your name" autocomplete="name"/>
+                </div>
+
+                <div class="flex flex-1 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+                    <label for="textInputDefault" class="w-fit pl-0.5 text-sm">Longitude</label>
+                    <input id="textInputDefault" type="text" class="w-full rounded-radius border border-outline bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark" name="name" placeholder="Enter your name" autocomplete="name"/>
+                </div>
+            </div>
+            
+            <div class=" flex flex-1 w-full gap-4 flex-col">
+
+                <div class="flex w-full max-w-md flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+                    <label for="textArea" class="w-fit pl-0.5 text-sm">Comment</label>
+                    <textarea id="textArea" class="w-full rounded-radius border border-outline bg-surface-alt px-2.5 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark" rows="3" placeholder="We'd love to hear from you..."></textarea>
+                </div>
+
+
+                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
+                    Salvar Terreno
+                </button>
+            </div>
+
+
+        </form>
+        {% endblock form %}
+
+    </div> <!--END Coluna Formulário-->
+
+    <!-- Coluna mapa -->
+    <div class=" flex-1 flex h-full flex-col">
+
+        {# SearchBar COntainer #}
+        <div id="pesquisaEndereco"
+            class="
+                relative 
+                text-on-surface dark:text-on-surface-dark
+                flex w-full flex-col 
+            "
+        > 
+            {# SearchBar #}
+                <input id="pesquisaEnderecoInput" 
+                    name="address_query" 
+                    type="text"
+                    hx-get="/htmx/address/search" 
+                    hx-trigger="keyup changed delay:400ms"
+                    {# @htmx:after-swap="show_results = true" #}
+                    hx-swap="innerHTML" 
+                    hx-target="#search-results" 
+                    @input="show_results = true"
+                    x-model="search_query"
+                    class="
+                        w-full
+                        rounded-radius 
+                        border border-outline dark:border-outline-dark
+                        bg-surface-alt dark:bg-surface-dark-alt/50
+                        py-2 pl-10 pr-2 
+                        text-sm
+                        focus-visible:outline focus-visible:outline-offset-1
+                        focus-visible:outline-dark dark:focus-visible:outline                    
+                    " 
+                    placeholder="Pesquiar endereço" aria-label="pesquisar endereco"
+                />
+
+                <i data-lucide="search" class="size-5 absolute left-2.5 top-1/2 -translate-y-1/2  text-on-surface/50 dark:text-on-surface-dark/50"></i>
+        </div>
+
+
+        <div class="relative">
+        
+        {# result container #}
+            <div class="absolute w-full z-1001 top-full"
+                style="margin-top: 6px;"
+            >
+                <ul id="search-results" 
+                    @click.away="show_results = false"
+                    x-show="show_results"
+                    class=" 
+                        
+                        bg-surface-alt dark:bg-surface-dark-alt
+                        border border-outline dark:border-outline-dark 
+                        shadow-2xl
+                        flex flex-col
+                        rounded-radius
+                    "
+                >
+
+                    {# RESULTADOS #}
+                    {# <li 
+                        class="
+                        group 
+                        p-2
+                        hover:bg-on-surface-dark
+                        cursor-pointer
+                        border-b border-outline dark:border-outline-dark last:border-0 
+                        transition-colors"
+                    >
+
+                            <div class="flex items-start gap-3">
+                                <div class="mt-1 text-gray-400 group-hover:text-indigo-600">
+                                    <i data-lucide="map-pin" class="size-5"></i>
+                                </div>
+
+                                <div class="flex flex-col">
+                                    <span class="font-medium text-gray-900 text-sm leading-tight">
+                                        Endereço
+                                    </span>
+                                    <span class="text-xs text-gray-500 truncate max-w-[300px]">
+                                        alguma otra coisa
+                                    </span>
+                                </div>
+                            </div>
+
+                        </li> #}
+
+
+                    </ul>
+                
+            </div> 
+        
+        
+        </div>
+
+    
+
+        {# map container  #}
+        <div class=" flex flex-1 pt-4">
+            {# Leafmap  #}
+            <div
+                id="map"
+                class="w-full h-full rounded-radius border"
+            ></div>
+        </div>
+
+    </div>
+</div>
+
+
 {% endblock content %}

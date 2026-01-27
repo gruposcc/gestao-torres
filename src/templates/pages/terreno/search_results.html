@@ -1,0 +1,42 @@
+
+{% for result in results %}
+<li 
+    class="group p-3 hover:bg-info cursor-pointer border-b border-outline-dark dark:border-outline last:border-0 transition-colors
+    "
+    @click="select_addr({
+        lat: {{ result.latitude }},
+        lng: {{ result.longitude }},
+        address: '{{ result.address }}'
+    }); show_results = false;"
+>
+
+<div class="flex items-start gap-3">
+        <div class="mt-1 text-gray-400 group-hover:text-indigo-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        </div>
+
+        <div class="flex flex-col">
+            <span class="font-medium text-gray-900 text-sm leading-tight">
+                {{ result.address.split(',')[0] }}
+            </span>
+            <span class="text-xs text-gray-500 truncate max-w-[300px]">
+                {{ result.address.split(',')[1:] | join(',') }}
+            </span>
+        </div>
+    </div>
+
+</li>
+
+
+{% endfor %}
+
+
+{# 
+<li class="p-2 hover:bg-indigo-100 cursor-pointer border-b border-gray-100 text-sm"
+    @click="selectAddress({{lat: {{result.latitude}}, lng: {{result.longitude}}, address: '{result}'}})">
+    <div class="font-medium text-gray-800">{result}</div>
+</li>
+ #}

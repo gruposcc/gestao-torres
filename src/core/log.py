@@ -1,4 +1,5 @@
 # import os
+from os import environ
 from pathlib import Path
 
 LOG_DIR = Path(__file__).parent.parent.parent / "logs"
@@ -16,6 +17,11 @@ FORMATTERS = {
     #    "format": DEFAULT_FMT,
     # },
 }
+
+""" if environ.get("DEBUG", False):
+    LOG_LEVEL = "DEBUG"
+else:
+    LOG_LEVEL = "WARNING" """
 
 LOG_LEVEL = "DEBUG"
 
@@ -38,7 +44,7 @@ DEV_LOGGERS = {
         "level": "INFO",
         "propagate": False,
     },
-    "app.": {"handlers": ["console"], "level": LOG_LEVEL, "propagate": False},
+    "app": {"handlers": ["console"], "level": LOG_LEVEL, "propagate": False},
 }
 
 LOG_CONFIG = {

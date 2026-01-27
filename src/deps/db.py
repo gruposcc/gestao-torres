@@ -15,13 +15,16 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             yield session
 
         except ConnectionRefusedError as cre:
+            logger.warning("Database não conseguiu se conectar")
+
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="O Banco de Dados está indisponível ou inacessível. (Connection Refused)",
             ) from cre
 
         # NÃO capture HTTPException, pois ela deve ser propagada
-        except HTTPException:
+        except HTTPException as he:
+            logger.warning(he.detail)
             raise  # Re-lança a HTTPException original (e.g., a 401) imediatamente
 
         except Exception as e:

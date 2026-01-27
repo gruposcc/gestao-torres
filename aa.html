@@ -33,13 +33,34 @@
 </head>
 
 <body hx-boost="true">
-    {% block body %}
-    
-    {% endblock body %}
+ <div x-data class="relative flex w-full flex-col h-svh "> 
 
-    {% block end_body %}
-        
-    {% endblock end_body %}
+    {% include "partials/header.html" %}
+
+    <div class="flex flex-row grow bg-surface-alt dark:bg-surface-dark-alt pb-4 pr-4">
+
+        {% include "partials/sidebar.html" %}
+
+        <!--background-->
+        <div class="border border-outline rounded-radius w-full dark:border-outline-dark">
+
+            {# moldura  #}
+            <div class=" w-full h-full rounded-radius bg-surface dark:bg-surface-dark">
+                
+                <div id="content" class="p-4 w-full h-full flex flex-col">
+                <!-- Add main content here  -->
+                    {% block content %}
+                    
+                    
+                    {% endblock content %}
+                </div>
+                
+            </div>
+
+        </div>
+
+    </div>
+</div>
 </body>
 
 </html>

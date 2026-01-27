@@ -80,7 +80,7 @@ async def sse_endpoint(
     user_id = user_session.id
 
     return StreamingResponse(
-        notifier.subscribe(request, user_id), media_type="text/event-stream"
+        notifier.subscribe(request, user_id.hex), media_type="text/event-stream"
     )
 
 

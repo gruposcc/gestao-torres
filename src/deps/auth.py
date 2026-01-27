@@ -18,7 +18,7 @@ async def get_user_session(
     try:
         token_payload = decode_token(cookie_token)
     except Exception as e:
-        logger.exception(f"Erro decodificando token: {e}")
+        # logger.exception(f"Erro decodificando token: {e}")
         raise HTTPException(401, "Token inválido")
 
     # Busca user no db pelo id codificado no token

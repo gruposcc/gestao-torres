@@ -43,12 +43,16 @@ async def login_post(
     form: Annotated[UserAuthForm, Form()],
     dbSession=Depends(get_db),
 ):
+    logger.debug("entrei no post login")
+
     if not request.headers.get("hx-request") == "true":
+        logger.warning("not htmx")
         raise HTTPException(403)
 
     template = "pages/login.html"
     service = AuthService(dbSession)
 
+    logger.debug("chamando serviço ")
     success, payload = await service.login(form)
 
     if not success:

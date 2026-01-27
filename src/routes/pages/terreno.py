@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Request
 from core.settings import TEMPLATES
 from deps.auth import get_user_session
 from deps.db import get_db
+from deps.geocoder import get_geocoder
 
 logger = logging.getLogger("app.pages.core")
 logger.level = logging.DEBUG

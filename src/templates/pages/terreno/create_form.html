@@ -1,0 +1,106 @@
+    <form hx-post="/api/terrenos"
+        x-data="addressForm()"
+        x-init="initMap()"
+        class="space-y-6 px-4 flex flex-col w-xl"
+    >       
+
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="text-xs text-gray-500">Latitude</label>
+                <input 
+                    type="text" 
+                    name="latitude" 
+                    x-model="lat" 
+                    @blur="updateFromCoords(lat, lng, true)"
+                    class="w-full border-gray-300 rounded text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                >
+            </div>
+            <div>
+                <label class="text-xs text-gray-500">Longitude</label>
+                <input 
+                    type="text" 
+                    name="longitude" 
+                    x-model="lng" 
+                    @blur="updateFromCoords(lat, lng, true)"
+                    class="w-full border-gray-300 rounded text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                >
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700">Endereço Selecionado:</label>
+            <textarea name="endereco_completo" x-model="addressText" readonly class="w-full border-gray-200 rounded text-sm bg-gray-50" rows="2"></textarea>
+        </div>
+
+            
+        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
+            Salvar Terreno
+        </button>
+    </form>
+
+
+
+
+<script>
+    document.addEventListener('alpine:init', () => {
+
+            // quando o usuário clica num resultado da busca Nominatim (via HTMX)
+            selectAddress(data) {
+                this.lat = parseFloat(data.lat);
+                this.lng = parseFloat(data.lng);
+                this.addressText = data.address;
+                this.searchQuery = data.address;
+                this.openResults = false;
+
+                // Move o mapa e o marcador
+                this.map.setView([this.lat, this.lng], 16);
+                this.marker.setLatLng([this.lat, this.lng]);
+            },
+
+            // quando interage com o mapa (clique/arrastar) 
+            // OU quando o usuário edita as coordenadas manualmente
+            async updateFromCoords(newLat, newLng, isManual = false) {
+                // Converte para float e valida
+                const parsedLat = parseFloat(newLat);
+                const parsedLng = parseFloat(newLng);
+
+                if (isNaN(parsedLat) || isNaN(parsedLng)) {
+                    // Evita mover o mapa com coordenadas inválidas
+                    console.error("Coordenadas inválidas. Por favor, insira números.");
+                    return; 
+                }
+
+                this.lat = parsedLat;
+                this.lng = parsedLng;
+                
+                // Move o mapa e o marcador
+                if (this.map && this.marker) {
+                    this.map.setView([this.lat, this.lng], 16); 
+                    this.marker.setLatLng([this.lat, this.lng]);
+                }
+
+                // Geocoding reverso para preencher o texto do endereço
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${this.lat}&lon=${this.lng}&zoom=18&addressdetails=1&extratags=1&accept-language=pt-BR`);
+                    const data = await response.json();
+                    
+                    // O Nominatim geralmente retorna o nome completo em 'display_name'
+                    const newAddressText = data.display_name || `Lat: ${this.lat.toFixed(4)}, Lng: ${this.lng.toFixed(4)}`;
+
+                    // Atualiza os campos de texto
+                    this.addressText = newAddressText;
+
+                    // Se for edição manual, preenche o campo de pesquisa para refletir o endereço
+                    if (isManual) {
+                        this.searchQuery = newAddressText;
+                    }
+
+                } catch (e) {
+                    this.addressText = `Lat: ${this.lat.toFixed(4)}, Lng: ${this.lng.toFixed(4)} (Não foi possível obter o endereço)`;
+                    console.error("Erro no Geocoding Reverso:", e);
+                }
+            }
+        }));
+
+    });
+</script> #}
