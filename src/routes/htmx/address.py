@@ -47,5 +47,7 @@ async def search(
         logger.debug(f"returning locations {locations}")
         return TEMPLATES.TemplateResponse(template, context)
 
+        ##TODO Formatar resposta estadoUF/ cidade /endereço
+
     except Exception as e:
         return HTMLResponse(f'<li class="p-2 text-red-500">Erro: {str(e)}</li>')

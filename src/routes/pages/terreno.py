@@ -1,14 +1,13 @@
 import logging
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from core.settings import TEMPLATES
 from deps.auth import get_user_session
 from deps.db import get_db
-from deps.geocoder import get_geocoder
 
-logger = logging.getLogger("app.pages.core")
-logger.level = logging.DEBUG
+logger = logging.getLogger("app.pages.terreno")
+# logger.level = logging.DEBUG
 
 
 router = APIRouter(prefix="/terreno")
@@ -41,3 +40,23 @@ async def create(request: Request, session=Depends(get_user_session)):
         return TEMPLATES.TemplateResponse(template, context, block_name="content")
 
     return TEMPLATES.TemplateResponse(template, context)
+
+
+@router.post("/create")
+async def post_create(
+    request: Request,
+    user_session=Depends(get_user_session),
+    db_session=Depends(get_db),
+):
+    if not request.headers.get("hx-request") == "true":
+        raise HTTPException(403)
+
+    data = await request.form()
+
+    context = {"request": request}
+    errors = {}
+    template = "pages/terreno/create.html"
+
+    logger.debug(data)
+
+    return HTTPException(300)
