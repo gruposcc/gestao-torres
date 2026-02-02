@@ -15,8 +15,8 @@ class ModelSchema(BaseSchema):
 logger = getLogger("app.schemas")
 
 
-def validate_html_form(
-    data: FormData, schema: type[BaseSchema]
+def validate_html_form[T: BaseSchema](
+    data: FormData, schema: type[T]
 ) -> tuple[Literal[True], BaseSchema] | tuple[Literal[False], Dict[str, str]]:
     errors = {}
     try:

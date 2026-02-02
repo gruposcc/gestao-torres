@@ -1,17 +1,19 @@
+import json
 import logging
+from typing import Any, Dict
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import ValidationError
 
 from core.schema import validate_html_form
 from core.settings import TEMPLATES
+from core.utils.htmx import is_htmx_request
 from deps.auth import get_user_session
 from deps.db import get_db
 from schemas.terreno import TerrenoIn
+from services.terreno import TerrenoService
 
 logger = logging.getLogger("app.pages.terreno")
-# logger.level = logging.DEBUG
-
 
 router = APIRouter(prefix="/terreno")
 
@@ -56,30 +58,68 @@ async def post_create(
 
     data = await request.form()
 
-    context = {"request": request}
-    errors = {}
+    context: Dict[str, Any] = {"request": request}
+    errors: Dict[str, Any] = {}
+
     template = "pages/terreno/create.html"
 
-    form_schema = TerrenoIn
-    success, _ = validate_html_form(data, form_schema)
+    logger.debug(data)
 
-    if errors:  # se tiver erro retorna o form com o erro renderizado
+    try:
+        valid_data = TerrenoIn.model_validate(data)
+    except ValidationError as ve:
+        for error in ve.errors():
+            # logger.debug(error)
+            field_name = str(error["loc"][0])
+            errors[field_name] = f"Erro no campo: {error['msg']}"
         context.update(errors)
-        return TEMPLATES.TemplateResponse(template, context, block_name="form")
+
+    # TODO
+    if errors:
+        return HTTPException(500, errors)
+        ...
+        # retorna o html do form com os erros
 
     ## cria o terreno
+    service = TerrenoService(db_session)
 
-    """ service = TerrenoService(db_session)
-    exists = await service. """
+    # tenta garantir unicidade
+    exists = await service.exists_name(name=valid_data.name)
+    if exists:
+        context.update(
+            {
+                "name": {"value": valid_data.name, "error": "Nome em uso"},
+                "lat": {"value": valid_data.lat},
+                "lng": {"value": valid_data.lng},
+                # "address": {"value": valid_data.address},
+            }
+        )
+        # RETORNA O BLOCK DO FORM COM OS ERROS E VALORES NO CONTEXTO
+        return TEMPLATES.TemplateResponse(template, context, block_name="form")
 
-    return HTTPException(300)
+    # SE UNICO CRIA NOVO
+    try:
+        new_terreno = await service.create(valid_data)
+
+        # await notifier.push bla bla
+        # prepara o redirecionamento
+        response = Response(status_code=200)
+        response.headers["HX-location"] = json.dumps(
+            {
+                "path": f"/terreno/view/{new_terreno.id}",
+                "target": "#content",
+                "swap": "innerHTML",
+            }
+        )
+
+        return response
+
+    except Exception as e:
+        logger.warning(e)
+        raise HTTPException(500, "Erro Criando o objeto")
 
 
-""" 
-[ BACKEND]            DEBUG    [app.pages.terreno] -  FormData([('lat',                    
-[ BACKEND]                     '-27.802639479776524'), ('lng', '-51.03149414062501'),      
-[ BACKEND]                     ('isAlugado', 'true'), ('valorAluguel', '123'),             
-[ BACKEND]                     ('selectedAddress', 'Anita Garibaldi, Região Geográfica     
-[ BACKEND]                     Imediata de Lages, Região Geográfica Intermediária de Lages,
-[ BACKEND]                     Santa Catarina, Região Sul, Brasil')])                 
-"""
+@router.get("/view/{terreno_id}")
+async def view_terreno(terreno_id: int, request: Request):
+    response = Response(status_code=200, content=f"{terreno_id}")
+    return response

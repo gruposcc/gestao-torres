@@ -26,8 +26,9 @@ function registerComponent() {
         s_addr_txt: '',
         show_results: false,
 
-        isAlugado: false,
-        valorAluguel: '',
+        name: '',
+        //isAlugado: false,
+        //valorAluguel: '',
 
         setupEvents() {
             this.map.on('zoomend', () => {
@@ -47,9 +48,9 @@ function registerComponent() {
                 //this.updateFromCoords(lat, lng);
             });
 
-            this.$watch('isAlugado', value => {
-                if (!value) this.valorAluguel = '';
-            });
+            //this.$watch('isAlugado', value => {
+            //    if (!value) this.valorAluguel = '';
+            //});
         },
 
         init() {
@@ -178,25 +179,25 @@ function registerComponent() {
             }
         },
 
-        formatMoeda(e) {
-            let value = this.valorAluguel.replace(/\D/g, ""); // Remove tudo que não é dígito
+        //formatMoeda(e) {
+        //    let value = this.valorAluguel.replace(/\D/g, ""); // Remove tudo que não é dígito
             
             // Converte para decimal (centavos)
-            value = (value / 100).toFixed(2) + "";
+        //    value = (value / 100).toFixed(2) + "";
             
             // Troca ponto por vírgula e adiciona separador de milhar
-            let parts = value.split(".");
-            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        //    let parts = value.split(".");
+        //    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             
-            this.valorAluguel = parts.join(",");
-        },
+        //    this.valorAluguel = parts.join(",");
+        //},
 
         // Função auxiliar para o hx-vals enviar o formato correto (float)
-        getValorAluguelFloat() {
-            if (!this.valorAluguel) return 0;
-            // Remove pontos de milhar e troca a vírgula decimal por ponto
-            return parseFloat(this.valorAluguel.replace(/\./g, '').replace(',', '.'));
-        },         
+        //getValorAluguelFloat() {
+        //    if (!this.valorAluguel) return 0;
+        //    // Remove pontos de milhar e troca a vírgula decimal por ponto
+        //    return parseFloat(this.valorAluguel.replace(/\./g, '').replace(',', '.'));
+        //},         
 
     })); 
 };
@@ -254,16 +255,49 @@ if (window.Alpine) {
             JSON.stringify({
                 lat: lat,
                 lng: lng,
-                isAlugado: isAlugado,
-                valorAluguel: getValorAluguelFloat(),
-                selectedAddress: s_addr_txt,
+                name: name,
             })
+            {# address: s_addr_txt, #}
             "
             class=" flex flex-col flex-1 w-full justify-between"
         >       
 
             {# field container #}
             <div class="flex w-full flex-1 flex-col gap-4">
+
+                {# Nome do terreno #}
+                <div class="flex flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+                    
+                    <label for="first_name" class="w-fit pl-0.5 text-sm font-medium text-on-surface-strong dark:text-on-surface-dark-strong">
+                        Nome do terreno <span class="text-danger">*</span>
+                    </label>
+
+                    <input 
+                        id="name"
+                        type="text" 
+                        name="name"
+                        x-model="name"
+
+                        class="w-full rounded-radius border px-3 py-2 text-base 
+                                bg-surface dark:bg-surface-dark border-outline dark:border-outline-dark
+                                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-primary-dark" 
+                        required
+                        minlength="1"
+                        maxlength="120"
+
+                        placeholder="Digite o nome do terreno"
+
+                        {% if name and name.value %}
+                            value="{{first_name.value}}"
+                        {%endif%}
+
+                    />
+                    {# <small class="gap 0 
+                        dark:text-on-surface-dark/60 text-on-surface/60 invisible
+                    ">
+                    </small> #}
+                </div>
+
 
                 {# Endereço selecionado #}
                 <div class="flex w-full flex-col gap-2">
@@ -299,7 +333,7 @@ if (window.Alpine) {
                 {# end endereço selecionado #}
 
                 {# Dados e documentos #}
-                <div class="flex w-full flex-col gap-2">
+                <!--<div class="flex w-full flex-col gap-2">
                     <label class="w-fit pl-0.5 text-sm">Dados e documentos</label>
 
                     {# Terreno alugado ? #}
@@ -366,7 +400,7 @@ if (window.Alpine) {
                         </div>
 
                     </div>
-                </div>
+                </div>{# end dados e documentos #} -->
 
             </div>
             {# end field container #}

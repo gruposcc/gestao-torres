@@ -1,9 +1,10 @@
 import logging
-from typing import Generic, Optional, TypeVar
+from typing import Any, Dict, Generic, Optional, Tuple, TypeVar
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from core.schema import BaseSchema
 from models.base import BaseSQLModel, ObjectStatus
 
 logger = logging.getLogger("app.core.service")
@@ -39,6 +40,7 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
                 conditions.append(getattr(self.model, key) == value)
             else:
                 # se o filtro nao existe no modelo so passa
+                self.logger.debug("Filtro não existe no modelo ...")
                 ...
 
         # se status nao foi passado no filtro, filtra por status == enabled
@@ -52,5 +54,20 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
         instance = result.scalar_one_or_none()
         return instance
 
-    async def create(self, *args, **kwargs):
+    async def create(self, data: BaseSchema, *args, **kwargs):
         raise NotImplementedError
+
+    async def create_unique(
+        self, keys: Dict[str, Any], data: BaseSchema
+    ) -> Tuple[bool, T]:
+        exists: bool
+
+        obj = await self.get_one_by(kwargs=keys)
+
+        if obj:
+            exists = True
+            return exists, obj
+
+        exists = False
+        new_obj = await self.create(data=data)
+        return exists, new_obj

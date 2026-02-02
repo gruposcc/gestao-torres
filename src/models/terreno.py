@@ -26,15 +26,31 @@ class Terreno(BaseSQLModel, StatusMixin, TimeStampMixin):
 
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
 
-    lat: Mapped[float] = mapped_column(
-        Numeric[Decimal](9, 6), nullable=False, unique=True
-    )
-    lng: Mapped[float] = mapped_column(
-        Numeric[Decimal](9, 6), nullable=False, unique=True
-    )
+    # TODO, ambos os pontos não podem ser o mesmo
+    # TODO nao posso ter os dois repetidos em outra coluna
+    lat: Mapped[float] = mapped_column(Numeric[Decimal](9, 6), nullable=False)
+    lng: Mapped[float] = mapped_column(Numeric[Decimal](9, 6), nullable=False)
 
     # TODO
     # torres relação
 
     # TODO
     # despesas relaçãõ
+
+
+""" 
+class Despesa(BaseSQLModel, TimeStampMixin):
+    ## recorrente
+    ## - mensal - qual dia ? - por qual periodo de tempo. / perpetua
+    ## - anual - data ? - por qual periodo de tempo. / perpetua
+    ## - semanal - data? - por qual periodo de tempo / -
+    ## - diaria
+
+    ## especifica
+    ## ex: manutenção, compra de equipamento, etc, possivelmente relacionada futuramente com outro modelo
+
+    ...
+
+
+class Renda(BaseSQLModel, TimeStampMixin): ...
+ """

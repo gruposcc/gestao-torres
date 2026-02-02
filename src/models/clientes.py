@@ -11,15 +11,12 @@ class TipoCliente(enum.Enum):
     PJ = "pj"
 
 
-TipoClienteDb = Enum(
-    TipoCliente, name="tipocliente", native_enum=True, create_type=False
-)
-
-
 class Cliente(BaseSQLModel, StatusMixin):
     __tablename__ = "cliente"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    tipo: Mapped[TipoCliente] = mapped_column(TipoClienteDb, nullable=False)
+    tipo: Mapped[TipoCliente] = mapped_column(
+        Enum(TipoCliente, name="tipocliente", create_type=False), nullable=False
+    )
 
     __mapper_args__ = {
         "polymorphic_on": tipo,
