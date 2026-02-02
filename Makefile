@@ -17,5 +17,11 @@ migration:
 migrate:
 	@uv run --env-file .env alembic upgrade head 
 
-.PHONY: dev migrate migration create_superuser
+prune_db:
+	@docker volume rm really_aio_torres_db_data
+
+prune_migrations:
+	@rm -r ./src/migrations/versions/*.py
+
+.PHONY: dev migrate migration create_superuser prune_db prune_migrations
 

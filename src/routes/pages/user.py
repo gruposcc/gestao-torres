@@ -94,12 +94,11 @@ async def create_post(
             field_name = error["loc"][0]
 
             errors[field_name] = f"Erro no campo: {error['msg']}"
-        v_form = None
+        context.update(errors)
+        # v_form = None
 
     if errors:
         return TEMPLATES.TemplateResponse(template, context, block_name="form")
-    if not v_form:
-        raise
 
     service = UserService(dbSession)
     exists = await service.email_exists(v_form.email)

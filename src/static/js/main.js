@@ -27,6 +27,7 @@ document.body.addEventListener('htmx:afterSwap', function(event) {
     window.addEventListener('popstate', () => {
         currentPath = window.location.pathname;
     });
+    
 });
 
 //LOG
@@ -53,7 +54,6 @@ createIcons({
 
 Alpine.store('messages', {
   initSSE:  (url = '/events') => {
-    // Verifica se o navegador suporta Server-Sent Events
     if (!window.EventSource) {
         console.warn("Seu navegador não suporta Server-Sent Events (SSE). As notificações em tempo real não funcionarão.");
         return;

@@ -1,10 +1,13 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import ValidationError
 
+from core.schema import validate_html_form
 from core.settings import TEMPLATES
 from deps.auth import get_user_session
 from deps.db import get_db
+from schemas.terreno import TerrenoIn
 
 logger = logging.getLogger("app.pages.terreno")
 # logger.level = logging.DEBUG
@@ -57,6 +60,26 @@ async def post_create(
     errors = {}
     template = "pages/terreno/create.html"
 
-    logger.debug(data)
+    form_schema = TerrenoIn
+    success, _ = validate_html_form(data, form_schema)
+
+    if errors:  # se tiver erro retorna o form com o erro renderizado
+        context.update(errors)
+        return TEMPLATES.TemplateResponse(template, context, block_name="form")
+
+    ## cria o terreno
+
+    """ service = TerrenoService(db_session)
+    exists = await service. """
 
     return HTTPException(300)
+
+
+""" 
+[ BACKEND]            DEBUG    [app.pages.terreno] -  FormData([('lat',                    
+[ BACKEND]                     '-27.802639479776524'), ('lng', '-51.03149414062501'),      
+[ BACKEND]                     ('isAlugado', 'true'), ('valorAluguel', '123'),             
+[ BACKEND]                     ('selectedAddress', 'Anita Garibaldi, Região Geográfica     
+[ BACKEND]                     Imediata de Lages, Região Geográfica Intermediária de Lages,
+[ BACKEND]                     Santa Catarina, Região Sul, Brasil')])                 
+"""

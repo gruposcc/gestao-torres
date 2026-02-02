@@ -1,4 +1,4 @@
-{% extends "layout/template.html" %}
+{% extends "layout/template_mapa.html" %}
 
 {% block content %}
 
@@ -241,7 +241,6 @@ if (window.Alpine) {
     <!-- Coluna do formulário -->
     <div class="flex flex-col flex-1 gap-4 h-full">
         
-        
         <span class="text-xl font-semibold">
             <h2>
                 Novo Terreno
@@ -347,25 +346,25 @@ if (window.Alpine) {
 
 
 
-                    <div class="flex items-center gap-2 text-on-surface dark:text-on-surface-dark">
-                        <div 
-                            class="group flex items-center rounded-radius border border-outline bg-surface-alt dark:border-outline-dark dark:bg-surface-dark-alt/50 focus-within:ring-2 focus-within:ring-primary transition-opacity"
-                            :class="!isAlugado ? 'opacity-50' : 'opacity-100'"
-                        >
-                            <span class="pl-2 text-xs font-semibold opacity-50 select-none">R$</span>
-                            <input 
-                                type="text" 
-                                x-model="valorAluguel"
-                                @input="formatMoeda($event)"
-                                :disabled="!isAlugado"
-                                placeholder="0,00"
-                                inputmode="numeric"
-                                class="w-24 bg-transparent p-1 text-sm focus:outline-none disabled:cursor-not-allowed"
-                            />
+                        <div class="flex items-center gap-2 text-on-surface dark:text-on-surface-dark">
+                            <div 
+                                class="group flex items-center rounded-radius border border-outline bg-surface-alt dark:border-outline-dark dark:bg-surface-dark-alt/50 focus-within:ring-2 focus-within:ring-primary transition-opacity"
+                                :class="!isAlugado ? 'opacity-50' : 'opacity-100'"
+                            >
+                                <span class="pl-2 text-xs font-semibold opacity-50 select-none">R$</span>
+                                <input 
+                                    type="text" 
+                                    x-model="valorAluguel"
+                                    @input="formatMoeda($event)"
+                                    :disabled="!isAlugado"
+                                    :required="isAlugado"
+                                    placeholder="0,00"
+                                    inputmode="numeric"
+                                    class="w-24 bg-transparent p-1 text-sm focus:outline-none disabled:cursor-not-allowed"
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    
                     </div>
                 </div>
 

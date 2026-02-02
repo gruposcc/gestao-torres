@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{page.web_title if page else "Torres SCC"}}</title>
+    <title>{{page.title if page and page.title else "Torres SCC"}}</title>
+
     <script type="module" src="/static/js/main.js" defer></script>
     <script>
         // Função para aplicar a classe 'dark' antes do carregamento completo.
