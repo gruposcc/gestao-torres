@@ -1,9 +1,8 @@
-from fastapi import HTTPException, Request
+from fastapi import Request
 
 
 def is_htmx_request(request: Request):
     if not request.headers.get("hx-request") == "true":
-        # return False
-        raise HTTPException(403)
+        return False
     else:
         return True

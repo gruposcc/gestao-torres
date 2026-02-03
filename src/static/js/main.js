@@ -30,7 +30,14 @@ document.body.addEventListener('htmx:afterSwap', function(event) {
     
 });
 
-//LOG
+
+//listner para alterar o titulo da pagina 
+document.addEventListener('updateTitle', (e) => {
+    document.title = e.detail;
+});
+
+
+//LOG NOTIFY
 document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('notify', function(event) {
       console.log('✅ EVENTO NOTIFY CAPTURADO!', event.detail);

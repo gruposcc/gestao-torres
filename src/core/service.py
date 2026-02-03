@@ -71,3 +71,19 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
         exists = False
         new_obj = await self.create(data=data)
         return exists, new_obj
+
+    async def get_list(self):
+        raise NotImplementedError
+
+    async def exists(self, **kwargs):
+        stmt = select(self.model)  # inicializa query do modelo
+
+        for key, value in kwargs.items():
+            # analiza o kwargs pra ver se o model tem uma propriedade que pode ser filtrada
+            if hasattr(self.model, key):
+                column = getattr(self.model, key)
+                # adiciona cada um dos kwargs analisados ao stmt
+                stmt.where(column == value)
+
+        result = await self.dbSession.execute(stmt)
+        return result.scalar() is not None
