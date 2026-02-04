@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, Generic, Optional, Tuple, TypeVar
 
-from sqlalchemy import select
+from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.schema import BaseSchema
@@ -75,15 +75,18 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
     async def get_list(self):
         raise NotImplementedError
 
-    async def exists(self, **kwargs):
-        stmt = select(self.model)  # inicializa query do modelo
-
+    async def exists_by(self, **kwargs):
+        stmt = select(exists(self.model))  # inicializa query do modelo
         for key, value in kwargs.items():
             # analiza o kwargs pra ver se o model tem uma propriedade que pode ser filtrada
             if hasattr(self.model, key):
                 column = getattr(self.model, key)
                 # adiciona cada um dos kwargs analisados ao stmt
                 stmt.where(column == value)
+        stmt.exists()
 
-        result = await self.dbSession.execute(stmt)
-        return result.scalar() is not None
+        raw_result = await self.dbSession.execute(stmt)
+        result = raw_result.scalar()
+
+        self.logger.debug(result)
+        return result
