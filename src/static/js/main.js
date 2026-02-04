@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
   //listner para alterar o titulo da pagina 
   window.addEventListener('updateTitle', (e) => {
     console.debug("aoooooooooo caralho mudando titulo")
-    console.debug(e)
-    document.title = e.detail;
+    console.debug(e.detail)
+    document.title = e.detail.value;
   });
 
   document.addEventListener('htmx:afterSwap', (event) => {

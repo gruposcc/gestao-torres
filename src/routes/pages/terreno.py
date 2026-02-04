@@ -25,12 +25,32 @@ async def list_page(
     dbSession=Depends(get_db),
 ):
     template = "pages/terreno/list.html"
-    page = {"title": "Terrenos"}
+    # page = {"title": "Terrenos"}
+    context = {"request": request, "user": session}
 
-    context = {"request": request, "user": session, "page": page}
+    if is_htmx_request(request):  # se somente bloco
+        response = TEMPLATES.TemplateResponse(template, context, block_name="content")
+        response.headers["HX-Trigger-After-Swap"] = json.dumps(
+            {"updateTitle": "Torres SCC - Terrenos "}
+        )
+    else:  # senao template todo - f5, acesso direto
+        response = TEMPLATES.TemplateResponse(template, context)
 
-    if request.headers.get("hx-request") == "true":
-        return TEMPLATES.TemplateResponse(template, context, block_name="content")
+    return response
+
+
+@router.post("/list")
+async def list_post(request: Request, db=Depends(get_db)):
+    if not is_htmx_request:
+        raise HTTPException(403)
+
+    service = TerrenoService(db)
+
+    # TODO, parametros de ordenação, paginação e filtro
+    terrenos = await service.get_list()
+
+    template = "pages/terreno/item.html"
+    context = {"request": request, "items": terrenos}
 
     return TEMPLATES.TemplateResponse(template, context)
 
@@ -84,7 +104,8 @@ async def post_create(
     service = TerrenoService(db_session)
 
     # tenta garantir unicidade
-    exists = await service.exists_name(name=valid_data.name)
+    # exists = await service.exists_name(name=valid_data.name)
+    exists = await service.exists_by(name=valid_data.name)
     if exists:
         context.update(
             {
@@ -94,6 +115,7 @@ async def post_create(
                 # "address": {"value": valid_data.address},
             }
         )
+        logger.debug("ja existe bobo")
         # RETORNA O BLOCK DO FORM COM OS ERROS E VALORES NO CONTEXTO
         return TEMPLATES.TemplateResponse(template, context, block_name="form")
 
@@ -122,4 +144,5 @@ async def post_create(
 @router.get("/view/{terreno_id}")
 async def view_terreno(terreno_id: int, request: Request):
     response = Response(status_code=200, content=f"{terreno_id}")
+
     return response
