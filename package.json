@@ -15,6 +15,9 @@
   "scripts": {
     "build.css": "pnpx @tailwindcss/cli -i ./src/static/css/app.css -o ./src/dist/css/app.css",
     "build.js": "esbuild src/static/js/main.js --bundle --outdir=./src/dist/js --outbase=./src/static/js --format=esm --splitting=true",
-    "dev": "concurrently --names \"CSS,JS\" --prefix-colors \"yellow,magenta\" \"pnpm run build.css\" \"pnpm run build.js\""  
+    "watch.css" : "pnpm run build.css --watch",
+    "watch.js": "pnpm run build.js --watch",
+
+    "dev": "concurrently --names \"CSS,JS\" --prefix-colors \"yellow,magenta\" \"pnpm run watch.css\" \"pnpm run watch.js\""  
   }
 }
