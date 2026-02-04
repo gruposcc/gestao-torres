@@ -11,6 +11,7 @@ from geopy.geocoders import Nominatim
 from core.api import app as api_app
 from core.database import sessionmanager
 from core.geocode_old import stop_geocoder
+from core.middleware.no_cache import NoCacheMiddleware
 from core.notifier import Notifier, get_notifier
 from core.settings import BASE_DIR, TEMPLATES
 from core.utils.jinja import CommentExtension
@@ -83,6 +84,8 @@ async def sse_endpoint(
         notifier.subscribe(request, user_id.hex), media_type="text/event-stream"
     )
 
+
+app.add_middleware(NoCacheMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

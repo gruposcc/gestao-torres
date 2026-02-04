@@ -38,3 +38,7 @@ JWT_EXPIRE_MINUTES_REFRESH = 60 * 24 * 7  # 7 dias
 BASE_DIR = Path(__file__).parent.parent
 
 TEMPLATES = Jinja2Blocks(directory=str(BASE_DIR / "templates"))
+
+
+TEMPLATES.env.auto_reload = True
+TEMPLATES.env.cache = {}
