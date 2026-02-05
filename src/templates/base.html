@@ -10,7 +10,8 @@
     {% endblock title %}
     
 
-    <script type="module" src="/static/js/main.js" defer></script>
+    {# <script type="module" src="/static/js/main.js" defer></script> #}
+    <script type="module" src="/static/js/main.js"></script>
     <script>
         // Função para aplicar a classe 'dark' antes do carregamento completo.
         if (localStorage.getItem('darkMode') === 'true' || 
@@ -19,6 +20,12 @@
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
+        }
+        
+        const isSidebarOpen = localStorage.getItem('isSidebarOpen');
+        if (isSidebarOpen === 'true') {
+            //document.getElementById("nav-sidebar").add('w-60');
+            document.documentElement.classList.add('sidebar-expanded');
         }
     </script>
         
