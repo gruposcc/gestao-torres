@@ -26,6 +26,7 @@
     <div 
         id="sidebar-items-container"
         class="flex flex-col gap-1 items-center ">
+
         <!--home-->
         <a 
             hx-get="/home"
@@ -48,16 +49,14 @@
                 focus-visible:underline focus:outline-hidden
                 dark:hover:bg-primary-dark/20 hover:bg-primary/5
 
-        "
-        :class="{
-            'w-10': !$store.sidebar.isSidebarOpen,
-            'w-full': $store.sidebar.isSidebarOpen,
-            '!text-primary dark:!text-primary-dark !bg-primary/10 dark:!bg-primary-dark/10': $store.sidebar.currentPath === '/home'
-        }"
-
-
-
+            "
+            :class="{
+                'w-10': !$store.sidebar.isSidebarOpen,
+                'w-full': $store.sidebar.isSidebarOpen,
+                '!text-primary dark:!text-primary-dark !bg-primary/10 dark:!bg-primary-dark/10': $store.sidebar.currentPath === '/home'
+            }"
         >
+
         <i data-lucide="house" class="size-5 shrink-0 transition-none"></i>
         <span x-cloak
             class="
