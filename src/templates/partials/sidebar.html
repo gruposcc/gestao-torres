@@ -6,12 +6,14 @@
 
 <nav 
     class="
-        fixed left-0 z-20
+        fixed left-0 z-10
         flex shrink-0 flex-col
         bg-surface-alt dark:bg-surface-dark-alt
         px-2.5
         w-15
-        transition-transform duration-300 
+
+        transition-transform
+        duration-300  ease-in-out 
         md:translate-x-0 md:relative
     " 
     :class="
@@ -19,7 +21,10 @@
     aria-label="sidebar navigation"
 >
     <!-- sidebar links  -->
-    <div class="flex flex-col gap-2.5 items-center ">
+    <div class="flex flex-col gap-1 items-center ">
+
+
+        
 
         <!--home-->
         <a 
@@ -29,33 +34,42 @@
         hx-push-url="true"
         href="/home"
         class="
+        transition-transform
+        duration-300  ease-out 
+
+
         flex items-center
         rounded-radius 
 
-        align-center
         text-sm font-medium
-        h-10
+        h-10 w-full pl-2.5
+
         text-on-surface dark:text-on-surface-dark
-        underline-offset-2
+        {# underline-offset-2 #}
         focus-visible:underline focus:outline-hidden
+
         dark:hover:bg-primary-dark/5 hover:bg-primary/5
+
         dark:hover:text-on-surface-dark-strong hover:text-on-surface-strong 
 
 
         "
         :class="{
-            'justify-center w-10': !$store.sidebar.isSidebarOpen,
-            'justify-start w-full pl-2.5': $store.sidebar.isSidebarOpen,
+            '{# justify-start  #}w-10': !$store.sidebar.isSidebarOpen,
+            'justify-start w-full': $store.sidebar.isSidebarOpen,
             '!text-primary dark:!text-primary-dark !bg-primary/10 dark:!bg-primary-dark/10': $store.sidebar.currentPath === '/home'
         }"
+
+
+
         >
-        <i data-lucide="house" class="size-5 shrink-0"></i>
+        <i data-lucide="house" class="size-5 shrink-0 transition-none"></i>
         <span x-cloak
             class="
                 whitespace-nowrap
-                transition-opacity 
+                transition-all 
                 duration-300
-                ease-in-out
+                {# ease-in-out #}
             "
             :class="{ 
                 'opacity-100 w-auto pl-2': $store.sidebar.isSidebarOpen, 

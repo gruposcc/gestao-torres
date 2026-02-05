@@ -33,25 +33,27 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
             raise e
 
     async def get_one_by(self, only_enabled=True, **kwargs) -> Optional[T]:
-        conditions = []
+        stmt = select(self.model)
 
         for key, value in kwargs.items():
             if hasattr(self.model, key):
-                conditions.append(getattr(self.model, key) == value)
-            else:
-                # se o filtro nao existe no modelo so passa
-                self.logger.debug("Filtro não existe no modelo ...")
-                ...
+                column = getattr(self.model, key)
+                stmt = stmt.where(column == value)
+            else:  # se nao existe so passa
+                logger.warning(
+                    f"Buscando coluna que nao existe no modelo: {self.model.__name__}, {key}"
+                )
+                pass
 
         # se status nao foi passado no filtro, filtra por status == enabled
         if hasattr(self.model, "status") and "status" not in kwargs and only_enabled:
-            conditions.append(getattr(self.model, "status") == ObjectStatus.ENABLE)
+            stmt = stmt.where(getattr(self.model, "status") == ObjectStatus.ENABLE)
 
-        stmt = select(self.model).where(*conditions)
-        logger.debug(f"Buscando: {stmt}")
+        logger.debug(f"Buscando {self.model.__name__} unico por: {stmt}")
 
         result = await self.dbSession.execute(stmt)
         instance = result.scalar_one_or_none()
+
         return instance
 
     async def create(self, data: BaseSchema, *args, **kwargs):
@@ -82,7 +84,13 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
             if hasattr(self.model, key):
                 column = getattr(self.model, key)
                 # adiciona cada um dos kwargs analisados ao stmt
-                stmt.where(column == value)
+                stmt = stmt.where(column == value)
+            else:  # se nao existe so passa
+                logger.warning(
+                    f"Buscando coluna que nao existe no modelo: {self.model.__name__}, {key}"
+                )
+                pass
+
         stmt.exists()
 
         raw_result = await self.dbSession.execute(stmt)

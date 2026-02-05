@@ -25,14 +25,15 @@ async def list_page(
     dbSession=Depends(get_db),
 ):
     template = "pages/terreno/list.html"
-    # page = {"title": "Terrenos"}
-    context = {"request": request, "user": session}
+    page = {"title": "Torres SCC - Terrenos"}
+    context = {"request": request, "user": session, "page": page}
 
     if is_htmx_request(request):  # se somente bloco
         response = TEMPLATES.TemplateResponse(template, context, block_name="content")
         response.headers["HX-Trigger-After-Swap"] = json.dumps(
-            {"updateTitle": "Torres SCC - Terrenos "}
+            {"updateTitle": page["title"]}
         )
+
     else:  # senao template todo - f5, acesso direto
         response = TEMPLATES.TemplateResponse(template, context)
 
@@ -142,7 +143,29 @@ async def post_create(
 
 
 @router.get("/view/{terreno_id}")
-async def view_terreno(terreno_id: int, request: Request):
-    response = Response(status_code=200, content=f"{terreno_id}")
+async def view_terreno(terreno_id: int, request: Request, dbSession=Depends(get_db)):
+    template = "pages/terreno/view.html"
+    context: Dict[str, Any] = {"request": request}
+
+    # try:
+    #    terreno = await service.get_terreno
+    # except:
+    # em caso de erro uma resposta diferente
+
+    service = TerrenoService(dbSession)
+    terreno = await service.get_one_by(id=terreno_id)
+
+    ##colocar dentro do schema ?
+
+    context.update({"item": terreno})
+
+    if not terreno:
+        raise HTTPException(404)
+
+    if is_htmx_request:
+        response = TEMPLATES.TemplateResponse(template, context, block_name="content")
+
+    else:
+        response = TEMPLATES.TemplateResponse(template, context)
 
     return response

@@ -1,0 +1,69 @@
+{% extends "layout/template.html" %}
+
+{% block content %}
+
+
+<div class="flex flex-col gap-4 p-2">
+
+  {# content header #}
+  <div class="flex flex-row items-center justify-between gap-4">
+
+    {# TITLE #}
+    <div class="flex items-center gap-3">
+      <div class="px-2 rounded-radius">
+      {# <div class="p-2 bg-primary/10 dark:bg-primary-dark/20 rounded-lg text-primary dark:text-primary-dark"> #}
+        <i data-lucide="land-plot" class="size-6"></i>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-on-surface-strong dark:text-on-surface-dark-strong leading-none">
+            Terreno {{item.name}}
+        </h2>
+        <p class="text-xs text-on-surface/60 dark:text-on-surface-dark/60 mt-1">
+            Gerenciamento e listagem
+        </p>
+      </div>
+    </div>
+
+
+    {# TODO #}
+    {# SEARCH BAR QUE FILTRA OS CAMPOS DA TABELA ABAIXO #}
+
+
+    {# RIGHT BUTTON #}
+    <button id="nav-create-terreno"
+      hx-get="/terreno/create"
+      hx-target="#content"
+      hx-swap="innerHTML" 
+      hx-push-url="true" 
+      href="/terreno/create"
+      type="button" 
+      class="
+        inline-flex 
+        justify-center 
+        items-center gap-2 
+        whitespace-nowrap 
+        rounded-radius
+        bg-primary border border-primary dark:border-primary-dark 
+        px-4 py-2 
+        text-sm font-medium 
+        tracking-wide
+        text-on-primary 
+        cursor-pointer
+        transition
+        hover:opacity-75
+        hover:shadow-md 
+        text-center focus-visible:outline 
+        focus-visible:outline-offset-2
+        focus-visible:outline-primary  dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark
+        max-w-30
+      "
+    >
+      <i data-lucide="circle-plus" class="size-5"></i>
+      Novo
+    </button>
+
+  </div>{# END CONTENT HEADER #}
+</div>
+
+{% endblock content %}

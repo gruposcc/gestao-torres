@@ -1,0 +1,63 @@
+<nav class="
+    sticky top-0 z-10 
+    flex flex-row justify-between 
+    h-15 py-2.5
+    bg-surface-alt  dark:bg-surface-dark-alt" 
+    aria-label="top navibation bar"
+ >
+
+    {# SIDEBAR TOGGLE #}
+    <div class="px-2.5 w-15"> 
+        <button class="flex items-center
+        
+        rounded-radius
+        text-md font-medium text-on-surface dark:text-on-surface-dark
+        hover:bg-primary/5 hover:text-on-surface-strong dark:hover:bg-primary-dark/5 dark:hover:text-on-surface-dark-strong justify-center
+        transition-all ease-in-out duration-150 
+        w-10 h-10
+
+        "
+        value="$store.sidebar.isSidebarOpen"
+        @click="$store.sidebar.toggle()"
+        aria-label=" Toggle Sidebar">
+
+            <!-- Ícone -->
+            <i data-lucide="panel-right-open" class="shrink-0 size-5 transition-all duration-300 ease-in-out "
+                :class="{ '-scale-x-100 ': $store.sidebar.isSidebarOpen, '-scale-x-100 ': !$store.sidebar.isSidebarOpen }"></i>
+        </button>
+    </div>
+    
+
+    <!--left section-->
+    <div class="flex flex-row flex-1 items-center justify-start bg-blue grow">
+        bem aqui 
+        {% block header_left %}
+            {% include "partials/breadcumb.html" %}
+        {% endblock header_left %}
+        <!-- Toggle Sidebar -->
+
+
+    </div><!--end left section-->
+
+    <!--center section-->
+    <div class="flex flex-row flex-3 justify-center items-center">
+
+        <!--search input-->
+        {# <div class="relative flex w-full max-w-1/2 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+
+            <i data-lucide="search" class="transition-transform duration-300 absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-on-surface/50
+                    dark:text-on-surface-dark"></i>
+
+            <input type="search"
+                class="w-full h-6 rounded-lg border border-outline bg-surface-alt py-2 pl-10 pr-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+                name="search" placeholder="Search" aria-label="search" />
+        </div> #}
+
+    </div><!--end center section-->
+
+    <!--right section-->
+    <div class="flex flex-row flex-1 items-center justify-end">
+
+    
+    </div><!--end right section-->
+</nav>

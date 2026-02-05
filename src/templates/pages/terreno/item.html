@@ -1,5 +1,26 @@
-<tr>
-    {# link com o id value={item.id} #}
-    <td class="p-4">{{loop.index}}</td>
-    <td class="p-4">{{item.name}}</td>
-</tr>
+{% if items %}
+    {% for item in items %}
+        <tr>
+            <td class="p-4">{{loop.index}}</td>
+            <td class="p-4">{{item.name}}</td>
+            <td class="p-4">endereço</td>
+            <td class="p-4">{{item.lat}}</td>
+            <td class="p-4">{{item.lng}}</td>
+            <td class="p-4">0</td>
+
+            <td class="p-4">
+                <button
+                    type="button"
+                    hx-get="/terreno/view/{{item.id}}"
+                    hx-target="#content"
+                    hx-swap="innerHTML"
+                    hx-push-url="true"
+                    href="/terreno/view/{{item.id}}"
+                >
+                    editar
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+{% endif %}
+

@@ -1,12 +1,15 @@
 #SHELL := /bin/bash
 
-dev:
+dev-full:
 	@pnpm exec concurrently \
 		--names 'FRONTEND, BACKEND' \
 		--prefix-colors 'blue, green' \
 		--kill-others-on-fail \
 		'pnpm run dev' \
 		'uv run --env-file .env scripts/dev.py'
+
+dev:
+	@uv run --env-file .env scripts/dev.py
 
 create_superuser:
 	@uv run --env-file .env scripts/create_superuser.py
@@ -23,5 +26,5 @@ prune_db:
 prune_migrations:
 	@rm -r ./src/migrations/versions/*.py
 
-.PHONY: dev migrate migration create_superuser prune_db prune_migrations
+.PHONY: dev migrate migration create_superuser prune_db prune_migrations dev-full
 

@@ -1,0 +1,11 @@
+<nav class="fixed left-0 z-10flex shrink-0 flex-colbg-surface-alt dark:bg-surface-dark-altpx-2.5transition-all
+    duration-300 ease-in-outmd:translate-x-0
+    md:relative":class="{ 'w-60': $store.sidebar.isSidebarOpen, 'w-15' : !$store.sidebar.isSidebarOpen}">
+    <div class="flex flex-col gap-1 items-start"><a hx-get=" /home"href="/home"
+            class="transition-all duration-300 ease-in-outflex items-centerrounded-radiustext-sm font-mediumh-10pl-2.5 /* 2. FIXO: Padding sempre igual para o ícone não mexer */text-on-surface dark:text-on-surface-darkdark:hover:bg-primary-dark/5 hover:bg-primary/5"
+            :class="{'w-10': !$store.sidebar.isSidebarOpen,'w-full': $store.sidebar.isSidebarOpen,'!text-primary dark:!text-primary-dark !bg-primary/10 dark:!bg-primary-dark/10': $store.sidebar.currentPath === '/home'}"><i
+                data-lucide="house" class="size-5 shrink-0"></i><span
+                x-cloakclass="whitespace-nowraptransition-all duration-300 ease-in-outoverflow-hidden"
+                :class="{'opacity-100 w-auto ml-2.5': $store.sidebar.isSidebarOpen,'opacity-0 w-0 ml-0': !$store.sidebar.isSidebarOpen}">Home</span></a>
+    </div>
+    </nav>
