@@ -57,7 +57,19 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
         return instance
 
     async def create(self, data: BaseSchema, *args, **kwargs):
-        raise NotImplementedError
+        payload = data.model_dump()
+
+        await self.before_create(payload, *args, **kwargs)
+
+        object = await self.save(self.model(**payload))
+
+        # TRATAR EXECÇÔES DO self.save
+
+        return object
+
+    async def before_create(self, payload: Dict[str, Any], *args, **kwargs):
+        """SOBREESCREVER O METODO QUE RECEBE O PAYLOAD E É CHAMADO ANTES DE SALVAR A INSTANCIA CRIADA NO DB"""
+        pass
 
     async def create_unique(
         self, keys: Dict[str, Any], data: BaseSchema

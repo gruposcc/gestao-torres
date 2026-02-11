@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter, Request
 
-from core.settings import TEMPLATES
+from core.templates import TResponse
 from deps.db import get_db
 from schemas.auth import UserAuthForm
 from services.auth import AuthService
@@ -27,4 +27,4 @@ async def home(request: Request, path: str):
     context = {"request": request, "breadcumb": breadcumb}
 
     if request.headers.get("hx-request") == "true":
-        return TEMPLATES.TemplateResponse(template, context, block_name="content")
+        return TResponse(template, context, block_name="content")

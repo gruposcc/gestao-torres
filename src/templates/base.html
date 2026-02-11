@@ -12,31 +12,14 @@
 
     {# <script type="module" src="/static/js/main.js" defer></script> #}
     <script type="module" src="/static/js/main.js"></script>
-    <script>
-        // Função para aplicar a classe 'dark' antes do carregamento completo.
-        if (localStorage.getItem('darkMode') === 'true' || 
-            (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
-        ) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-        
-        // Checar estado da sidebar
-        const isSidebarOpen = localStorage.getItem('isSidebarOpen');
-        if (isSidebarOpen === 'true') {
-            //document.getElementById("nav-sidebar").add('w-60');
-            document.documentElement.classList.add('sidebar-expanded');
-        }
-    </script>
+    
+    {% include "partials/scripts/darkmode.html" %}
+    {% include "partials/scripts/sidebar_state.html" %}
+    {% include "partials/scripts/alpine_utils.html" %}
         
     <link rel="stylesheet" href="/static/css/app.css">
     
-    {# <style>
-        #map { height: 400px; width: 100%; }
-    </style>
-    #}
-    {% block head %}
+    {% block head  %}
     
     
     
@@ -48,10 +31,6 @@
     {% block body %}
     
     {% endblock body %}
-
-    {% block end_body %}
-        
-    {% endblock end_body %}
 </body>
 
 </html>

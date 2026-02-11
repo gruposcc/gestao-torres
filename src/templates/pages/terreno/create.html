@@ -2,12 +2,16 @@
 
 {% block content %}
 
-<script>
-function registerComponent() {
-    console.debug("registrando essa merda")
+{# leaflet #}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+crossorigin=""></script> 
 
-    Alpine.data("newTerrenoForm", () => ({
-        
+
+
+<script>
+{
+    const terrenoFormComponent = () => ({
         map: null,
         marker: null,
 
@@ -52,13 +56,17 @@ function registerComponent() {
             //    if (!value) this.valorAluguel = '';
             //});
         },
-
         init() {
-
-            this.initMap();
-            // Atualiza o zoom_level sempre que o usuário interagir com o zoom
-
-            this.setupEvents();
+            // Em vez de um loop while, usamos um pequeno delay ou 
+            // verificamos se o Leaflet (L) já está disponível.
+            const checkLeaflet = setInterval(() => {
+                if (typeof L !== 'undefined') {
+                    clearInterval(checkLeaflet);
+                    if (this.initMap()) {
+                        this.setupEvents();
+                    }
+                }
+            }, 100); // Tenta a cada 100ms até o Leaflet carregar
         },
 
         updatelatlng(n_lat, n_lng) {
@@ -94,19 +102,41 @@ function registerComponent() {
 
         async initMap() {
             //mapa, layer e marcador baseado nas coordenadas full
-            this.map = L.map('map')
-                .setView([this.lat, this.lng], this.zoom_level);
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-                .addTo(this.map);
+            // 1. Verifica se o elemento 'map' existe no DOM
+            const mapElement = document.getElementById('map');
+            if (!mapElement) return false;
 
-            this.marker = L.marker([this.lat, this.lng], {draggable: true})
-                .addTo(this.map);
+            // 2. Verifica se o Leaflet está carregado
+            if (typeof L === 'undefined') return false;
 
-            //this.s_addr_txt = await this.geocode(this.lat, this.lng)
-            //primeiro endereço selecionado -
-            //await this.updateFromCoords(this.lat, this.lng)
-            this.updateFromCoords(this.lat, this.lng)
+
+
+            if (!this.map) {
+                try {
+
+                    this.map = L.map('map')
+                        .setView([this.lat, this.lng], this.zoom_level);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+                        .addTo(this.map);
+
+                    this.marker = L.marker([this.lat, this.lng], {draggable: true})
+                        .addTo(this.map);
+
+                    //this.s_addr_txt = await this.geocode(this.lat, this.lng)
+                    //primeiro endereço selecionado -
+                    //await this.updateFromCoords(this.lat, this.lng)
+                    this.updateFromCoords(this.lat, this.lng);
+                    return true;
+                } catch (e) {
+                    console.error("Erro na inicialização do leaftlet")
+                    return false;
+                }
+
+
+            } else { return false }
+
         },
 
         async updateFromCoords(new_lat, new_lng) {
@@ -198,44 +228,16 @@ function registerComponent() {
         //    // Remove pontos de milhar e troca a vírgula decimal por ponto
         //    return parseFloat(this.valorAluguel.replace(/\./g, '').replace(',', '.'));
         //},         
+    })
 
-    })); 
-};
-
-if (window.Alpine) {
-    registerComponent();
-} else {
-    document.addEventListener("alpine:init", registerComponent);
+    registerComponent("newTerrenoForm", terrenoFormComponent)
 }
-
 </script>
-<style>
-    .htmx-indicator {
-        opacity: 0;
-        pointer-events: none; /* Importante para não bloquear cliques quando invisível */
-        transition: opacity 200ms ease-in;
-    }
 
-    .htmx-request .htmx-indicator,
-    .htmx-request.htmx-indicator {
-        opacity: 1;
-        pointer-events: auto;
-    }
 
-    /* Quando o indicador estiver ativo, force o SVG lá dentro a girar */
-    .htmx-request .animate-spin,
-    .htmx-request.animate-spin {
-        animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-</style>
 
 <div 
-    x-data="newTerrenoForm()"
+    x-data="newTerrenoForm"
     class="flex flex-row h-full overflow-x-auto gap-4 p-2"
 >
 

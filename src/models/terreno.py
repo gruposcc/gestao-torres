@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from uuid import UUID, uuid4
 
 from sqlalchemy import Boolean, CheckConstraint, Enum, Integer, Numeric, String, Uuid
@@ -7,10 +7,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base import BaseSQLModel, StatusMixin, TimeStampMixin
 
+if TYPE_CHECKING:
+    from .torre import Torre
+
 
 class Terreno(BaseSQLModel, StatusMixin, TimeStampMixin):
     __tablename__ = "terreno"
-
     __table_args__ = (
         CheckConstraint(
             "lat BETWEEN -90 AND 90",
@@ -23,7 +25,6 @@ class Terreno(BaseSQLModel, StatusMixin, TimeStampMixin):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
 
     # TODO, ambos os pontos não podem ser o mesmo
@@ -33,24 +34,37 @@ class Terreno(BaseSQLModel, StatusMixin, TimeStampMixin):
 
     # TODO
     # torres relação
-
+    torres: Mapped[List["Torre"]] = relationship(
+        "Torre", back_populates="terreno", cascade="all"
+    )
     # TODO
     # despesas relaçãõ
 
 
-""" 
-class Despesa(BaseSQLModel, TimeStampMixin):
-    ## recorrente
-    ## - mensal - qual dia ? - por qual periodo de tempo. / perpetua
-    ## - anual - data ? - por qual periodo de tempo. / perpetua
-    ## - semanal - data? - por qual periodo de tempo / -
-    ## - diaria
+"""  
 
-    ## especifica
-    ## ex: manutenção, compra de equipamento, etc, possivelmente relacionada futuramente com outro modelo
+ class Despesa(BaseSQLModel, TimeStampMixin): 
 
-    ...
+     ## recorrente 
+
+     ## - mensal - qual dia ? - por qual periodo de tempo. / perpetua 
+
+     ## - anual - data ? - por qual periodo de tempo. / perpetua 
+
+     ## - semanal - data? - por qual periodo de tempo / - 
+
+     ## - diaria 
 
 
-class Renda(BaseSQLModel, TimeStampMixin): ...
- """
+     ## especifica 
+
+     ## ex: manutenção, compra de equipamento, etc, possivelmente relacionada futuramente com outro modelo 
+
+
+     ... 
+
+
+
+ class Renda(BaseSQLModel, TimeStampMixin): ... 
+
+"""

@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 
-from core.settings import TEMPLATES
+from core.templates import TResponse
 from deps.db import get_db
 from schemas.auth import UserAuthForm
 from services.user import UserService
@@ -29,10 +29,8 @@ async def email_input(request: Request, email: str = Form(), dbSession=Depends(g
             "request": request,
             "error": {"email": "Email em uso"},
         }
-        return TEMPLATES.TemplateResponse(
-            template, context, block_name="email_feedback"
-        )
+        return TResponse(template, context, block_name="email_feedback")
 
     context = {"request": request}
 
-    return TEMPLATES.TemplateResponse(template, context, block_name="email_feedback")
+    return TResponse(template, context, block_name="email_feedback")

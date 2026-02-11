@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
-from core.settings import TEMPLATES
+from core.templates import TResponse, render_chunk, render_html, render_page
 from deps.auth import get_user_session
 from deps.db import get_db
 from schemas.auth import UserAuthForm
@@ -21,20 +21,18 @@ router = APIRouter()
 async def home(request: Request, user=Depends(get_user_session)):
     template = "pages/home.html"
     page = {"title": "Home"}
-
     context = {"request": request, "user": user, "page": page}
 
-    if request.headers.get("hx-request") == "true":
-        return TEMPLATES.TemplateResponse(template, context, block_name="content")
-
-    return TEMPLATES.TemplateResponse(template, context)
+    return render_page(request, template, context)
 
 
 @router.get("/login")
 async def login_page(request: Request):
     template = "pages/login.html"
-    context = {"request": request, "error": None}
-    return TEMPLATES.TemplateResponse(template, context)
+    page = {"title": "SCC Torres - Login"}
+    context = {"request": request, "page": page, "error": None}
+
+    return render_html(request, template, context)
 
 
 @router.post("/login")
@@ -58,7 +56,7 @@ async def login_post(
     if not success:
         # retorna fragmento de html com erro
         context = {"request": request, "email": form.email, "error": payload}
-        return TEMPLATES.TemplateResponse(template, context, block_name="login_form")
+        return TResponse(template, context, block_name="login_form")
 
     response = HTMLResponse(status_code=200)
     response.set_cookie(

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse
 from geopy.geocoders import Nominatim
 
-from core.settings import TEMPLATES
+from core.templates import TResponse
 from deps.geocoder import get_geocoder
 
 logger = logging.getLogger("app.hmtx.address")
@@ -45,7 +45,7 @@ async def search(
         context = {"request": request, "results": locations}
 
         logger.debug(f"returning locations {locations}")
-        return TEMPLATES.TemplateResponse(template, context)
+        return TResponse(template, context)
 
         ##TODO Formatar resposta estadoUF/ cidade /endereço
 

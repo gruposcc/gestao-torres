@@ -1,0 +1,14 @@
+    <script>
+        function registerComponent(name, component) {
+            const start = () => {
+                console.debug(`Registrando componente: ${name}`);
+                Alpine.data(name, component);
+            };
+
+            if (window.Alpine) {
+                start();
+            } else {
+                document.addEventListener("alpine:init", start)
+            }
+        }
+    </script>

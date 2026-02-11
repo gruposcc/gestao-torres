@@ -77,6 +77,7 @@ def do_run_migrations(connection: Connection) -> None:
         process_revision_directives=alembic_helpers.writer,
         render_item=alembic_helpers.render_item,
         include_name=include_name,
+        compare_type=True,
     )
 
     with context.begin_transaction():

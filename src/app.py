@@ -13,14 +13,12 @@ from core.database import sessionmanager
 from core.geocode_old import stop_geocoder
 from core.middleware.no_cache import NoCacheMiddleware
 from core.notifier import Notifier, get_notifier
-from core.settings import BASE_DIR, TEMPLATES
-from core.utils.jinja import CommentExtension
+from core.settings import BASE_DIR
 from deps.auth import get_user_session
 from routes.htmx.router import router as htmx_router
 from routes.pages.router import router as pages_router
 from schemas.auth import UserSession
 
-TEMPLATES.env.add_extension(CommentExtension)
 LOGGER = getLogger("app")
 
 

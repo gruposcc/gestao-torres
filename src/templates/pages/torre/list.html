@@ -1,0 +1,143 @@
+{% extends "layout/template.html" %}
+
+{# {% if page and page.title %}
+  {% block title %}
+    {{page.title}}
+  {% endblock title %}
+{% endif %} #}
+
+{% block content  %}
+<div class="content-frame">
+
+  {# content header #}
+  <div class="content-header">
+
+    {# TITLE #}
+    <div class="title">
+      <div class="icon">
+      {# <div class="p-2 bg-primary/10 dark:bg-primary-dark/20 rounded-lg text-primary dark:text-primary-dark"> #}
+        <i data-lucide="radio-tower"></i>
+      </div>
+
+      <div>
+        <h2>
+            Torres
+        </h2>
+        <p >
+            Gerenciamento e listagem
+        </p>
+      </div>
+    </div>
+
+
+    {# TODO #}
+    {# SEARCH BAR QUE FILTRA OS CAMPOS DA TABELA ABAIXO #}
+
+    {# RIGHT BUTTON #}
+    <button
+      hx-get="/torre/create"
+      hx-target="#content"
+      hx-swap="innerHTML" 
+      hx-push-url="true" 
+      href="/torre/create"
+      type="button" 
+      class="nav-create-btn"
+    >
+      <i data-lucide="circle-plus"></i>
+      Novo
+    </button>
+
+  </div>{# END CONTENT HEADER #}
+
+  {# TABLE CONTAINER #}
+  <div id="table-container"
+     class="
+      overflow-x-auto w-full
+      rounded-radius 
+      border border-outline dark:border-outline-dark
+    "
+  >
+  <table id="items-table" 
+    class="
+      w-full table-fixed 
+      text-left text-sm
+      text-on-surface dark:text-on-surface-dark
+    "
+  >
+
+      <colgroup>
+        <col class="w-10">
+        <col class="w-auto">
+        <col class="w-auto">
+        <col class="w-auto">
+        <col class="w-auto">
+        <col class="w-auto">
+        <col class="w-20 text-right">
+      </colgroup>
+
+      <thead 
+        class="
+          border-b border-outline dark:border-outline-dark
+          bg-surface-alt
+          text-sm text-on-surface-strong   dark:text-on-surface-dark-strong
+        "
+      >
+
+        <tr class="">
+
+          {# TODO fazer ordenavel pelo header  #}
+
+          <th scope="col" class="p-2 font-semibold">#</th> {#  #}
+          <th scope="col" class="p-2 font-semibold">Nome do terreno</th>
+          <th scope="col" class="p-2 font-semibold">Endereço</th> 
+          <th scope="col" class="p-2 font-semibold">latitude</th> 
+          <th scope="col" class="p-2 font-semibold">longitude</th> 
+          <th scope="col" class="p-2 font-semibold">torres</th> 
+          <th scope="col" class="p-2 font-semibold">Ações</th> {#  fixar no final #}
+        </tr>
+
+      </thead>
+
+      <tbody id="table-body" 
+        hx-post="/terreno/list" 
+        hx-trigger="load once" 
+        hx-target="this"
+        hx-swap="innerHTML"
+        class="
+          divide-y divide-outline dark:divide-outline-dark
+        "
+      >
+
+        <tr {# id="item-id-{{item.id}}" #}>
+          <td class="p-4">0</td>
+          <td class="p-4">Item fixo</td>
+          <td class="p-4">bla bla rua lalala</td> {# TODO  Endereço deve ter um popup que mostra o endereço todo #}
+          <td class="p-4">lat</td>
+          <td class="p-4">long</td>
+          <td class="p-4">quantidade de torres</td>
+          <td class="p-4 text-center">
+            <div class="flex justify-center gap-2">
+              <button>editar</button>
+            </div>
+          </td>
+        </tr>
+        {# {% block table %}
+        {% if items %}
+        {% for item in items %}
+        <tr>
+          {% include "pages/terreno/item.html" %}
+        </tr>
+        {% endfor %}
+        {% endif %}
+        {% endblock table %} #}
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{# {% block end_body %}
+{% include "partials/notification.html" %}
+{% endblock end_body %} #}

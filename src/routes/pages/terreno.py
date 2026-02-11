@@ -2,11 +2,11 @@ import json
 import logging
 from typing import Any, Dict
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from pydantic import ValidationError
 
-from core.schema import validate_html_form
-from core.settings import TEMPLATES
+# from core.schema import validate_html_form TODO
+from core.templates import TResponse, render_chunk, render_page
 from core.utils.htmx import is_htmx_request
 from deps.auth import get_user_session
 from deps.db import get_db
@@ -28,16 +28,7 @@ async def list_page(
     page = {"title": "Torres SCC - Terrenos"}
     context = {"request": request, "user": session, "page": page}
 
-    if is_htmx_request(request):  # se somente bloco
-        response = TEMPLATES.TemplateResponse(template, context, block_name="content")
-        response.headers["HX-Trigger-After-Swap"] = json.dumps(
-            {"updateTitle": page["title"]}
-        )
-
-    else:  # senao template todo - f5, acesso direto
-        response = TEMPLATES.TemplateResponse(template, context)
-
-    return response
+    return render_page(request, template, context)
 
 
 @router.post("/list")
@@ -50,22 +41,19 @@ async def list_post(request: Request, db=Depends(get_db)):
     # TODO, parametros de ordenação, paginação e filtro
     terrenos = await service.get_list()
 
-    template = "pages/terreno/item.html"
+    template = "pages/terreno/items.html"
     context = {"request": request, "items": terrenos}
 
-    return TEMPLATES.TemplateResponse(template, context)
+    return render_chunk(request, template, context)
 
 
 @router.get("/create")
 async def create(request: Request, session=Depends(get_user_session)):
     template = "pages/terreno/create.html"
-    page = {"title": "Novo Terreno"}
+    page = {"title": "Torres SCC - Novo Terreno"}
     context = {"request": request, "user": session, "page": page}
 
-    if request.headers.get("hx-request") == "true":
-        return TEMPLATES.TemplateResponse(template, context, block_name="content")
-
-    return TEMPLATES.TemplateResponse(template, context)
+    return render_page(request, template, context)
 
 
 @router.post("/create")
@@ -74,20 +62,19 @@ async def post_create(
     user_session=Depends(get_user_session),
     db_session=Depends(get_db),
 ):
-    if not request.headers.get("hx-request") == "true":
+    if not is_htmx_request:
         raise HTTPException(403)
 
-    data = await request.form()
-
+    template = "pages/terreno/create.html"
     context: Dict[str, Any] = {"request": request}
     errors: Dict[str, Any] = {}
 
-    template = "pages/terreno/create.html"
-
-    logger.debug(data)
+    data = await request.form()
+    # logger.debug(data)
 
     try:
         valid_data = TerrenoIn.model_validate(data)
+
     except ValidationError as ve:
         for error in ve.errors():
             # logger.debug(error)
@@ -104,8 +91,7 @@ async def post_create(
     ## cria o terreno
     service = TerrenoService(db_session)
 
-    # tenta garantir unicidade
-    # exists = await service.exists_name(name=valid_data.name)
+    # tenta garantir unicidade por nome
     exists = await service.exists_by(name=valid_data.name)
     if exists:
         context.update(
@@ -117,8 +103,9 @@ async def post_create(
             }
         )
         logger.debug("ja existe bobo")
+
         # RETORNA O BLOCK DO FORM COM OS ERROS E VALORES NO CONTEXTO
-        return TEMPLATES.TemplateResponse(template, context, block_name="form")
+        return TResponse(template, context, block_name="form")
 
     # SE UNICO CRIA NOVO
     try:
@@ -163,9 +150,35 @@ async def view_terreno(terreno_id: int, request: Request, dbSession=Depends(get_
         raise HTTPException(404)
 
     if is_htmx_request:
-        response = TEMPLATES.TemplateResponse(template, context, block_name="content")
+        response = TResponse(template, context, block_name="content")
 
     else:
-        response = TEMPLATES.TemplateResponse(template, context)
+        response = TResponse(template, context)
 
     return response
+
+
+@router.post("/search")
+async def search_terreno(
+    request: Request,
+    searchQuery: str = Form(),
+    db_session=Depends(get_db),
+):
+    template = "pages/torre/search-result.html"
+    context: Dict[str, Any] = {"request": request}
+
+    logger.debug(searchQuery)
+
+    # sanitizar a query
+
+    service = TerrenoService(db_session)
+    terrenos = await service.search_by_name(name=searchQuery)
+
+    logger.debug(terrenos)
+    if terrenos:
+        context.update({"results": terrenos})
+
+    if not isinstance(terrenos, list):
+        terrenos = [terrenos]
+
+    return TResponse(template, context)

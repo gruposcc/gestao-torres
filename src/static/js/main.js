@@ -8,10 +8,29 @@ import focus from '@alpinejs/focus'
 // Caution, this will import all the icons and bundle them.
 createIcons({ icons });
 
-//LOG NOTIFY
+
+/* 
+*
+* @param {string} name - Nome do componenete (x-data) 
+* @param {function} component - Func que retorna objeto do componente
+*
+*/
+/* export function registerComponent(name, component) {
+  const start = () => {
+    console.debug(`Registrando componente: ${name}`);
+    Alpine.data(name, component);
+  };
+
+  if (window.Alpine) {
+    start();
+  } else {
+    document.addEventListener("alpine:init", start)
+  }
+}
+window.registerComponent = registerComponent; */
+
+
 document.addEventListener('DOMContentLoaded', () => {
-
-
   //listner para alterar o titulo da pagina 
   window.addEventListener('updateTitle', (e) => {
     console.debug("aoooooooooo caralho mudando titulo")
@@ -33,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //createIcons({ icons });
     //console.log("Lucide icons re-rendered after HTMX swap.");
     if (typeof createIcons === "function") {
-      createIcons({icons})/
+      createIcons({icons})
       console.debug("Lucide reloaded porra")
     }
 
@@ -64,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('Listener "notify" ativo.');
 
 });
-
+/* asdas */
 
 Alpine.plugin(persist)
 Alpine.plugin(focus)
@@ -78,6 +97,11 @@ createIcons({
     Globe
   }
 }); */
+
+window.reloadLucide = function () {
+  createIcons({ icons })
+  console.debug("Lucide reloaded na força")
+}
 
 Alpine.store('messages', {
   initSSE:  (url = '/events') => {
@@ -162,10 +186,15 @@ Alpine.store('theme', {
 Alpine.store('sidebar', {
   currentPath: window.location.pathname, 
   isSidebarOpen: Alpine.$persist(false).as("isSidebarOpen"),
+
   toggle() {
     this.isSidebarOpen = !this.isSidebarOpen
   }
 })
+
+Alpine.directive('active')
+
+
 
 
 window.Alpine = Alpine

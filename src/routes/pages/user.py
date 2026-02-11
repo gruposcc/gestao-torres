@@ -7,7 +7,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from pydantic import ValidationError
 
 from core.notifier import Notifier, get_notifier
-from core.settings import TEMPLATES
+from core.templates import TResponse, render_chunk, render_html, render_page
+from core.utils.htmx import is_htmx_request
 from deps.auth import get_user_session
 from deps.db import get_db
 from schemas.auth import UserAuthForm
@@ -29,28 +30,24 @@ async def list_page(
 ):
     template = "pages/user/list.html"
     page = {"title": "Usuários"}
-
     context = {"request": request, "user": user, "page": page}
 
-    if request.headers.get("hx-request") == "true":
-        return TEMPLATES.TemplateResponse(template, context, block_name="content")
-
-    return TEMPLATES.TemplateResponse(template, context)
+    return render_page(request, template, context)
 
 
 @router.post("/list")
 async def list_post(request: Request, dbSession=Depends(get_db)):
-    if not request.headers.get("hx-request") == "true":
+    if not is_htmx_request:
         raise HTTPException(403)
 
     service = UserService(dbSession)
     users = await service.get_all(response_schema=UserOut)
-
     # logger.debug(users)
+
     template = "pages/user/list.html"
     context = {"request": request, "users": users}
 
-    return TEMPLATES.TemplateResponse(template, context, block_name="user_list")
+    return TResponse(template, context, block_name="user_list")
 
     # retorna o framento do html
 
@@ -61,10 +58,7 @@ async def create_page(request: Request, user=Depends(get_user_session)):
     page = {"title": "Novo usuário"}
     context = {"request": request, "user": user, "page": page}
 
-    if request.headers.get("hx-request") == "true":
-        return TEMPLATES.TemplateResponse(template, context, block_name="content")
-
-    return TEMPLATES.TemplateResponse(template, context)
+    return render_page(request, template, context)
 
 
 @router.post("/create")
@@ -98,7 +92,7 @@ async def create_post(
         # v_form = None
 
     if errors:
-        return TEMPLATES.TemplateResponse(template, context, block_name="form")
+        return TResponse(template, context, block_name="form")
 
     service = UserService(dbSession)
     exists = await service.email_exists(v_form.email)
@@ -109,7 +103,7 @@ async def create_post(
             "first_name": {"value": v_form.first_name},
             "last_name": {"value": v_form.last_name},
         }
-        return TEMPLATES.TemplateResponse(template, context, block_name="form")
+        return TResponse(template, context, block_name="form")
 
     try:
         new_user = await service.create(v_form)

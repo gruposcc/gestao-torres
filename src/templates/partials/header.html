@@ -1,38 +1,31 @@
-<nav class="
-    sticky top-0 z-20
-    flex flex-row justify-between 
-    h-15 py-2.5
-    bg-surface-alt  dark:bg-surface-dark-alt" 
-    aria-label="top navibation bar"
+<nav class="top-navbar" 
  >
     {# SIDEBAR TOGGLE #}
     <div 
-        class="flex items-center px-2.5 transition-transform duration-300{#  ease-out #} "
-        :class="{ 'w-60': $store.sidebar.isSidebarOpen, 'w-15': !$store.sidebar.isSidebarOpen }"
+        class="
+            toggle-sidebar
+        "
+        :class="{ 'open': $store.sidebar.isSidebarOpen, 'close': !$store.sidebar.isSidebarOpen }"
+        {# exapnde a area esquerda da top navbar do mesmo tamanho da sidebar #}
     >
-        <button 
-            class="flex items-center
-                rounded-radius
-                text-md font-medium text-on-surface dark:text-on-surface-dark
-                hover:bg-primary/5 hover:text-on-surface-strong dark:hover:bg-primary-dark/5 dark:hover:text-on-surface-dark-strong 
-                justify-center
-                transition-transform ease-out duration-200
-                w-10 h-10
-            "
 
+        <button 
+            class="toggle-btn"
             value="$store.sidebar.isSidebarOpen"
             @click="$store.sidebar.toggle()"
-            aria-label=" Toggle Sidebar">
-
-            <!-- Ícone -->
-            <i data-lucide="panel-right-open" class="shrink-0 size-5 transition-transform duration-300 ease-out "
-                :class="{ '-scale-x-100 ': $store.sidebar.isSidebarOpen, '-scale-x-100 ': !$store.sidebar.isSidebarOpen }"></i>
+        >
+            <i  data-lucide="panel-right-open" 
+                :class="{ '-scale-x-100 ': $store.sidebar.isSidebarOpen, '-scale-x-100 ': !$store.sidebar.isSidebarOpen }">
+            </i>
             {# <i data-lucide="panel-left" class="shrink-0 size-5 transition-all duration-300"
                :class="{ 'rotate-180': $store.sidebar.isSidebarOpen }"></i> #}
         </button>
+
+
         {# <div class="flex flex-row gap-1 ml-auto" x-show="$store.sidebar.isSidebarOpen" x-transition>
             abre quando a sidebar abre 
         </div> #}
+
     </div>
 
 

@@ -15,7 +15,7 @@ class Cliente(BaseSQLModel, StatusMixin):
     __tablename__ = "cliente"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tipo: Mapped[TipoCliente] = mapped_column(
-        Enum(TipoCliente, name="tipocliente", create_type=False), nullable=False
+        Enum(TipoCliente, name="tipocliente", inherit_schema=True), nullable=False
     )
 
     __mapper_args__ = {

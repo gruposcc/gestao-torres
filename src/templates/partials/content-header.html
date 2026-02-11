@@ -1,0 +1,47 @@
+    <div class="content-header">
+
+    {# TITLE #}
+    <div class="title">
+
+      <div class="icon">
+        <i  data-lucide="
+                {% if icon %} icon
+                {% else %} bug
+                {% endif %}
+            "
+        ></i>
+      </div>
+
+      <div>
+        <h2>
+            {% if header_title %}Header title
+            {% else %}Error
+            {% endif %}
+        </h2>
+            {% if subtitle %}
+                <p>
+                    {{subtitle}}
+                </p>
+            {% else %}
+            {% endif %}
+      </div>
+    </div>
+
+
+
+    {# TODO #}
+    {# SEARCH BAR QUE FILTRA OS CAMPOS DA TABELA ABAIXO #}
+
+    {# RIGHT BUTTON #}
+    <button
+      hx-get="/torre/create"
+      hx-target="#content"
+      hx-swap="innerHTML" 
+      hx-push-url="true" 
+      href="/torre/create"
+      type="button" 
+      class="nav-create-btn"
+    >
+      <i data-lucide="circle-plus"></i>
+      Novo 
+    </button>

@@ -15,9 +15,10 @@
   "scripts": {
     "build.css": "pnpx @tailwindcss/cli -i ./src/static/css/app.css -o ./src/dist/css/app.css",
     "build.js": "esbuild src/static/js/main.js --bundle --outdir=./src/dist/js --outbase=./src/static/js --format=esm --splitting=true",
-    "watch.css" : "pnpm run build.css --watch",
-    "watch.js": "pnpm run build.js --watch",
-
-    "dev": "concurrently --names \"CSS,JS\" --prefix-colors \"yellow,magenta\" \"pnpm run watch.css\" \"pnpm run watch.js\""  
+    "watch.js": "nodemon --watch ./src/static/js --ext js --exec \"pnpm run build.js\"",
+    "dev": "concurrently --names \"CSS,JS\" --prefix-colors \"yellow,magenta\" \"pnpm run watch.css.nodemon\" \"pnpm run watch.js\""  ,
+    "watch.css": "nodemon --exec \"pnpm run watch.css || exit 0 \" ",
+    "watch.css.nodemon" : "nodemon --watch ./src/static/css --ext css --exec \"pnpm run build.css --watch\""
   }
 }
+
