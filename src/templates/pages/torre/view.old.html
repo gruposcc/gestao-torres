@@ -1,0 +1,224 @@
+{% extends "layout/template.html" %}
+
+{% block content %}
+<script>
+{
+    // Handler para interceptar o PUT e anexar os arquivos do Alpine ao FormData
+    // 1. Defina a função fora do escopo de inicialização se possível, 
+    // ou verifique se ela já existe no window.
+    window.handleEditUpload = (event) => {
+        // Verifica se o alvo é o formulário de edição
+        const form = event.detail.elt;
+        
+        if (event.detail.verb === 'put' && form.getAttribute('hx-encoding') === 'multipart/form-data') {
+            
+            const element = document.querySelector('[x-ref="torreEditElement"]');
+            const alpineData = element ? Alpine.$data(element) : null;
+
+            if (alpineData && alpineData.documentosParaSubir.length > 0) {
+                const formData = event.detail.parameters;
+                
+                // LIMPEZA: Evita que o HTMX envie inputs vazios do DOM
+                formData.delete('arquivos');
+                formData.delete('nomes_customizados');
+
+                alpineData.documentosParaSubir.forEach((doc) => {
+                    formData.append('arquivos', doc.file);
+                    formData.append('nomes_customizados', doc.customName || doc.name);
+                });
+            }
+        }
+    };
+
+    document.body.removeEventListener('htmx:configRequest', handleEditUpload);
+    document.body.addEventListener('htmx:configRequest', handleEditUpload);
+
+    const torreEditForm = (initialData = {}) => ({
+        name: initialData.name || "",
+        altura: initialData.altura || "",
+        terrenoName: initialData.terrenoName || "",
+        tipoText: initialData.tipoText || "",
+        
+        // Novos documentos selecionados agora
+        documentosParaSubir: [],
+
+        init() {
+            this.$watch('documentosParaSubir', () => {
+                this.$nextTick(() => { window.reloadLucide(); });
+            });
+            this.$nextTick(() => { window.reloadLucide(); });
+        },
+
+        addDocumento(event) {
+            const files = event.target.files;
+            for (let i = 0; i < files.length; i++){
+                this.documentosParaSubir.push({
+                    id: Date.now() + i,
+                    name: files[i].name,
+                    customName: "",
+                    file: files[i],
+                    size: (files[i].size / 1024).toFixed(2) + ' KB'
+                });
+            }
+            event.target.value = '';
+        },
+
+        removeDocumento(id) {
+            this.documentosParaSubir = this.documentosParaSubir.filter(doc => doc.id !== id);
+        }
+    })
+
+    registerComponent("torreEditForm", torreEditForm)
+}
+</script>
+
+<div class="content-frame overflow-y-auto">
+    <div class="content-header">
+        <div class="title">
+            <div class="icon"><i data-lucide="pencil"></i></div>
+            <div>
+                <h2>Editar Torre</h2>
+                <p>Gerenciamento de dados e documentos</p>
+            </div>
+        </div>
+    </div>
+
+    <div x-data="torreEditForm({
+            name: '{{ item.name }}',
+            altura: '{{ item.altura }}',
+            terrenoName: '{{ item.terreno.name if item.terreno else 'Não informado' }}',
+            tipoText: '{{ item.tipo.value if item.tipo else '' }}'
+         })" 
+         x-ref="torreEditElement"
+         class="w-full h-full">
+
+        <form class="w-full h-full flex flex-1 gap-8"
+              hx-put="/torre/{{ item.id }}"
+              hx-target="#content"
+              hx-swap="innerHTML"
+              hx-encoding="multipart/form-data"
+        >
+
+        {# COLUNA ESQUERDA: DADOS FIXOS #}
+        <div class="flex-1 flex flex-col gap-4">
+            <div class="form-field pb-2">
+                <label class="font-bold text-primary">Nome da Torre:</label>
+                <div class="pl-2">
+                    <div class="input-field border-primary/30">
+                        <input class="field" x-model="name" type="text" name="name" required />
+                    </div>
+                </div>
+            </div>
+
+                <div class="form-field opacity-70">
+                    <label>Terreno / Tipo / Altura:</label>
+                    <div class="pl-2 space-y-2">
+                        <div class="input-field bg-surface-alt/50 border-dashed">
+                            <i data-lucide="land-plot" class="icon text-gray-400"></i>
+                            <input type="text" x-model="terrenoName" disabled class="field cursor-not-allowed pl-8">
+                        </div>
+                        <div class="input-field bg-surface-alt/50 border-dashed">
+                            <i data-lucide="radio-tower" class="icon text-gray-400"></i>
+                            <input type="text" x-model="tipoText" disabled class="field cursor-not-allowed pl-8">
+                        </div>
+                        <div class="input-field bg-surface-alt/50 border-dashed">
+                            <i data-lucide="ruler" class="icon text-gray-400"></i>
+                            <input type="text" :value="altura + ' metros'" disabled class="field cursor-not-allowed pl-8">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 pl-2">
+                    <button type="submit" class="form-create-btn w-full flex justify-center items-center gap-2">
+                        <i data-lucide="save"></i> Salvar Alterações
+                    </button>
+                </div>
+            </div>
+
+
+
+                {# COLUNA DIREITA: DOCUMENTOS #}
+                <div class="w-full max-w-md flex flex-col gap-4">
+                    <div class="bg-surface border border-outline rounded-radius p-6 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4 border-b pb-2">Documentos Atuais</h3>
+                        
+                        {# LISTA DE ARQUIVOS QUE JÁ EXISTEM NO BANCO #}
+                        <div class="space-y-2 mb-6">
+                            {% for doc in item.documentos %}
+                            <div class="flex items-center gap-3 p-2 rounded border bg-surface-alt/30 group" id="doc-{{ doc.id }}">
+                                <i data-lucide="file-check" class="text-green-600 size-4"></i>
+                                
+                                {# Mostra o nickname se houver, senão o filename #}
+                                <span class="text-sm truncate flex-1" title="{{ doc.filename }}">
+                                    {{ doc.nickname if doc.nickname else doc.filename }}
+                                </span>
+                                
+                                <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <a href="/documento/download/{{ doc.id }}" class="hover:text-primary" title="Download">
+                                        <i data-lucide="download" class="size-4"></i>
+                                    </a>
+                                    
+                                    {# Botão de remover arquivo existente #}
+                                    <button type="button" 
+                                            hx-delete="/torre/documento/{{ doc.id }}"
+                                            hx-target="#doc-{{ doc.id }}"
+                                            hx-swap="outerHTML"
+                                            hx-confirm="Tem certeza que deseja excluir este documento permanentemente?"
+                                            class="text-red-500 hover:text-red-700" title="Excluir">
+                                        <i data-lucide="trash-2" class="size-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-sm text-primary">Anexar Novos</h3>
+                            {# BOTÃO DE UPLOAD DEDICADO PARA NOVOS ARQUIVOS #}
+                            <button type="button" 
+                                    x-show="documentosParaSubir.length > 0"
+                                    @click="$el.setAttribute('hx-put', '/torre/{{ item.id }}/upload-docs'); htmx.process($el);"
+                                    hx-encoding="multipart/form-data"
+                                    hx-target="#content"
+                                    class="text-[10px] bg-primary text-white px-2 py-1 rounded hover:bg-primary-dark transition-colors flex items-center gap-1">
+                                <i data-lucide="upload" class="size-3"></i> Subir Agora
+                            </button>
+                        </div>
+
+                        <div class="relative group border-2 border-dashed border-outline rounded-lg p-4 hover:border-primary transition-colors text-center">
+                            <input type="file" multiple @change="addDocumento" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <i data-lucide="upload-cloud" class="mx-auto mb-1 text-gray-400"></i>
+                            <p class="text-xs text-gray-500">Clique para selecionar arquivos</p>
+                        </div>
+
+                        {# PREVIEW DOS ARQUIVOS SELECIONADOS (Ainda não subiram) #}
+                        <div class="mt-4 space-y-2">
+                            <template x-for="doc in documentosParaSubir" :key="doc.id">
+                                <div class="p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <input type="text" x-model="doc.customName" :placeholder="doc.name" 
+                                            class="text-xs bg-white border rounded px-2 py-1 focus:outline-primary w-full">
+                                        <button type="button" @click="removeDocumento(doc.id)" class="text-red-500 hover:bg-red-50 p-1 rounded shrink-0">
+                                            <i data-lucide="trash" class="size-3"></i>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-1 px-1">
+                                        <p class="text-[9px] text-gray-400 truncate max-w-[150px]" x-text="doc.name"></p>
+                                        <span class="text-[9px] font-mono text-gray-400" x-text="doc.size"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+
+
+        </form>
+    </div>
+</div>
+{% endblock %}

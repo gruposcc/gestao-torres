@@ -4,9 +4,7 @@
 <script>
 {
 
-    // 1. Criamos uma função nomeada para podermos remover o listener se necessário
-    // ou usamos a técnica de registrar apenas uma vez.
-    const handleFileUpload = (event) => {
+    {# const handleFileUpload = (event) => {
         const form = event.detail.elt;
         // Só age se o post for para criar torre e o formulário existir
         if (event.detail.path === '/torre/create') {
@@ -37,11 +35,11 @@
                 });
             }
         }
-    };
+    }; #}
 
     // Removemos qualquer listener antigo antes de adicionar o novo (evita duplicatas)
-    document.body.removeEventListener('htmx:configRequest', handleFileUpload);
-    document.body.addEventListener('htmx:configRequest', handleFileUpload);
+    {# document.body.removeEventListener('htmx:configRequest', handleFileUpload);
+    document.body.addEventListener('htmx:configRequest', handleFileUpload); #}
 
 
     const torreFormComponent = (initialData = {}) => ({
@@ -54,34 +52,29 @@
 
         altura: initialData.altura || "", 
 
-        documentos: [],
+        {# documentos: [], #}
 
         showResults: false,
         searchQuery: initialData.terrenoText || "",
 
         init(){
-            
-            {% if form and form.terreno_text %}
-                this.showResults = false;
-            {% else %}
-            {% endif %}
             // Sincronização com o DOM (Bug anterior de voltar página)
             //this.$nextTick(() => {
             //    this.name = document.getElementById('inputname')?.value || "";
             //    this.altura = document.getElementById('inputAltura')?.value || "";
             //});
 
-            this.$watch('documentos', () => {
-                this.$nextTick(() => { window.reloadLucide(); });
-            });
+            //this.$watch('documentos', () => {
+            //    this.$nextTick(() => { window.reloadLucide(); });
+            //});
         },
 
         // --- RESET AO SAIR ---
         // Essa função pode ser chamada explicitamente ou via hx-on
         destroy() {
-            this.documentos = [];
+            //this.documentos = [];
             this.terrenoId = "";
-            console.debug("Componente destruído e arquivos limpos");
+            //console.debug("Componente destruído e arquivos limpos");
         },
 
 
@@ -202,6 +195,7 @@ class="w-full h-full"
                     x-model="name"
                     type="text"
                     name="name"
+                    maxlength="50"
                     placeholder="Nome da torre"
                     autocomplete="off"
                     required
@@ -241,7 +235,7 @@ class="w-full h-full"
                         x-model="searchQuery"
                         hx-post="/terreno/search"
                         hx-push-url="false"
-                        hx-trigger="{# load,  #} keyup changed delay:350ms"
+                        hx-trigger="click,  keyup changed delay:350ms"
                         hx-swap="innerHTML" 
                         hx-target="#search-results"
 
@@ -423,78 +417,7 @@ class="w-full h-full"
 
 {# COLUNA DA DIREITA: DOCUMENTOS #}
 <div class="w-full h-full flex flex-col gap-4">
-    <h3 class="font-bold text-lg border-b pb-2">Documentos da Torre</h3>
-    
-    <div class="relative group border-2 border-dashed border-outline rounded-lg p-6 transition-colors hover:border-primary">
-
-        <input 
-            type="file" 
-            multiple 
-            @change="addDocumento"
-            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        >
-
-        <div class="flex flex-col items-center justify-center text-gray-500">
-            <i data-lucide="upload-cloud" class="w-10 h-10 mb-2"></i>
-            <p class="text-sm">Clique ou arraste arquivos aqui</p>
-        </div>
-
-    </div>
-
-    <div class="flex flex-col gap-2 overflow-y-auto max-h-[400px]">
-
-
-        <template x-for="doc in documentos" :key="doc.id">
-            <div class="flex items-center justify-between p-3 bg-surface-alt dark:bg-surface-dark-alt rounded-lg border border-outline mb-2">
-                <div class="flex items-center gap-3 w-full">
-                    <i data-lucide="file-text" class="text-primary shrink-0"></i>
-
-                    <div class="flex-1 relative">
-
-{#                         <i data-lucide="pencil" class="absolute text-on-surface size-4 left-1.5 translate-y-1/2"></i>
- #}
-                        <input 
-                            type="text" 
-                            x-model="doc.customName" 
-                            :placeholder="doc.name"
-                            autocomplete="off"
-                            maxlength="80"
-                            class="w-full bg-transparent border-b border-outline focus:outline-none text-sm font-medium transition-colors p-0 mb-1 pl-2"
-                        >
-
-                        <div class="flex justify-between items-center">
-                            <p class="text-[10px] text-gray-500 truncate">
-                                <span x-text="doc.name"></span> • <span x-text="doc.size"></span>
-                            </p>
-                            <template x-if="doc.customName.length > 0">
-                                <span class="text-[9px] text-gray-400" 
-                                    :class="doc.customName.length >= 70 ? 'text-orange-300' : ''"
-                                    x-text="doc.customName.length + '/80'">
-                                </span>
-                            </template>
-                        </div>
-                                                
-                        {# <p class="text-[10px] text-gray-500 truncate">
-                            <span x-text="doc.name"></span> • <span x-text="doc.size"></span>
-                        </p> #}
-                    </div>
-                </div>
-
-                <button 
-                    type="button" 
-                    @click="removeDocumento(doc.id)"
-                    class="p-2 ml-2 hover:bg-red-100 hover:text-red-500 rounded-full transition-colors shrink-0"
-                >
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
-            </div>
-        </template>
-
-        <div x-show="documentos.length === 0" class="text-center py-10 text-gray-400 italic text-sm">
-            Nenhum documento anexado.
-        </div>
-
-    </div>
+    {# TODO, foto ? #}
 
 </div>
 

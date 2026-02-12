@@ -1,6 +1,7 @@
 import asyncio
 from logging.config import fileConfig
 
+import alembic_postgresql_enum  # noqa: F401
 from alembic import context
 from geoalchemy2 import alembic_helpers
 from sqlalchemy import pool
@@ -15,6 +16,7 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+from models.base import BaseSQLModel  # noqa: E402
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -22,9 +24,14 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 from core.settings import DB_URL  # noqa: E402
 from core.utils.loader import load_models  # noqa: E402
-from models.base import BaseSQLModel  # noqa: E402
+
+
+# noqa: E402
 
 load_models()
+
+print(f"Tabelas detectadas: {BaseSQLModel.metadata.tables.keys()}")
+
 target_metadata = BaseSQLModel.metadata
 config.set_main_option("sqlalchemy.url", DB_URL)
 
@@ -77,7 +84,9 @@ def do_run_migrations(connection: Connection) -> None:
         process_revision_directives=alembic_helpers.writer,
         render_item=alembic_helpers.render_item,
         include_name=include_name,
+        include_schemas=True,
         compare_type=True,
+        version_table_schema="public",
     )
 
     with context.begin_transaction():

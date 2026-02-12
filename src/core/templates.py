@@ -47,11 +47,9 @@ def render_chunk(
     context: dict,
     block: str | None = None,
 ):
-    if not is_htmx_request(request):
-        raise HTTPException(403)
-
     if not block:
         response = TResponse(template, context)
+
     else:
         response = TResponse(template, context, block_name=block)
 

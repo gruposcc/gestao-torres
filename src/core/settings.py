@@ -34,3 +34,12 @@ JWT_EXPIRE_MINUTES = 15  # 15 min
 JWT_EXPIRE_MINUTES_REFRESH = 60 * 24 * 7  # 7 dias
 
 BASE_DIR = Path(__file__).parent.parent
+
+UPLOADS_DIR = BASE_DIR / "uploads"
+ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".png", ".jpg", ".jpeg"}
+MAX_SIZE_MB = 10
+
+
+# se base dir nao existe criar
+if not os.path.exists(UPLOADS_DIR):
+    os.mkdir(UPLOADS_DIR)

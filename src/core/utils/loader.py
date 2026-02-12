@@ -18,7 +18,3 @@ def load_models():
 
         module_name = f"models.{module_info.name}"
         _module = import_module(module_name)
-
-
-if __name__ == "__main__":
-    load_models()

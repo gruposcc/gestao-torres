@@ -1,7 +1,10 @@
+from uuid import UUID
+
+
+import uuid
 import enum
 from decimal import Decimal
-from typing import TYPE_CHECKING
-from uuid import UUID, uuid4
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import (
     Boolean,
@@ -32,24 +35,50 @@ class TipoTorre(enum.Enum):
 class Torre(BaseSQLModel, StatusMixin, TimeStampMixin):
     __tablename__ = "torre"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    # id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid[UUID](as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
 
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
 
     terreno_id: Mapped[int] = mapped_column(ForeignKey("terreno.id"), nullable=False)
     terreno: Mapped["Terreno"] = relationship("Terreno", back_populates="torres")
 
-    # TODO
-    altura: Mapped[Decimal] = mapped_column(
-        Numeric[Decimal](6, 2), nullable=False, comment="Altura em metros"
+    altura: Mapped[int] = mapped_column(
+        Integer, nullable=False, comment="Altura em metros"
     )
 
     tipo: Mapped[TipoTorre] = mapped_column(
         Enum(TipoTorre), nullable=False, default=TipoTorre.OUTRO
     )
 
+    documentos: Mapped[List[DocumentoTorre]] = relationship(
+        "DocumentoTorre", back_populates="torre", cascade="all, delete-orphan"
+    )
+
     # TODO
-    # tipo
+    # documentos
+
+
+class DocumentoTorre(BaseSQLModel, StatusMixin, TimeStampMixin):
+    __tablename__ = "documento_torre"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid[UUID](as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    nickname: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    path: Mapped[str] = mapped_column(String(100), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(100), nullable=True)
+
+    torre_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("torre.id"), nullable=False)
+    torre: Mapped["Torre"] = relationship("Torre", back_populates="documentos")
+
+    # Mime type (pdf, jpg, etc)
+    # content_type: Mapped[str] = mapped_column(String(100), nullable=True)
 
 
 """ 

@@ -1,4 +1,7 @@
-import json
+import shutil
+import uuid
+import os
+from core.settings import UPLOADS_DIR
 import logging
 from decimal import Decimal
 from typing import Any, Dict, List
@@ -15,16 +18,16 @@ from fastapi import (
 )
 from fastapi.datastructures import UploadFile
 from fastapi.responses import HTMLResponse
+from models.torre import TipoTorre
 from pydantic import ValidationError
 
 from core.schema import validate_html_form
-from core.templates import render_page
+from core.templates import render_chunk, render_page
 from core.utils.htmx import is_htmx_request, redirect_htmx_header, update_htmx_title
 from deps.auth import get_user_session
 from deps.db import get_db
-from models.torre import TipoTorre
 from schemas.torre import TorreIn
-from services.torre import TorreService
+from services.torre import TorreService, DocumentoTorreService
 
 logger = logging.getLogger("app.pages.torre")
 
@@ -47,6 +50,21 @@ async def list_page(
     return render_page(request, template, context)
 
 
+@router.get("/list")
+async def list_items(request: Request, db=Depends(get_db)):
+    if not is_htmx_request:
+        raise HTTPException(403)
+
+    service = TorreService(db)
+
+    # parametros de oordenação, filtro, etc etc
+    torres = await service.get_list(load_relations=["terreno"])
+    context = {"request": request, "items": torres}
+    template = "pages/torre/list.html"
+
+    return render_chunk(request, template, context, block="items")
+
+
 @router.get("/create")
 async def get_create(
     request: Request, user=Depends(get_user_session), extra_context={}
@@ -61,14 +79,14 @@ async def get_create(
         "tipos": list[TipoTorre](TipoTorre),
     }
 
-    if len(extra_context.items()) > 0:
+    if len(extra_context.items()) > 0:  # Usado no retorno de erros do post
         context.update(extra_context)
 
     return render_page(request, template, context)
 
 
 @router.post("/create")
-async def create_torre(
+async def post_create(
     request: Request,
     # FORM FIELDS
     name: str = Form(...),
@@ -77,20 +95,11 @@ async def create_torre(
     altura: Decimal = Form(...),
     searchQuery: str = Form(...),
     # ARQUIVOS
-    arquivos: List[UploadFile] = File(default=[]),
-    nomes_customizados: List[str] = Form(default=[]),
+    # arquivos: List[UploadFile] = File(default=[]),
+    # nomes_customizados: List[str] = Form(default=[]),
     # DEPS
     db=Depends(get_db),
 ):
-    # TODO HTMX VALIDATION
-
-    # 3. Processar arquivos
-    """
-    for arquivo, custom_name in zip(arquivos, nomes_customizados):
-        # content = await arquivo.read()
-        logger.debug(f"Recebido: {custom_name}")
-    """
-
     # PASSO 1 validar FORM -> SCHEMA
     try:
         data = {
@@ -102,7 +111,7 @@ async def create_torre(
 
         valid_data = TorreIn.model_validate(data)
 
-        logger.debug(valid_data)
+        # logger.debug(valid_data)
 
     except (ValidationError, ValueError) as e:
         # TODO: Retornar o form com erros (HTMX swap o form)
@@ -143,13 +152,18 @@ async def create_torre(
 
 
 @router.get("/view/{id}")
-async def view(id: int, request: Request, dbSession=Depends(get_db)):
+async def view(
+    id: uuid.UUID,
+    request: Request,
+    dbSession=Depends(get_db),
+    user=Depends(get_user_session),
+):
     template = "pages/torre/view.html"
 
-    context: Dict[str, Any] = {"request": request}
+    context: Dict[str, Any] = {"request": request, "user": user}
 
     service = TorreService(dbSession)
-    torre = await service.get_one_by(id=id)
+    torre = await service.get_one_by(id=id, load_relations=["terreno", "documentos"])
 
     if not torre:
         raise HTTPException(404)
@@ -158,3 +172,76 @@ async def view(id: int, request: Request, dbSession=Depends(get_db)):
     context.update({"item": torre, "page": page})
 
     return render_page(request, template, context)
+
+
+@router.put("/{id}")
+async def update(
+    id: uuid.UUID,
+    request: Request,
+    name: str = Form(...),
+    arquivos: List[UploadFile] = File(default=[]),
+    nomes_customizados: List[str] = Form(default=[]),
+    db=Depends(get_db),
+):
+    service = TorreService(db)
+    # 1. Busca a torre existente com os documentos atuais
+    torre = await service.get_one_by(id=id, load_relations=["documentos"])
+
+    if not torre:
+        raise HTTPException(404, "Torre não encontrada")
+
+    # 2. Validar se o novo nome já existe em OUTRA torre
+    if name != torre.name:
+        exists = await service.get_one_by(name=name)
+        if exists:
+            # Aqui você retornaria o form com erro de "Nome em uso"
+            return HTMLResponse(content="Nome já existe", status_code=422)
+        torre.name = name
+
+    # 3. Salvar alterações básicas
+    await service.save(torre)
+
+    # 4. Processar novos documentos, se houver
+    if arquivos and any(a.filename for a in arquivos):
+        await service.append_docs(
+            torre=torre, arquivos=arquivos, nicknames=nomes_customizados
+        )
+
+    # 5. Resposta HTMX: Redireciona para a visualização
+    # Ou você pode retornar a própria página de view renderizada
+    response = Response(status_code=200)
+    return redirect_htmx_header(response, path=f"/torre/view/{torre.id}")
+
+
+@router.delete("/documento/{doc_id}")
+async def delete_documento(doc_id: uuid.UUID, db=Depends(get_db)):
+    service = DocumentoTorreService(db)
+    # Buscamos o documento
+    doc = await service.get_one_by(id=doc_id)
+    if not doc:
+        return Response(status_code=204)  # Já não existe
+
+    # 1. Remover arquivo físico
+    if os.path.exists(doc.path):
+        os.remove(doc.path)
+
+    # 2. Remover do banco
+    await service.soft_delete(doc)
+
+    # Retorna vazio para o HTMX remover o elemento do DOM (hx-swap="outerHTML")
+    return Response(status_code=200)
+
+
+@router.delete("/{id}")
+async def soft_delete(id: int, request: Request, db=Depends(get_db)):
+    service = TorreService(db)
+    torre = await service.get_one_by(id=id)
+
+    if not torre:
+        response = Response(status_code=204)
+    else:
+        success = await service.soft_delete(torre)
+    if success:
+        # RETORNA VAZIO PARA O HTMX
+        response = Response(status_code=200)
+    return response

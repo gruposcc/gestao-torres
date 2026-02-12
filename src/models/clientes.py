@@ -15,7 +15,7 @@ class Cliente(BaseSQLModel, StatusMixin):
     __tablename__ = "cliente"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tipo: Mapped[TipoCliente] = mapped_column(
-        Enum(TipoCliente, name="tipocliente", inherit_schema=True), nullable=False
+        Enum(TipoCliente, name="tipocliente"), nullable=False
     )
 
     __mapper_args__ = {
@@ -43,7 +43,7 @@ class ClientePF(Cliente, TimeStampMixin):
 
 
 class ClientePJ(Cliente, TimeStampMixin):
-    __tablename__ = "clientes_pj"
+    __tablename__ = "cliente_pj"
 
     id: Mapped[int] = mapped_column(
         ForeignKey("cliente.id", ondelete="CASCADE"),

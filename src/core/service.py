@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, Generic, Optional, Tuple, TypeVar
 
 from sqlalchemy import exists, select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.schema import BaseSchema
@@ -32,8 +33,21 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
         except Exception as e:
             raise e
 
-    async def get_one_by(self, only_enabled=True, **kwargs) -> Optional[T]:
+    async def get_one_by(
+        self, only_enabled=True, load_relations: list | None = None, **kwargs
+    ) -> Optional[T]:
         stmt = select(self.model)
+
+        if load_relations:
+            for rel in load_relations:
+                # VERIFICAR SE EXISTE A REFERENCIA
+                # ex: Torre.terreno
+                if hasattr(self.model, rel):
+                    attr = getattr(self.model, rel)
+                    stmt = stmt.options(selectinload(attr))
+
+                else:
+                    pass
 
         for key, value in kwargs.items():
             if hasattr(self.model, key):
@@ -110,3 +124,19 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
 
         self.logger.debug(result)
         return result
+
+    async def soft_delete(self, obj: T) -> bool:
+        # Verifica se o objeto suporta soft delete
+        if not hasattr(obj, "status"):
+            return False
+
+        # Altera o status
+        obj.status = ObjectStatus.DELETED  # pyright: ignore[reportAttributeAccessIssue]
+
+        # Se você tiver um campo de timestamp, preencha-o
+        """ if hasattr(obj, "deleted_at"):
+            obj.deleted_at = datetime.now() """
+
+        # Salva a alteração (commit)
+        instance = await self.save(obj)
+        return True
