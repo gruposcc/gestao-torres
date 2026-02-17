@@ -71,7 +71,7 @@
         <col class="w-100 border-r border-outline ">
         <col class="w-25 text-center border-r border-outline">
         <col class="w-25 text center border-r border-outline">
-        <col class="w-30">
+        <col class="w-30 text-center ">
       </colgroup>
 
       <thead 
@@ -89,86 +89,86 @@
           <th scope="col" class="py-2 w-10 text-center font-semibold border-r border-outline">#</th> {#  #}
           <th scope="col" class="py-2 pl-3 font-semibold border-r border-outline ">Nome</th>
           <th scope="col" class="py-2 pl-3 font-semibold border-r border-outline">Terreno</th> 
-          <th scope="col" class="py-2 pl-3 font-semibold border-r border-outline  ">Altura</th> 
-          <th scope="col" class="py-2 pl-3 font-semibold border-r border-outline ">Contratos</th> 
+          <th scope="col" class="py-2 pl-3 text-center font-semibold border-r border-outline  ">Altura</th> 
+          <th scope="col" class="py-2 pl-3 text-center font-semibold border-r border-outline ">Contratos</th> 
           <th scope="col" class="p-2 pl-3 font-semibold  right-0 text-center">Ações</th> {#  fixar no final #}
         </tr>
 
       </thead>
 
       <tbody id="table-body" 
-        hx-get="/torre/list" 
+        hx-get="/torre/list/items" 
         hx-trigger="load once" 
         hx-target="this"
-        {# hx-swap="innerHTML" #}
+        hx-push-url="false"
         hx-swap="innerHTML"
+        {# ADICIONAR OS PARAMS DE ORDENAÇÂO E PAGINAÇÃO #}
         class="
           divide-y divide-outline dark:divide-outline-dark
         "
       >
 
       {% block items %}
-      
+        {% if items %}
+        {% for item in items %}        
+          <tr id="torre-{{item.id}}">
 
-                      {% if items %}
-                {% for item in items %}
-                
-                    <tr id="torre-{{item.id}}">
-                        <td class=" text-center">{{loop.index}}</td>
-                        <td class="px-3 py-2">
-                          <span class="block truncate" title="{{item.name}}">
-                                {{item.name}} {# Popup que mostra o nome todo  #}
-                            </span>
-                        
-                        </td> 
-                        <td class="px-3 py-2  ">
-                            <span class="block truncate" title="{{item.terreno.name}}">
-                                {{item.terreno.name}}
-                            </span>
-                        </td> {# TRUNCAR O NOME E POPUP PARA VER COMPLETO #}
-                        <td class="px-3 py-2 text-center ">{{item.altura}} m</td>
-                        <td class="px-3 py-2 text-center ">0</td>
+            <td class=" text-center">{{loop.index}}</td>
 
-                        <td class="p-4 text-center">
-                            <div class="flex justify-center gap-3">
-                                {# <button 
-                                hx-get="/torre/{{item.id}}" 
-                                class="text-on-surface/70 hover:text-primary transition-colors"
-                                title="Visualizar"
-                                >
-                                <i data-lucide="eye" class="w-4 h-4"></i>
-                                </button> #}
+            <td class="px-3 py-2"> <span class="block truncate" title="{{item.name}}">
+              {{item.name}} {# Popup que mostra o nome todo  #}
+            </span> </td> 
 
-                                <button 
-                                hx-get="/torre/view/{{item.id}}" 
-                                hx-target="#content"
-                                hx-push-url="true"
-                                class="text-on-surface/70 hover:text-secondary transition-colors"
-                                title="Editar"
-                                >
-                                <i data-lucide="pencil" class="w-4 h-4"></i>
-                                </button>
+            <td class="px-3 py-2  ">
+              <span class="block truncate" title="{{item.terreno.name}}">
+                  {{item.terreno.name}}
+              </span>
+            </td> {# TRUNCAR O NOME E POPUP PARA VER COMPLETO #}
 
 
-                                <button type="button" 
-                                    @click="$dispatch('open-delete-modal', { id: '{{item.id}}', name: '{{item.name}}' })"
-                                    class="text-on-surface/70 hover:text-error transition-colors">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
+            <td class="px-3 py-2 text-center ">{{item.altura}} m</td>
+            <td class="px-3 py-2 text-center ">0</td>
 
-                                <button id="real-delete-{{item.id}}"
-                                    hx-delete="/torre/{{item.id}}" 
-                                    hx-target="#torre-{{item.id}}" 
-                                    hx-swap="outerHTML"
-                                    class="hidden">
-                                </button>
+            <td class="p-4 text-center">
+                <div class="flex justify-center gap-3">
+                    {# <button 
+                    hx-get="/torre/{{item.id}}" 
+                    class="text-on-surface/70 hover:text-primary transition-colors"
+                    title="Visualizar"
+                    >
+                    <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button> #}
 
-    
+                    <button 
+                    hx-get="/torre/view/{{item.id}}" 
+                    hx-target="#content"
+                    hx-push-url="true"
+                    class="text-on-surface/70 hover:text-secondary transition-colors"
+                    title="Editar"
+                    >
+                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                    </button>
 
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
+
+                    <button type="button" 
+                        @click="$dispatch('open-delete-modal', { id: '{{item.id}}', name: '{{item.name}}' })"
+                        class="text-on-surface/70 hover:text-error transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+
+                    <button id="real-delete-{{item.id}}"
+                        hx-delete="/torre/{{item.id}}" 
+                        hx-target="#torre-{{item.id}}" 
+                        hx-swap="outerHTML"
+                        class="hidden">
+                    </button>
+
+
+
+                </div>
+            </td>
+          </tr>
+              {% endfor %}
             {% endif %}
 
 

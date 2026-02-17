@@ -2,8 +2,8 @@
 <a class="sr-only" href="#content">skip to the main content</a>
     
 <!-- dark overlay for when the sidebar is open on smaller screens  -->
-{# <div class="fixed inset-0 z-10 bg-surface-dark/10 backdrop-blur-xs md:hidden" aria-hidden="true" x-on:click="showSidebar = false" x-transition.opacity></div> #}
-
+{# <div class="fixed inset-0 z-10 bg-surface-dark/10 backdrop-blur-xs md:hidden" aria-hidden="true" x-on:click="showSidebar = false" x-transition.opacity></div> 
+ #}
 <nav 
     id="nav-sidebar"
     class="
@@ -102,14 +102,14 @@
 
         {# TORRE #}
         <a 
-            hx-get="/torre"
+            hx-get="/torre/list"
             hx-target="#content"
             hx-swap="innerHTML"
             hx-push-url="true"
-            href="/torre"
+            href="/torre/list"
             class=" sidebar-item"
             :class="{
-                'active' : $store.sidebar.currentPath === '/torre/'
+                'active' : $store.sidebar.startswith('/torre')
             }"
         >
             <div >

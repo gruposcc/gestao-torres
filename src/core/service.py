@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, Generic, Optional, Tuple, TypeVar
 
-from sqlalchemy import exists, select
+from sqlalchemy import exists, select, delete
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -139,4 +139,15 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
 
         # Salva a alteração (commit)
         instance = await self.save(obj)
+        return True
+
+    async def hard_delete(self, obj: T):
+        # Cria o comando de delete direto
+        try:
+            await self.dbSession.delete(obj)
+            await self.dbSession.commit()
+            # await self.dbSession.refresh(obj)
+
+        except:
+            pass
         return True

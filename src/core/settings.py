@@ -37,7 +37,7 @@ BASE_DIR = Path(__file__).parent.parent
 
 UPLOADS_DIR = BASE_DIR / "uploads"
 ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".png", ".jpg", ".jpeg"}
-MAX_SIZE_MB = 10
+MAX_SIZE_MB = 20 * 1024 * 1024  # 20MB
 
 
 # se base dir nao existe criar

@@ -1,77 +1,237 @@
+{% extends "layout/template.html" %}
 
-{# COLUNA DA DIREITA: DOCUMENTOS #}
-<div class="w-full h-full flex flex-col gap-4">
-    <h3 class="font-bold text-lg border-b pb-2">Documentos da Torre</h3>
-    
-    <div class="relative group border-2 border-dashed border-outline rounded-lg p-6 transition-colors hover:border-primary">
+{% block content %}
+<script>
+/**
+ * Monitora o input para mostrar o botão de salvar do HTMX
+ */
+function handleDocEdit(input) {
+    const originalValue = input.getAttribute('data-original-value');
+    const row = input.closest('li');
+    const saveBtn = row.querySelector('.save-doc-btn');
 
-        <input 
-            type="file" 
-            multiple 
-            @change="addDocumento"
-            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        >
+    if (input.value !== originalValue) {
+        saveBtn.classList.remove('hidden');
+    } else {
+        saveBtn.classList.add('hidden');
+    }
+}
 
-        <div class="flex flex-col items-center justify-center text-gray-500">
-            <i data-lucide="upload-cloud" class="w-10 h-10 mb-2"></i>
-            <p class="text-sm">Clique ou arraste arquivos aqui</p>
-        </div>
+document.body.addEventListener('htmx:afterRequest', function(evt) {
+    const path = evt.detail.pathInfo?.path || ""; 
+    const target = evt.detail.target;
 
-    </div>
+    if (target?.classList?.contains('doc-nickname-input') || path.includes('rename')) {
+        const row = target.closest('li');
+        if (!row) return; 
+        
+        const input = row.querySelector('.doc-nickname-input');
+        if (evt.detail.successful && input) {
+            input.setAttribute('data-original-value', input.value);
+        }
+    }
+});
 
-    <div class="flex flex-col gap-2 overflow-y-auto max-h-[400px]">
+document.body.addEventListener('htmx:responseError', function(evt) {
+    if (evt.detail.xhr.status === 400) {
+        const errorDiv = document.getElementById('upload-error');
+        errorDiv.innerText = evt.detail.xhr.responseText;
+        setTimeout(() => { errorDiv.innerText = ''; }, 5000);
+    }
+});
+</script>
 
+<div class="content-frame overflow-y-auto">
+    <div class="content-header">
+        <div class="title">
+            <div class="icon">
+                <i data-lucide="radio-tower"></i>
+            </div>
+            <div>
+                <h2>Nova Torre</h2>
+                <p>Criação</p>
+            </div>
+        </div>
+    </div>
 
-        <template x-for="doc in documentos" :key="doc.id">
-            <div class="flex items-center justify-between p-3 bg-surface-alt dark:bg-surface-dark-alt rounded-lg border border-outline mb-2">
-                <div class="flex items-center gap-3 w-full">
-                    <i data-lucide="file-text" class="text-primary shrink-0"></i>
+    {# MAIN GRID #}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start mt-6">
+        
+        {# COLUNA ESQUERDA: FORMULÁRIO #}
+        <div class="">
+            <form action="" method="POST" class="flex flex-col gap-6">
+                
+                {# PRIMEIRA LINHA: NOME + ALTURA #}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="form-field md:col-span-2">
+                        <label for="inputname">Nome da Torre</label>
+                        <div class="input-field group {% if form and form.name.error %}border-red-500{% endif %}">
+                            <input id="inputname" class="field" type="text" name="name" maxlength="50" placeholder="Ex: Torre Alvorada" value="{{ item.name }}" autocomplete="off" required />
+                        </div>
+                        {% if form and form.name.error %}
+                            <span class="text-red-500 text-xs mt-1 block italic">{{ form.name.error }}</span>
+                        {% endif %}
+                    </div>
 
-                    <div class="flex-1 relative">
+                    <div class="form-field">
+                        <label class="opacity-70">Altura</label>
+                        <div class="input-field bg-surface-alt flex items-center px-3 gap-2">
+                            <i data-lucide="ruler" class="size-4 text-gray-400"></i>
+                            <input disabled class="field" placeholder="{{ item.altura }} metros">
+                        </div>
+                    </div>
+                </div>
 
-{#                         <i data-lucide="pencil" class="absolute text-on-surface size-4 left-1.5 translate-y-1/2"></i>
- #}
-                        <input 
-                            type="text" 
-                            x-model="doc.customName" 
-                            :placeholder="doc.name"
-                            autocomplete="off"
-                            maxlength="80"
-                            class="w-full bg-transparent border-b border-outline focus:outline-none text-sm font-medium transition-colors p-0 mb-1 pl-2"
-                        >
+                {# SEGUNDA LINHA: TERRENO + TIPO #}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-field">
+                        <label class="opacity-70">Terreno</label>
+                        <div class="input-field bg-surface-alt flex items-center px-3 gap-2">
+                            <i data-lucide="land-plot" class="size-4 text-gray-400"></i>
+                            <input disabled class="field" placeholder="{{ item.terreno.name }}">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label class="opacity-70">Tipo</label>
+                        <div class="input-field bg-surface-alt flex items-center px-3 gap-2">
+                            <i data-lucide="radio-tower" class="size-4 text-gray-400"></i>
+                            <input disabled class="field" placeholder="{{ item.tipo.value }}">
+                        </div>
+                    </div>
+                </div>
 
-                        <div class="flex justify-between items-center">
-                            <p class="text-[10px] text-gray-500 truncate">
-                                <span x-text="doc.name"></span> • <span x-text="doc.size"></span>
-                            </p>
-                            <template x-if="doc.customName.length > 0">
-                                <span class="text-[9px] text-gray-400" 
-                                    :class="doc.customName.length >= 70 ? 'text-orange-300' : ''"
-                                    x-text="doc.customName.length + '/80'">
-                                </span>
-                            </template>
-                        </div>
-                                                
-                        {# <p class="text-[10px] text-gray-500 truncate">
-                            <span x-text="doc.name"></span> • <span x-text="doc.size"></span>
-                        </p> #}
-                    </div>
-                </div>
+                <button type="submit" class="form-create-btn">
+                    <i data-lucide="save" class="size-4"></i>
+                    Salvar Alterações
+                </button>
+            </form>
+        </div>
 
-                <button 
-                    type="button" 
-                    @click="removeDocumento(doc.id)"
-                    class="p-2 ml-2 hover:bg-red-100 hover:text-red-500 rounded-full transition-colors shrink-0"
-                >
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
-            </div>
-        </template>
+        {# COLUNA DIREITA: DOCUMENTOS COM ABAS #}
+        <div class="flex flex-col gap-4 h-full">
+            <div class="bg-surface border border-outline shadow-sm rounded-radius flex flex-col h-[600px]" x-data="{ selectedTab: 'arquivos' }">
+                
+                {# HEADER DO CARD: TITULO + ABAS #}
+                <div class="px-5 border-b border-outline flex justify-between items-center bg-surface-alt/50 rounded-t-radius min-h-[56px]">
+                    <h3 class="font-bold text-on-surface flex items-center gap-2 whitespace-nowrap">
+                        <i data-lucide="files" class="size-5 text-primary"></i>
+                        Documentos 
+                    </h3>
 
-        <div x-show="documentos.length === 0" class="text-center py-10 text-gray-400 italic text-sm">
-            Nenhum documento anexado.
-        </div>
+                    {# SELETOR DE PÁGINAS (TABS) #}
+                    <div class="flex gap-1 h-full items-end" role="tablist">
+                        <button 
+                            x-on:click="selectedTab = 'arquivos'"
+                            hx-get="/torre/{{ item.id }}/docs/aba-arquivos"
+                            hx-target="#document-list-container"
+                            class="flex items-center gap-2 px-3 py-3 text-xs transition-all border-b-2"
+                            :class="selectedTab === 'arquivos' ? 'font-bold text-primary border-primary' : 'text-on-surface-variant border-transparent hover:text-on-surface'"
+                            type="button" role="tab">
+                            <i data-lucide="file-text" class="size-3.5"></i>
+                            Arquivos
+                        </button>
+                        <button 
+                            x-on:click="selectedTab = 'logs'"
+                            hx-get="/torre/{{ item.id }}/docs/aba-logs"
+                            hx-target="#document-list-container"
+                            class="flex items-center gap-2 px-3 py-3 text-xs transition-all border-b-2"
+                            :class="selectedTab === 'logs' ? 'font-bold text-primary border-primary' : 'text-on-surface-variant border-transparent hover:text-on-surface'"
+                            type="button" role="tab">
+                            <i data-lucide="history" class="size-3.5"></i>
+                            Logs
+                        </button>
+                                                <button 
+                            x-on:click="selectedTab = 'logs'"
+                            hx-get="/torre/{{ item.id }}/docs/aba-logs"
+                            hx-target="#document-list-container"
+                            class="flex items-center gap-2 px-3 py-3 text-xs transition-all border-b-2"
+                            :class="selectedTab === 'logs' ? 'font-bold text-primary border-primary' : 'text-on-surface-variant border-transparent hover:text-on-surface'"
+                            type="button" role="tab">
+                            <i data-lucide="history" class="size-3.5"></i>
+                            Logs
+                        </button>
+                        <button 
+                            x-on:click="selectedTab = 'info'"
+                            hx-get="/torre/{{ item.id }}/docs/aba-info"
+                            hx-target="#document-list-container"
+                            class="flex items-center gap-2 px-3 py-3 text-xs transition-all border-b-2"
+                            :class="selectedTab === 'info' ? 'font-bold text-primary border-primary' : 'text-on-surface-variant border-transparent hover:text-on-surface'"
+                            type="button" role="tab">
+                            <i data-lucide="info" class="size-3.5"></i>
+                            Info
+                        </button>
+                    </div>
+                </div>
 
-    </div>
+                {# CORPO: LISTA DE ARQUIVOS (DINAMICO VIA HTMX) #}
+                <div id="document-list-container" class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                    {% block doclist %}
+                        {# O CONTEÚDO DA LISTA QUE VOCÊ JÁ TEM FICA AQUI #}
+                        {% if item.documentos %}
+                        <ul class="space-y-3">
+                            {% for doc in item.documentos %}
+                            <li class="group flex flex-col p-3 rounded-radius border border-outline bg-surface hover:border-primary/30 hover:shadow-md transition-all">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-green-50 rounded text-green-600">
+                                        <i data-lucide="file-check" class="size-5"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <input type="text" name="nickname" class="doc-nickname-input text-sm font-medium bg-transparent border-b border-transparent focus:border-primary outline-none w-full transition-colors" value="{{ doc.nickname }}" data-original-value="{{ doc.nickname }}" oninput="handleDocEdit(this)">
+                                        <p class="text-[11px] text-on-surface-variant mt-1 truncate">
+                                            <span class="font-mono">{{ doc.filename }}</span> • {{ doc.size }}
+                                        </p>
+                                    </div>
+                                    <div class="flex gap-1 items-center">
+                                        <button class="delete-doc-btn p-1.5 hover:bg-red-50 hover:text-red-600 rounded transition-colors opacity-0 group-hover:opacity-100" hx-delete="/torre/doc/{{ doc.id }}" hx-target="#document-list-container">
+                                            <i data-lucide="trash-2" class="size-4"></i>
+                                        </button>
+                                        <a href="/torre/doc/{{ doc.id }}/download" class="p-1.5 hover:bg-blue-50 hover:text-blue-600 rounded transition-colors opacity-0 group-hover:opacity-100">
+                                            <i data-lucide="download" class="size-4"></i>
+                                        </a>
+                                        <button class="save-doc-btn hidden p-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded" hx-patch="/torre/doc/{{ doc.id }}/rename" hx-include="closest li find .doc-nickname-input" hx-target="closest li" hx-swap="outerHTML">
+                                            <i data-lucide="check" class="size-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <div class="h-full flex flex-col items-center justify-center text-on-surface-variant opacity-60 gap-3 border-2 border-dashed border-outline rounded-radius">
+                            <i data-lucide="upload-cloud" class="size-12"></i>
+                            <p class="text-sm">Nenhum documento enviado ainda</p>
+                        </div>
+                        {% endif %}
+                    {% endblock doclist %}
+                </div>
 
+                {# FOOTER: ÁREA DE UPLOAD (Só aparece na aba 'arquivos') #}
+                <div x-show="selectedTab === 'arquivos'" x-transition>
+                    <form hx-post="/torre/upload/doc/{{ item.id }}" hx-encoding="multipart/form-data" hx-target="#document-list-container" class="p-4 bg-surface-alt/30 border-t border-outline">
+                        <label for="fileUpload" class="border-2 border-dashed border-outline hover:border-primary/50 transition-colors rounded-radius p-4 flex flex-col items-center gap-2 cursor-pointer group">
+                            <div class="p-2 bg-primary/5 rounded-full group-hover:scale-110 transition-transform">
+                                <i data-lucide="upload-cloud" class="size-5 text-primary"></i>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm font-semibold text-on-surface">Clique para enviar</p>
+                            </div>
+                            <input type="file" name="arquivos" id="fileUpload" class="hidden" multiple hx-post="/torre/upload/doc/{{ item.id }}" hx-trigger="change" hx-target="#document-list-container">
+                        </label>
+                        <div id="upload-error" class="text-red-500 text-xs mt-2 text-center"></div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+</style>
+{% endblock content %}
+
+quero usar esse modelo mas sem nada de alpine, uma rot apara cada coisa como o htmx gosta 

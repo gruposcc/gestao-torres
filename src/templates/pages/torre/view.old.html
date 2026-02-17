@@ -126,7 +126,7 @@
                             <input type="text" :value="altura + ' metros'" disabled class="field cursor-not-allowed pl-8">
                         </div>
                     </div>
-                </div>
+                </div>dbSession
 
                 <div class="pt-6 pl-2">
                     <button type="submit" class="form-create-btn w-full flex justify-center items-center gap-2">
@@ -140,7 +140,10 @@
                 {# COLUNA DIREITA: DOCUMENTOS #}
                 <div class="w-full max-w-md flex flex-col gap-4">
                     <div class="bg-surface border border-outline rounded-radius p-6 shadow-sm">
+                    <div class="flex flex-row border border-outline">
                         <h3 class="font-bold text-lg mb-4 border-b pb-2">Documentos Atuais</h3>
+                    </div>
+
                         
                         {# LISTA DE ARQUIVOS QUE JÁ EXISTEM NO BANCO #}
                         <div class="space-y-2 mb-6">

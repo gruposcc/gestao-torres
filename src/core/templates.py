@@ -21,7 +21,8 @@ def render_page(
     htmx_block: str | None = "content",
     update_title: bool = True,
 ) -> Response:
-    # se request htmx
+    context.update({"request": request})
+
     if is_htmx_request(request):
         if not htmx_block:  # se, bloco
             response = TResponse(template, context)
@@ -47,6 +48,8 @@ def render_chunk(
     context: dict,
     block: str | None = None,
 ):
+    context.update({"request": request})
+
     if not block:
         response = TResponse(template, context)
 
@@ -58,13 +61,3 @@ def render_chunk(
 
 def render_html(request: Request, template: str, context: dict):
     return TResponse(template, context)
-
-
-""" def render_raw(
-    
-)
-
-
-def handle_htmx_form(
-    
-) """

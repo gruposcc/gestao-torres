@@ -5,7 +5,7 @@ import uuid
 import enum
 from decimal import Decimal
 from typing import TYPE_CHECKING, List
-
+import datetime
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
@@ -15,6 +15,7 @@ from sqlalchemy import (
     Numeric,
     String,
     Uuid,
+    DateTime,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -57,6 +58,10 @@ class Torre(BaseSQLModel, StatusMixin, TimeStampMixin):
         "DocumentoTorre", back_populates="torre", cascade="all, delete-orphan"
     )
 
+    despesas: Mapped[List[DespesaTorre]] = relationship(
+        "DespesaTorre", back_populates="torre", cascade="all, delete-orphan"
+    )
+
     # TODO
     # documentos
 
@@ -78,12 +83,42 @@ class DocumentoTorre(BaseSQLModel, StatusMixin, TimeStampMixin):
     torre: Mapped["Torre"] = relationship("Torre", back_populates="documentos")
 
     # Mime type (pdf, jpg, etc)
-    # content_type: Mapped[str] = mapped_column(String(100), nullable=True)
 
 
-""" 
-class Despesa(BaseSQLModel, TimeStampMixin):
-    ## recorrente
+class RecorrenciaDespesa(enum.Enum):
+    UNICA = "Única"
+    DIARIA = "Diaria"
+    MENSAL = "Mensal"
+    ANUAL = "Anual"
+
+
+class DespesaTorre(BaseSQLModel, TimeStampMixin):
+    __tablename__ = "despesa_torre"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    torre_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("torre.id"), nullable=False)
+    torre: Mapped["Torre"] = relationship(
+        "Torre", back_populates="despesas", lazy="selectin"
+    )
+
+    recorrencia: Mapped[RecorrenciaDespesa] = mapped_column(
+        Enum(RecorrenciaDespesa), nullable=False, default=RecorrenciaDespesa.UNICA
+    )
+
+    perpetua: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    # DATE RANGE
+    data_inicio: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), default=None, nullable=False
+    )
+
+    data_final: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), default=None, nullable=False
+    )
+
+    description: Mapped[str] = mapped_column(String(255), nullable=True)
+
     ## - mensal - qual dia ? - por qual periodo de tempo. / perpetua
     ## - anual - data ? - por qual periodo de tempo. / perpetua
     ## - semanal - data? - por qual periodo de tempo / -
@@ -91,9 +126,3 @@ class Despesa(BaseSQLModel, TimeStampMixin):
 
     ## especifica
     ## ex: manutenção, compra de equipamento, etc, possivelmente relacionada futuramente com outro modelo
-
-    ...
-
-
-class Renda(BaseSQLModel, TimeStampMixin): ...
- """

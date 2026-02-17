@@ -1,0 +1,127 @@
+<div class="flex flex-col h-full bg-surface border border-outline rounded-radius overflow-hidden">
+    
+    {# HEADER: Altura fixa definida pelo conteúdo (min-h-[56px]) #}
+    <div class="px-5 border-b border-outline flex justify-between items-center bg-surface-alt/50 min-h-[56px] flex-none">
+        <h3 class="font-bold text-on-surface flex items-center gap-2">
+            <i data-lucide="receipt" class="size-5 text-primary"></i>
+            Despesas 
+            <span id="item-count" class="ml-1 px-2 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full border border-primary/20">
+                {{ items|length }}
+            </span>
+        </h3>
+        <div class="flex gap-1 overflow-x-auto max-w-full no-scrollbar" role="tablist">
+            <!-- Aba Arquivos -->
+            <button 
+                hx-get="/torre/view/{{torre_id }}/docs"
+                hx-target="#subpage-card"
+                hx-swap="innerHTML"
+                class="flex items-center gap-2 px-3 py-4 text-xs font-medium transition-all border-b-2 whitespace-nowrap {{ 'text-primary border-primary' if current_tab == 'docs' or not current_tab else 'text-on-surface-variant border-transparent hover:text-on-surface' }}"
+                type="button">
+                <i data-lucide="file-text" class="size-3.5"></i>
+                Arquivos
+            </button>
+
+            <!-- Aba Contratos -->
+            <button 
+                hx-get="/torre/view/{{ torre_id }}/contratos"
+                hx-target="#subpage-card"
+                hx-swap="innerHTML"
+                class="flex items-center gap-2 px-3 py-4 text-xs font-medium transition-all border-b-2 whitespace-nowrap {{ 'text-primary border-primary' if current_tab == 'contratos' else 'text-on-surface-variant border-transparent hover:text-on-surface' }}"
+                type="button">
+                <i data-lucide="briefcase" class="size-3.5"></i>
+                Contratos
+            </button>
+
+            <!-- Aba Despesas -->
+            <button 
+                hx-get="/torre/view/{{ torre_id }}/despesas"
+                hhx-target="#subpage-card"
+                hx-swap="innerHTML"
+                class="flex items-center gap-2 px-3 py-4 text-xs font-medium transition-all border-b-2 whitespace-nowrap {{ 'text-primary border-primary' if current_tab == 'despesas' else 'text-on-surface-variant border-transparent hover:text-on-surface' }}"
+                type="button">
+                <i data-lucide="receipt" class="size-3.5"></i>
+                Despesas
+            </button>
+
+            <!-- Aba Logs -->
+            <button 
+                hx-get="/torre/{{ torre_id }}/aba/logs"
+                hx-target="#subpage-card"
+                hx-swap="innerHTML"
+                class="flex items-center gap-2 px-3 py-4 text-xs font-medium transition-all border-b-2 whitespace-nowrap {{ 'text-primary border-primary' if current_tab == 'logs' else 'text-on-surface-variant border-transparent hover:text-on-surface' }}"
+                type="button">
+                <i data-lucide="history" class="size-3.5"></i>
+                Logs
+            </button>
+        </div>
+    </div>
+
+    {# CORPO (LISTA): O truque está no flex-1 e overflow-y-auto #}
+    {# flex-1: Diz para este div "pegue todo o espaço que sobrar entre o header e o footer" #}
+    <div id="object-list-container" class="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-0">
+        {% block list_content %}
+            {% if items|length > 0 %}
+                <div id="items-grid" class="space-y-3">
+                    {% for doc in items  %}
+
+                        <li class="group flex flex-col p-3 rounded-radius border border-outline bg-surface hover:border-primary/30 hover:shadow-md transition-all">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-green-50 rounded text-green-600">
+                                    <i data-lucide="file-check" class="size-5"></i>
+                                </div>
+
+                                <div class="flex-1 min-w-0">
+                                    <input type="text" name="nickname" class="doc-nickname-input text-sm font-medium bg-transparent border-b border-transparent focus:border-primary outline-none w-full transition-colors" value="{{ doc.nickname }}" data-original-value="{{ doc.nickname }}" oninput="handleDocEdit(this)">
+                                    <p class="text-[11px] text-on-surface-variant mt-1 truncate">
+                                        <span class="font-mono">{{ doc.filename }}</span> • {{ doc.size or 0 }}
+                                    </p>
+                                </div>
+
+                                <div class="flex gap-1 items-center">
+                                    <button class="delete-doc-btn p-1.5 hover:bg-red-50 hover:text-red-600 rounded transition-colors opacity-0 group-hover:opacity-100" hx-delete="/torre/doc/{{ doc.id }}" hx-target="#subpage-card">
+                                        <i data-lucide="trash-2" class="size-4"></i>
+                                    </button>
+                                    <a href="/torre/doc/{{ doc.id }}/download" class="p-1.5 hover:bg-blue-50 hover:text-blue-600 rounded transition-colors opacity-0 group-hover:opacity-100">
+                                        <i data-lucide="download" class="size-4"></i>
+                                    </a>
+                                    <button class="save-doc-btn hidden p-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded" hx-patch="/torre/doc/{{ doc.id }}/rename" hx-include="closest li find .doc-nickname-input" hx-target="closest li" hx-swap="outerHTML">
+                                        <i data-lucide="check" class="size-4"></i>
+                                    </button>
+                                </div>
+
+                                
+                            </div>
+                        </li>          
+
+                    {% endfor %}
+                </div>{# END ITEMS LIST #}
+            {% else %}
+                <div class="h-full flex flex-col items-center justify-center text-on-surface-variant opacity-60 gap-3 border-2 border-dashed border-outline rounded-radius">
+                    <i data-lucide="receipt" class="size-12"></i>
+                    <p class="text-sm">Nenhuma despesa registrada</p>
+                </div>
+            {% endif %}
+        {% endblock list_content %}
+    </div>
+
+    {# RODAPÉ: Altura fixa, sempre visível na base #}
+    <div class="p-4 bg-surface-alt/30 border-t border-outline flex-none">
+{#         <button 
+            hx-get="/torre/{{ torre_id }}/despesas/novo" 
+            hx-target="#subpage-card"
+            class="w-full border-2 border-dashed border-primary/30 hover:border-primary hover:bg-primary/5 transition-all rounded-radius p-4 flex flex-col items-center gap-2 group">
+            
+            <div class="p-2 bg-primary/10 rounded-full group-hover:scale-110 transition-transform">
+                <i data-lucide="plus" class="size-5 text-primary"></i>
+            </div>
+            
+            <div class="text-center">
+                <p class="text-sm font-semibold text-on-surface">Nova Despesa</p>
+            </div>
+        </button> #}
+            <button type="button" class="form-create-btn">
+                    <i data-lucide="plus-circle" class="size-4"></i>
+                        Nova despesa
+                </button>
+    </div>
+</div>
