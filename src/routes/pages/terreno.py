@@ -18,20 +18,20 @@ logger = logging.getLogger("app.pages.terreno")
 router = APIRouter(prefix="/terreno")
 
 
-@router.get("/")
-async def list_page(
+@router.get("/list")
+async def list_view(
     request: Request,
     session=Depends(get_user_session),
     dbSession=Depends(get_db),
 ):
     template = "pages/terreno/list.html"
     page = {"title": "Torres SCC - Terrenos"}
-    context = {"request": request, "user": session, "page": page}
+    context = {"user": session, "page": page}
 
     return render_page(request, template, context)
 
 
-@router.post("/list")
+@router.get("/list/items")
 async def list_post(request: Request, db=Depends(get_db)):
     if not is_htmx_request:
         raise HTTPException(403)
@@ -39,12 +39,11 @@ async def list_post(request: Request, db=Depends(get_db)):
     service = TerrenoService(db)
 
     # TODO, parametros de ordenação, paginação e filtro
-    terrenos = await service.get_list()
-
-    template = "pages/terreno/items.html"
+    terrenos = await service.get_list(load_relations=["torres"])
+    template = "pages/terreno/list.html"
     context = {"request": request, "items": terrenos}
 
-    return render_chunk(request, template, context)
+    return render_chunk(request, template, context, block="items")
 
 
 @router.get("/create")
@@ -140,7 +139,7 @@ async def view_terreno(terreno_id: int, request: Request, dbSession=Depends(get_
     # em caso de erro uma resposta diferente
 
     service = TerrenoService(dbSession)
-    terreno = await service.get_one_by(id=terreno_id)
+    terreno = await service.get_one_by(id=terreno_id, load_relations=["torres"])
 
     ##colocar dentro do schema ?
 

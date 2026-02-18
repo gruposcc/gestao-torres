@@ -21,7 +21,7 @@ from core.settings import UPLOADS_DIR
 class TorreService(AbstractModelService[Torre]):
     model = Torre
 
-    async def get_list(
+    """ async def get_list(
         self,
         out_schema: ModelSchema | None = None,
         only_enable=True,
@@ -58,6 +58,7 @@ class TorreService(AbstractModelService[Torre]):
         else:
             parsed = [out_schema.model_validate(item) for item in items]
             return parsed
+     """
 
     async def search_by_name(self, name: str, limit: int = 3):
         # Se o nome estiver vazio, podemos retornar os mais recentes
@@ -189,3 +190,15 @@ class DocumentoTorreService(AbstractModelService[DocumentoTorre]):
 
 class DespesaTorreSerivce(AbstractModelService[DespesaTorre]):
     model = DespesaTorre
+
+    async def get_all_from_torre(self, torre_id):
+        stmt = select(self.model).where(self.model.torre_id == torre_id)
+
+        """ if only_enabled:
+            stmt = stmt.where(self.model.status == ObjectStatus.ENABLE) """
+
+        # Ordenada pelo mais recente
+        # stmt = stmt.order_by(self.model.created_at.desc())
+
+        result = await self.dbSession.execute(stmt)
+        return list[DespesaTorre](result.scalars().all())

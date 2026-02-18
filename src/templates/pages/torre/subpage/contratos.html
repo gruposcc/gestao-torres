@@ -1,0 +1,156 @@
+<div class="flex flex-col h-full bg-surface  rounded-radius overflow-hidden">
+
+
+    {# HEADER DO CARD: TITULO + ABAS #}
+    <div class="
+        px-5 border-b border-outline flex justify-between items-center bg-surface-alt/50 rounded-t-radius min-h-[56px]"
+    >
+        <div class=" text-on-surface flex items-center gap-2 whitespace-nowrap">
+            <i data-lucide="banknote-arrow-up" class="size-6 "></i>
+            <h3 class="font-semibold">
+            Contratos
+            </h3>
+            {# CONTADOR #}
+            <span id="doc-count" class=" px-2 py-0.5 text-[11px] text-center items-center bg-primary/10 rounded-full border border-primary/20">
+                {{ items|length }}
+            </span>
+        </div>
+        {# ABAS #}
+
+        <div class="flex gap-1 overflow-x-auto max-w-full no-scrollbar" role="tablist">
+            {% include "pages/torre/subpage/partials/subpage-navigation.html" %}
+        </div>
+    </div>
+
+    {# CORPO (LISTA): O truque está no flex-1 e overflow-y-auto #}
+    {# flex-1: Diz para este div "pegue todo o espaço que sobrar entre o header e o footer" #}
+    <div id="object-list-container" class="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-0">
+        {% block list_content %}
+            {% if items|length > 0 %}
+                <div id="items-grid" class="space-y-3" x-data="{ activeDeleteId: null }"">
+                    {% for doc in items  %}
+                    <li :class="activeDeleteId === {{ doc.id }} ? 'bg-red-50/50 border-red-200' : 'bg-surface border-outline'"
+                        class="group flex flex-col p-4 rounded-radius border border-outline bg-surface hover:border-primary/30 hover:shadow-md transition-all overflow-hidden relative min-h-[82px] justify-center">
+
+                            {# CONTEÚDO ORIGINAL #}
+                            <div x-show="activeDeleteId !== {{ doc.id }}"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0"
+                                x-transition:enter-end="opacity-100"
+                                x-transition:leave="transition ease-in duration-100"
+                                x-transition:leave-start="opacity-100"
+                                x-transition:leave-end="opacity-0"
+                                class="flex items-center gap-4">
+
+                                <div class="p-2.5 bg-blue-50 rounded-lg text-blue-600 flex-shrink-0">
+                                    <i data-lucide="receipt-text" class="size-5"></i>
+                                </div>
+
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-sm font-semibold text-on-surface truncate">
+                                        {{ doc.name }}
+                                    </h4>
+                                    <div class="flex flex-col gap-0.5 mt-0.5">
+                                        <p class="text-[11px] text-on-surface-variant flex items-center gap-1">
+                                            <i data-lucide="calendar" class="size-3"></i>
+                                            {{ doc.data_inicio.strftime('%d/%m/%Y') }}
+                                            {% if doc.data_final %}
+                                                <span class="text-on-surface"> até </span>
+                                                {{ doc.data_final.strftime('%d/%m/%Y') }}
+                                            {% endif %}
+                                        </p>
+                                        {% if not doc.data_final and doc.recorrencia.value != 'UNICA' %}
+                                            <span class="text-[9px] text-blue-500 font-bold uppercase italic">Perpétua</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center">
+                                    <div class="text-right transition-all duration-300">
+                                        <div class="flex flex-col">
+                                            <span class="text-sm font-bold text-primary whitespace-nowrap">
+                                                R$ {{ "{:,.2f}".format(doc.valor_total or doc.valor).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                                            </span>
+                                            {% if doc.recorrencia.value != 'UNICA' and doc.valor_total and doc.valor_total > doc.valor %}
+                                                {% set parcelas = (doc.valor_total / doc.valor)|round|int %}
+                                                <span class="text-[10px] text-on-surface/50 font-medium">
+                                                    {{ parcelas }}x R$ {{ "{:,.2f}".format(doc.valor).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex items-center justify-end gap-1 mt-1">
+                                            <span class="px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-medium uppercase whitespace-nowrap">
+                                                {{ doc.recorrencia.value }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center w-0 opacity-0 group-hover:w-20 group-hover:opacity-100 group-hover:ml-4 transition-all duration-300 ease-in-out overflow-hidden">
+                                        <div class="flex gap-1 border-l border-outline pl-2">
+                                            <button class="p-1.5 hover:bg-primary/10 hover:text-primary rounded transition-colors"
+                                                    hx-get="/despesa/torre/{{ doc.id }}/edit" hx-target="#content">
+                                                <i data-lucide="pencil" class="size-4"></i>
+                                            </button>
+                                            <button class="p-1.5 hover:bg-red-50 hover:text-red-600 rounded transition-colors"
+                                                    @click="activeDeleteId = {{ doc.id }}">
+                                                <i data-lucide="trash-2" class="size-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# INTERFACE DE CONFIRMAÇÃO #}
+                            <div x-show="activeDeleteId === {{ doc.id }}"
+                                x-transition:enter="transition ease-out duration-200 delay-100"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-100"
+                                x-transition:leave-start="opacity-100"
+                                x-transition:leave-end="opacity-0"
+                                class="absolute inset-x-4 flex items-center justify-between" x-cloak>
+
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-red-100 text-red-600 rounded-full">
+                                        <i data-lucide="alert-triangle" class="size-5"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-red-700 leading-none">Excluir?</p>
+                                        <p class="text-[10px] text-red-600/70 uppercase font-black mt-1 leading-none">Ação irreversível</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <button @click="activeDeleteId = null"
+                                            class="px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-200/50 rounded-md transition-colors">
+                                        Cancelar
+                                    </button>
+                                    <button class="px-3 py-1.5 text-xs font-bold bg-red-600 text-white hover:bg-red-700 rounded-md shadow-sm transition-all"
+                                            hx-delete="/despesa/torre/{{ doc.id }}"
+                                            hx-target="#subpage-card"
+                                            hx-swap="outerHTML swap:300ms">
+                                        Confirmar
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </div>{# END ITEMS LIST #}
+            {% else %}
+                    <div class="h-full flex flex-col items-center justify-center text-on-surface-variant opacity-60 gap-3 border-2 border-dashed border-outline rounded-radius">
+                        <i data-lucide="banknote-arrow-up" class="size-12"></i>
+                        <p class="text-sm">Nenhum Contrato registrado</p>
+                    </div>
+            {% endif %}
+        {% endblock list_content %}
+    </div>
+
+    {# RODAPÉ: Altura fixa, sempre visível na base #}
+    <div class="p-4 bg-surface-alt/30 border-t border-outline flex-none">
+
+            <button type="button" class="form-create-btn" hx-get="/contrato/torre/{{torre_id}}/create" hx-trigger="click" hx-target="#content" hx-push-url="true">
+                <i data-lucide="plus-circle" class="size-4"></i>
+                        Novo Contrato
+                </button>
+    </div>
+</div>

@@ -76,14 +76,14 @@
 
         {# TERRENO #}
         <a 
-            hx-get="/terreno" 
+            hx-get="/terreno/list" 
             hx-target="#content"
             hx-swap="innerHTML"
             hx-push-url="true"
-            href="/terreno" 
+            href="/terreno/list" 
             class=" sidebar-item "
             :class="{
-                'active' : $store.sidebar.currentPath === '/terreno/'
+                'active' : $store.sidebar.currentPath.startsWith('/terreno')
             }"
         >
             <div>
@@ -109,7 +109,7 @@
             href="/torre/list"
             class=" sidebar-item"
             :class="{
-                'active' : $store.sidebar.startswith('/torre')
+                'active' : $store.sidebar.currentPath.startsWith('/torre')
             }"
         >
             <div >
@@ -130,46 +130,5 @@
 
   </div>
   {% include "partials/user_sidebar.html" %}
-
-    {# <button
-    class="
-    mt-auto
-        flex items-center
-        rounded-radius 
-
-        align-center
-        text-sm font-medium
-        h-10
-        text-on-surface dark:text-on-surface-dark
-        underline-offset-2
-        focus-visible:underline focus:outline-hidden
-        dark:hover:bg-primary-dark/5 hover:bg-primary/5
-        dark:hover:text-on-surface-dark-strong hover:text-on-surface-strong 
-        overflow-hidden 
-        max-w-full
-        cursor-pointer
-        "
-    :class="
-        {'justify-center w-10': !$store.sidebar.isSidebarOpen, 'justify-start w-full pl-2.5': $store.sidebar.isSidebarOpen}
-    "
-    >
-        <i data-lucide="circle-user-round" class="size-5 shrink-0"></i>
-        <span x-cloak
-            class="
-                whitespace-nowrap
-                transition-opacity 
-                duration-300
-                ease-in-out
-
-            "
-            :class="{ 
-                'opacity-100 w-auto pl-2': $store.sidebar.isSidebarOpen, 
-                'opacity-0 w-0 overflow-hidden': !$store.sidebar.isSidebarOpen 
-            }"
-        >
-            {{user.name}} aaaaaaaaaaaaaaaaaaaaa
-        </span>
-
-    </button> #}
 
 </nav>

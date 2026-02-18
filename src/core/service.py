@@ -5,7 +5,7 @@ from sqlalchemy import exists, select, delete
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.schema import BaseSchema
+from core.schema import BaseSchema, ModelSchema
 from models.base import BaseSQLModel, ObjectStatus
 
 logger = logging.getLogger("app.core.service")
@@ -100,8 +100,44 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
         new_obj = await self.create(data=data)
         return exists, new_obj
 
-    async def get_list(self):
-        raise NotImplementedError
+    async def get_list(
+        self,
+        out_schema: ModelSchema | None = None,
+        only_enable=True,
+        load_relations: list | None = None,
+    ):
+        stmt = select(self.model)
+
+        if load_relations:
+            for rel in load_relations:
+                # VERIFICAR SE EXISTE A REFERENCIA
+                # ex: Torre.terreno
+                if hasattr(self.model, rel):
+                    attr = getattr(self.model, rel)
+                    stmt = stmt.options(selectinload(attr))
+
+                else:
+                    pass
+
+        if only_enable and hasattr(self.model, "status"):
+            status = getattr(self.model, "status")
+            stmt = stmt.where(status == ObjectStatus.ENABLE)
+
+        result = await self.dbSession.execute(stmt)
+
+        items = result.scalars().all()
+
+        # .unique() é recomendado ao usar joins ou selectinload para evitar duplicatas nos resultados
+        # items = result.scalars().unique().all()
+
+        if not out_schema:
+            return items
+
+        #
+        # cogitar uso de type adapter
+        else:
+            parsed = [out_schema.model_validate(item) for item in items]
+            return parsed
 
     async def exists_by(self, **kwargs):
         stmt = select(exists(self.model))  # inicializa query do modelo
@@ -146,8 +182,7 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
         try:
             await self.dbSession.delete(obj)
             await self.dbSession.commit()
-            # await self.dbSession.refresh(obj)
-
+            await self.dbSession.refresh(obj)
         except:
             pass
         return True

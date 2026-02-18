@@ -1,0 +1,195 @@
+{% extends "layout/template.html" %}
+
+{% block content %}
+<script>
+{
+    const despesaForm = (initialData = {}) => ({
+        recorrenciaOpen: false,
+        recorrencia: initialData.recorrencia || "", 
+        recorrenciaText: initialData.recorrenciaText || "Não definida",
+        dataInicio: initialData.dataInicio || new Date().toISOString().split('T')[0],
+        description: initialData.description || "",
+        valor: initialData.valor || "",
+        name: initialData.name || "",
+
+        formatDate(dateStr) {
+            if (!dateStr) return "--/--/----";
+            const [year, month, day] = dateStr.split('-');
+            return `${day}/${month}/${year}`;
+        },
+
+        selectRecorrencia(valor, text) {
+            this.recorrencia = valor;
+            this.recorrenciaText = text;
+            this.recorrenciaOpen = false;
+        },
+
+        openDatePicker(event) {
+            try { event.target.showPicker(); } catch (e) {}
+        },
+
+        formatarValor() {
+            if (this.valor) {
+                const partes = this.valor.toString().split('.');
+                if (partes[1] && partes[1].length > 2) {
+                    this.valor = parseFloat(this.valor).toFixed(2);
+                }
+            }
+        },
+    });
+    registerComponent("despesaForm", despesaForm);
+}
+</script>
+
+<div class="content-frame overflow-y-auto">
+    <div class="content-header">
+        <div class="title">
+            <div class="icon"><i data-lucide="receipt"></i></div>
+            <div>
+                <h2>Nova Despesa</h2>
+                <p>vincular custo à torre</p>
+            </div>
+        </div>     
+    </div>
+
+    <div x-data="despesaForm({})" class="w-full h-full p-6">
+        <form class="grid grid-cols-3 gap-8"
+            hx-post="/despesa/create"
+            hx-target="#content"
+            hx-swap="innerHTML"
+        >
+            <div class="col-span-2 flex flex-col gap-6">
+                
+                {# Campo NOME #}
+                <div class="form-field">
+                    <label class="font-bold text-gray-700 dark:text-gray-300">Nome da Despesa</label>
+                    <div class="input-field mt-1">
+                        <input x-model="name" type="text" name="name" maxlength="50" placeholder="Ex: Manutenção Predial" class="field" required />
+                    </div>
+                </div>
+
+                {# Valor e Recorrência Lado a Lado #}
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-field">
+                        <label class="font-bold text-gray-700 dark:text-gray-300">Valor (R$)</label>
+                        <div class="input-field mt-1 relative">
+                            <i data-lucide="banknote" class="icon"></i>
+                            <input name="valor" x-model="valor" @input="formatarValor()" type="number" step="0.01" min="0.01" class="pl-10 field" placeholder="0,00" required>
+                        </div>
+                    </div>
+
+                    <div class="form-field" @click.away="recorrenciaOpen=false">
+                        <label class="font-bold text-gray-700 dark:text-gray-300">Recorrência</label>
+                        <div class="input-field mt-1 relative" @click="recorrenciaOpen = !recorrenciaOpen">
+                            <i data-lucide="rotate-cw" class="icon"></i>
+                            <input readonly x-model="recorrenciaText" class="pl-10 field cursor-pointer" placeholder="Selecione...">
+                            <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 transition-transform" :class="recorrenciaOpen ? 'rotate-180' : ''"></i>
+                            <input type="hidden" name="recorrencia" x-model="recorrencia" required>
+                        </div>
+                        
+                        <div class="options-anchor">
+                            <div class="options-container" x-show="recorrenciaOpen" x-cloak>
+                                <ul class="options">
+                                    {% for rec in recorrencias %}
+                                        <li class="group item" @click.stop="selectRecorrencia('{{ rec.value }}', '{{ rec.value|title }}')">
+                                            <span>{{ rec.value }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Campo Descrição #}
+                <div class="form-field">
+                    <label class="font-bold text-gray-700 dark:text-gray-300">Descrição Detalhada</label>
+                    <div class="input-field mt-1">
+                        <textarea x-model="description" name="description" rows="4" class="w-full bg-transparent p-3 text-sm focus:outline-none" placeholder="Opcional: Detalhes sobre o contrato ou serviço..."></textarea>
+                    </div>
+                </div>
+
+                {# Data de Início #}
+                <div class="form-field w-1/2">
+                    <label class="font-bold text-gray-700 dark:text-gray-300">Data de Início</label>
+                    <div class="input-field mt-1 relative">
+                        <i data-lucide="calendar" class="icon pointer-events-none"></i>
+                        <input type="date" name="data_inicio" x-model="dataInicio" @click="openDatePicker($event)" class="pl-10 field w-full cursor-pointer">
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="form-create-btn w-full py-4 text-lg justify-center shadow-lg shadow-primary/20">
+                        <i data-lucide="circle-plus"></i>
+                        Confirmar e Salvar Despesa
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-span-1">
+                <div class="sticky top-6 bg-surface-alt dark:bg-surface-dark-alt/30 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800 dark:text-gray-100 italic">Preview da Despesa</h3>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="pb-4 border-b border-gray-100 dark:border-gray-800">
+                            <span class="text-[11px] uppercase tracking-widest text-gray-400 font-bold">Identificação</span>
+                            <p class="text-lg font-bold text-gray-700 dark:text-gray-200 break-words mt-1" x-text="name || 'Nome da despesa...'"></p>
+                        </div>
+
+                        <div class="pb-4 border-b border-gray-100 dark:border-gray-800">
+                            <span class="text-[11px] uppercase tracking-widest text-gray-400 font-bold">Investimento</span>
+                            <div class="flex items-baseline gap-2 mt-1">
+                                <span class="text-3xl font-black text-primary" x-text="valor ? 'R$ ' + parseFloat(valor).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : 'R$ 0,00'"></span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="building-2" class="w-4 h-4 text-gray-400"></i>
+                                <div>
+                                    <span class="block text-[10px] uppercase text-gray-400 font-bold leading-none">Torre</span>
+                                    <span class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ torre.name }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-400"></i>
+                                <div>
+                                    <span class="block text-[10px] uppercase text-gray-400 font-bold leading-none">Recorrência</span>
+                                    <span class="text-sm font-medium text-gray-600 dark:text-gray-300" x-text="recorrenciaText"></span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="calendar-days" class="w-4 h-4 text-gray-400"></i>
+                                <div>
+                                    <span class="block text-[10px] uppercase text-gray-400 font-bold leading-none">Primeiro Pagamento</span>
+                                    <span class="text-sm font-medium text-gray-600 dark:text-gray-300" x-text="formatDate(dataInicio)"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800/50">
+                        <p class="text-[11px] text-blue-600 dark:text-blue-400 leading-relaxed">
+                            <i data-lucide="info" class="w-3 h-3 inline mr-1 mb-0.5"></i>
+                            Esta despesa será vinculada ao balanço mensal da <strong>{{ torre.name }}</strong> a partir de <span x-text="formatDate(dataInicio)"></span>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        background: transparent; bottom: 0; color: transparent; cursor: pointer;
+        height: auto; left: 0; position: absolute; right: 0; top: 0; width: auto;
+    }
+    [x-cloak] { display: none !important; }
+</style>
+{% endblock content %}

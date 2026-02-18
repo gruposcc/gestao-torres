@@ -49,8 +49,8 @@ document.body.addEventListener('htmx:responseError', function(evt) {
                 <i data-lucide="radio-tower"></i>
             </div>
             <div>
-                <h2>Nova Torre</h2>
-                <p>Criação</p>
+                <h2>Torre {{item.name}}</h2>
+                <p>Gerenci</p>
             </div>
         </div>
     </div>
@@ -113,7 +113,7 @@ document.body.addEventListener('htmx:responseError', function(evt) {
             <div class="bg-surface border border-outline shadow-sm rounded-radius flex flex-col h-[600px]">
 
 
-                <div id="subpage-card" class="w-full h-full flex flex-col" hx-get="/torre/view/{{item.id}}/docs" hx-target="this" hx-trigger="load once" hx-swap="innerHTML"> {# HTMX SUBSTITUI TUDO #}
+                <div id="subpage-card" class="w-full h-full flex flex-col" hx-get="/torre/view/{{item.id}}/{{initial_subpage}}" hx-target="this" hx-trigger="load once" hx-swap="innerHTML"> {# HTMX SUBSTITUI TUDO #}
                 {# {% block subpage %}        
                 {% endif %}     #}
                 </div>

@@ -27,7 +27,7 @@ class TerrenoService(AbstractModelService[Terreno]):
         result = await self.dbSession.execute(stmt)
         return result.scalar() is not None """
 
-    async def get_list(self, out_schema: ModelSchema = None, only_enable=True):
+    """ async def get_list(self, out_schema: ModelSchema = None, only_enable=True):
         stmt = select(self.model)
 
         if only_enable:
@@ -44,7 +44,7 @@ class TerrenoService(AbstractModelService[Terreno]):
         # cogitar uso de type adapter
         else:
             parsed = [out_schema.model_validate(item) for item in items]
-            return parsed
+            return parsed """
 
     async def search_by_name(self, name: str, limit: int = 3):
         # Se o nome estiver vazio, podemos retornar os mais recentes

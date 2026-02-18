@@ -1,5 +1,5 @@
 import json
-
+from typing import Dict, Any
 from fastapi import Request, Response
 
 
@@ -16,9 +16,18 @@ def update_htmx_title(response: Response, title) -> Response:
 
 
 def redirect_htmx_header(
-    response: Response, path: str, target: str = "#content", swap: str = "innerHTML"
+    response: Response,
+    path: str,
+    target: str = "#content",
+    swap: str = "innerHTML",
+    extra_headers: Dict[str, Any] | None = None,
 ):
-    response.headers["HX-location"] = json.dumps(
-        {"path": path, "target": target, "swap": swap}
-    )
+    hx_location_header = {"path": path, "target": target, "swap": swap}
+
+    if extra_headers:
+        headers = {"headers": extra_headers}
+        hx_location_header.update(headers)
+
+    response.headers["HX-location"] = json.dumps(hx_location_header)
+
     return response

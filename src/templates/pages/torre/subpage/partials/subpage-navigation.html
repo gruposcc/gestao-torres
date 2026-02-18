@@ -1,0 +1,74 @@
+
+    <!-- Aba Arquivos -->
+    <button
+        hx-get="/torre/view/{{torre_id }}/arquivos"
+        hx-target="#subpage-card"
+        hx-swap="innerHTML"
+        class="flex items-center gap-2 px-3 py-4 text-xs font-normal transition-all duration-200 ease-in-out border-b-2 whitespace-nowrap
+        {% if current_tab == 'arquivos' %}
+            text-primary border-primary
+        {% else %}
+            text-on-surface/50 border-transparent hover:text-on-surface  hover:border-on-surface/50
+        {% endif %}
+        "
+        type="button">
+        <i data-lucide="file-text" class="size-3.5"></i>
+        Arquivos
+    </button>
+
+    <!-- Aba Contratos -->
+    <button
+        hx-get="/torre/view/{{ torre_id }}/contratos"
+        hx-target="#subpage-card"
+        hx-swap="innerHTML"
+        class="flex items-center gap-2 px-3 py-4 text-xs font-normal transition-all duration-200 ease-in-out border-b-2 whitespace-nowrap
+
+        {% if current_tab == 'contratos' %}
+            text-primary border-primary
+        {% else %}
+            text-on-surface/50 border-transparent hover:text-on-surface  hover:border-on-surface/50
+        {% endif %}
+        "
+        type="button">
+        <i data-lucide="banknote-arrow-up" class="size-3.5"></i>
+        Contratos
+    </button>
+
+    <!-- Aba Despesas -->
+    <button
+        hx-get="/torre/view/{{ torre_id }}/despesas"
+        hhx-target="#subpage-card"
+        hx-swap="innerHTML"
+        class="flex items-center gap-2 px-3 py-4 text-xs font-normal transition-all duration-200 ease-in-out border-b-2 whitespace-nowrap
+
+        {% if current_tab == 'despesas' %}
+            text-primary border-primary
+        {% else %}
+            text-on-surface/50 border-transparent hover:text-on-surface  hover:border-on-surface/50
+        {% endif %}
+        "
+        type="button">
+        <i data-lucide="banknote-arrow-down" class="size-3.5"></i>
+        Despesas
+    </button>
+
+    <!-- Aba Logs -->
+    <button
+        hx-get="/torre/{{ torre_id }}/aba/logs"
+        hx-target="#subpage-card"
+        hx-swap="innerHTML"
+        class="flex items-center gap-2 px-3 py-4 text-xs font-normal transition-all duration-200 ease-in-out border-b-2 whitespace-nowrap
+
+        {% if current_tab == 'logs' %}
+            text-primary border-primary
+        {% else %}
+            text-on-surface/50 border-transparent hover:text-on-surface  hover:border-on-surface/50
+        {% endif %}
+        "
+
+
+
+        type="button">
+        <i data-lucide="history" class="size-3.5"></i>
+        Logs
+    </button>

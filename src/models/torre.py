@@ -23,6 +23,7 @@ from models.base import BaseSQLModel, StatusMixin, TimeStampMixin
 
 if TYPE_CHECKING:
     from .terreno import Terreno
+    from .contratos import Contrato
 
 
 class TipoTorre(enum.Enum):
@@ -62,8 +63,9 @@ class Torre(BaseSQLModel, StatusMixin, TimeStampMixin):
         "DespesaTorre", back_populates="torre", cascade="all, delete-orphan"
     )
 
-    # TODO
-    # documentos
+    contratos: Mapped[List[Contrato]] = relationship(
+        "Contrato", back_populates="torre", cascade="all, delete-orphan"
+    )
 
 
 class DocumentoTorre(BaseSQLModel, StatusMixin, TimeStampMixin):
@@ -97,32 +99,29 @@ class DespesaTorre(BaseSQLModel, TimeStampMixin):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+
     torre_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("torre.id"), nullable=False)
     torre: Mapped["Torre"] = relationship(
         "Torre", back_populates="despesas", lazy="selectin"
     )
 
+    valor: Mapped[Decimal] = mapped_column(Numeric[Decimal](10, 2), nullable=False)
+    valor_total: Mapped[Decimal] = mapped_column(Numeric[Decimal], nullable=True)
+
     recorrencia: Mapped[RecorrenciaDespesa] = mapped_column(
         Enum(RecorrenciaDespesa), nullable=False, default=RecorrenciaDespesa.UNICA
     )
+    # DATE RANGE
 
     perpetua: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
-    # DATE RANGE
     data_inicio: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), default=None, nullable=False
     )
 
     data_final: Mapped[datetime.datetime] = mapped_column(
-        DateTime(timezone=True), default=None, nullable=False
+        DateTime(timezone=True), default=None, nullable=True
     )
 
     description: Mapped[str] = mapped_column(String(255), nullable=True)
-
-    ## - mensal - qual dia ? - por qual periodo de tempo. / perpetua
-    ## - anual - data ? - por qual periodo de tempo. / perpetua
-    ## - semanal - data? - por qual periodo de tempo / -
-    ## - diaria
-
-    ## especifica
-    ## ex: manutenção, compra de equipamento, etc, possivelmente relacionada futuramente com outro modelo

@@ -234,84 +234,161 @@ crossorigin=""></script>
 }
 </script>
 
-
-
-<div 
-    x-data="newTerrenoForm"
-    class="flex flex-row h-full overflow-x-auto gap-4 p-2"
->
-
-    <!-- Coluna do formulário -->
-    <div class="flex flex-col flex-1 gap-4 h-full">
-        
-        <span class="text-xl font-semibold">
-            <h2>
-                Novo Terreno
-            </h2>
-        </span>
-
-        {% block form %}
-
-        <form hx-post="/terreno/create"
-            x-bind:hx-vals="
-            JSON.stringify({
-                lat: lat,
-                lng: lng,
-                name: name,
-            })
-            {# address: s_addr_txt, #}
-            "
-            class=" flex flex-col flex-1 w-full justify-between"
-        >       
-
-            {# field container #}
-            <div class="flex w-full flex-1 flex-col gap-x-4 gap-y-2">
-
-                {# Nome do terreno #}
-                <div class="flex flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+<div class="content-frame overflow-y-auto h-full "
+x-data="newTerrenoForm">
+    <div class="content-header">
+        {# TITLE #}
+        <div class="flex">
+        <div class="title">
+            <div class="icon">
+                <i data-lucide="land-plot"></i>
+            </div>
+            <div>
+                <h2>Novo Terreno</h2>
+                <p>criação</p>
+            </div>
+        </div>      
+        </div>
+        <div class=" w-1/2"
+        x-on:htmx:after-swap="show_results = true">{# ALINHADA NA DIREITA #}
+        {# SearchBar Container #}
+            <div 
+                id="pesquisaEndereco"
+                class="
+                    relative 
+                    text-on-surface dark:text-on-surface-dark
+                    flex w-full flex-col 
+                    pl-2 pr-2
+                "
+            > 
+                <input id="pesquisaEnderecoInput"  {# SearchBar #}
+                    name="address_query" 
+                    type="text"
+                    placeholder="Pesquiar endereço" aria-label="pesquisar endereco"
                     
-                    <label for="first_name" class="w-fit pl-0.5 text-sm font-medium text-on-surface-strong dark:text-on-surface-dark-strong">
-                        Nome do terreno <span class="text-danger">*</span>
-                    </label>
+                    {# HMTX #}
+                    x-model="search_query"
+                    hx-get="/htmx/address/search" 
+                    hx-trigger="keyup changed delay:300ms"
+                    hx-swap="innerHTML" 
+                    hx-target="#search-results" 
+                    hx-indicator=".htmx-indicator"
+                    {# EVENTOS #}
+                    @input="show_results = false"
+                    @mousedown="
+                        if ($refs.searchResults?.children.length > 0) {
+                            show_results = true
+                        }
+                    "
+                    {# CSS #}
+                    class="
+                        w-full
+                        rounded-radius 
+                        border border-outline dark:border-outline-dark
+                        bg-surface-alt dark:bg-surface-dark-alt/50
+                        py-2 pl-10 pr-2 
+                        text-sm
+                        focus-visible:outline focus-visible:outline-offset-1
+                        focus-visible:outline-dark dark:focus-visible:outline                    
+                    "/>
 
-                    <input 
-                        id="name"
-                        type="text" 
-                        name="name"
-                        x-model="name"
+                    <i data-lucide="search" 
+                    class="
+                        size-5
+                        absolute left-4.5 top-1/2 -translate-y-1/2 
+                        text-on-surface/50 dark:text-on-surface-dark/50"></i>
+                    <span id="loading-wrapper" class="htmx-indicator absolute right-2.5 top-1/2 -translate-y-1/2">
+                        {# ÍCONE (Controlado pelo Lucide e Tailwind) #}
+                        <i data-lucide="loader-2" class="animate-spin size-5 text-indigo-600"></i>
+                    </span>
 
-                        class="w-full rounded-radius border px-3 py-2 text-base 
-                                bg-surface dark:bg-surface-dark border-outline dark:border-outline-dark
-                                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-primary-dark" 
-                        required
-                        minlength="1"
-                        maxlength="120"
+            </div>
+    
 
-                        placeholder="Digite o nome do terreno"
+            <div class="relative"> {# result container #}
+                <div 
+                    class="
+                        absolute z-1001 px-2
+                        w-full top-full
+                        flex flex-col "
+                    style="margin-top: 6px;"
+                >
+                    <ul id="search-results" 
+                        class=" 
+                            bg-surface-alt dark:bg-surface-dark-alt
+                            border border-outline dark:border-outline-dark 
+                            shadow-2xl
+                            rounded-radius
+                        "
+                        @mousedown.away="show_results = false"
+                        x-show="show_results"
+                        x-ref="searchResults"
+                    >{% block search_results %}{% endblock search_results %}</ul>
+                </div> 
+            </div>
+        
+        </div>  
+    </div>
 
-                        {% if name and name.value %}
-                            value="{{name.value}}"
-                        {%endif%}
 
-                    />
+
+
+
+
+    <div 
+        class="flex flex-row h-full overflow-x-auto gap-4"
+    >
+
+
+        <!-- Coluna do formulário -->
+        <div class="flex flex-col flex-1 gap-4 h-full">
+            
+            {% block form %}
+
+            <form hx-post="/terreno/create"
+                x-bind:hx-vals="
+                JSON.stringify({
+                    lat: lat,
+                    lng: lng,
+                    name: name,
+                })
+                {# address: s_addr_txt, #}
+                "
+                class=" flex flex-col  justify-between"
+            >       
+
+                {# campo NOME #}
+                <div class="form-field pb-4">
+
+                    <label for="inputname">Nome: </label>
+
+                    <div class="pl-2">
+                        <div class="input-field {% if form and form.name.error %}border-red-500{% endif %}">
+                            <input 
+                                id="name"
+                                class="field curor-pointer"
+                                x-model="name"
+                                type="text"
+                                name="name"
+                                maxlength="80"
+                                placeholder="Nome da terreno"
+                                autocomplete="off"
+                                required
+                                {% if name and name.value %}
+                                value="{{name.value}}"
+                                {%endif%}
+
+
+                            />
+                        </div>
                         {% if name and name.error %}
-                            <small class="mb-1
-                                text-danger text-xs
-                            ">
-                            Nome em uso
-                        </small>
-                        {% else %}
-                        <small class="mb-1
-                            dark:text-on-surface-dark/60 text-on-surface/60 invisible
-                        "></small>
+                            <span class="text-red-500 text-xs ml-2">nome em uso</span>
                         {% endif %}
-
-
+                    </div>
                 </div>
 
-
                 {# Endereço selecionado #}
-                <div class="flex w-full flex-col gap-2">
+                <div class="form-field pb-6">
                     <label 
                         for="textselectedaddr"
                         class="
@@ -319,7 +396,7 @@ crossorigin=""></script>
 
                         Endereço Selecionado
                     </label>
-
+                    <div class="pl-2">
                     <textarea
                         style="resize: none;"
                         disabled
@@ -340,216 +417,80 @@ crossorigin=""></script>
                         rows="5" 
                         placeholder="...">
                     </textarea>
-                </div>
-                {# end endereço selecionado #}
-
-                {# Dados e documentos #}
-                <!--<div class="flex w-full flex-col gap-2">
-                    <label class="w-fit pl-0.5 text-sm">Dados e documentos</label>
-
-                    {# Terreno alugado ? #}
-                    <div class="flex flex-row items-center gap-4">
-                        
-                        {# checkbox #}
-                        <label for="checkboxAluguel" 
-                            class="
-                                flex
-                                items-center gap-2
-                                text-sm font-medium
-                                text-on-surface dark:text-on-surface-dark
-                                has-checked:text-on-surface-strong dark:has-checked:text-on-surface-dark-strong 
-                                has-disabled:cursor-not-allowed
-                                has-disabled:opacity-75
-                            "
-                        >
-                            <span class="relative flex items-center">
-                                <input id="checkboxAluguel" type="checkbox"
-                                    x-model="isAlugado"
-                                    class="
-                                        before:content[''] peer 
-                                        relative size-4
-                                        appearance-none overflow-hidden 
-                                        rounded-sm 
-                                        border border-outline
-                                        bg-surface-alt 
-                                        before:absolute before:inset-0
-                                        checked:border-primary checked:before:bg-primary 
-                                        focus:outline-2 focus:outline-offset-2 focus:outline-outline-strong
-                                        checked:focus:outline-primary active:outline-offset-0 disabled:cursor-not-allowed
-                                        dark:border-outline-dark dark:bg-surface-dark-alt
-                                        dark:checked:border-primary-dark dark:checked:before:bg-primary-dark
-                                        dark:focus:outline-outline-dark-strong dark:checked:focus:outline-primary-dark
-                                    "
-                                    
-                                />
-                                <i data-lucide="check" class="size-3 pointer-events-none invisible absolute left-1/2 top-1/2 -translate-1/2 text-on-primary peer-checked:visible dark:text-on-primary-dark"></i>
-                            </span>
-                            <span>
-                                Terreno alugado ?
-                            </span>
-                        </label>
-
-
-
-                        <div class="flex items-center gap-2 text-on-surface dark:text-on-surface-dark">
-                            <div 
-                                class="group flex items-center rounded-radius border border-outline bg-surface-alt dark:border-outline-dark dark:bg-surface-dark-alt/50 focus-within:ring-2 focus-within:ring-primary transition-opacity"
-                                :class="!isAlugado ? 'opacity-50' : 'opacity-100'"
-                            >
-                                <span class="pl-2 text-xs font-semibold opacity-50 select-none">R$</span>
-                                <input 
-                                    type="text" 
-                                    x-model="valorAluguel"
-                                    @input="formatMoeda($event)"
-                                    :disabled="!isAlugado"
-                                    :required="isAlugado"
-                                    placeholder="0,00"
-                                    inputmode="numeric"
-                                    class="w-24 bg-transparent p-1 text-sm focus:outline-none disabled:cursor-not-allowed"
-                                />
-                            </div>
-                        </div>
-
                     </div>
-                </div>{# end dados e documentos #} -->
+                </div>
+                    {# end endereço selecionado #}
 
-            </div>
-            {# end field container #}
-
-            {# send btn #}
-            <div class=" flex w-full gap-4 flex-col">
-                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
-                    Salvar Terreno
-                </button>
-            </div>
-
-
-        </form>
-        {% endblock form %}
-
-    </div> {# END Coluna Formulário #}
-
-    {# Coluna mapa  #}
-    <div class=" flex-1 flex h-full flex-col"
-        x-on:htmx:after-swap="show_results = true"
-    >
-        {# SearchBar Container #}
-        <div 
-            id="pesquisaEndereco"
-            class="
-                relative 
-                text-on-surface dark:text-on-surface-dark
-                flex w-full flex-col 
-            "
-        > 
-            <input id="pesquisaEnderecoInput"  {# SearchBar #}
-                name="address_query" 
-                type="text"
-                placeholder="Pesquiar endereço" aria-label="pesquisar endereco"
                 
-                {# HMTX #}
-                x-model="search_query"
-                hx-get="/htmx/address/search" 
-                hx-trigger="keyup changed delay:300ms"
-                hx-swap="innerHTML" 
-                hx-target="#search-results" 
-                hx-indicator=".htmx-indicator"
-                {# EVENTOS #}
-                @input="show_results = false"
-                @mousedown="
-                    if ($refs.searchResults?.children.length > 0) {
-                        show_results = true
-                    }
-                "
-                {# CSS #}
-                class="
-                    w-full
-                    rounded-radius 
-                    border border-outline dark:border-outline-dark
-                    bg-surface-alt dark:bg-surface-dark-alt/50
-                    py-2 pl-10 pr-2 
-                    text-sm
-                    focus-visible:outline focus-visible:outline-offset-1
-                    focus-visible:outline-dark dark:focus-visible:outline                    
-                "/>
+                {# end field container #}
 
-                <i data-lucide="search" 
-                class="
-                    size-5
-                    absolute left-2.5 top-1/2 -translate-y-1/2 
-                    text-on-surface/50 dark:text-on-surface-dark/50"></i>
-                <span id="loading-wrapper" class="htmx-indicator absolute right-2.5 top-1/2 -translate-y-1/2">
-                    {# ÍCONE (Controlado pelo Lucide e Tailwind) #}
-                    <i data-lucide="loader-2" class="animate-spin size-5 text-indigo-600"></i>
-                </span>
-
-        </div>
-
-        <div class="relative"> {# result container #}
-            <div 
-                class="
-                    absolute z-1001 px-2
-                    w-full top-full
-                    flex flex-col "
-                style="margin-top: 6px;"
-            >
-                <ul id="search-results" 
-                    class=" 
-                        bg-surface-alt dark:bg-surface-dark-alt
-                        border border-outline dark:border-outline-dark 
-                        shadow-2xl
-                        rounded-radius
-                    "
-                    @mousedown.away="show_results = false"
-                    x-show="show_results"
-                    x-ref="searchResults"
-                >{% block search_results %}{% endblock search_results %}</ul>
-            </div> 
-        </div>
-
-        <div class=" flex flex-1 pt-4 h-full"> {# map container  #}
-            <div {# Leafmap  #}
-                id="map"
-                class="w-full h-full rounded-radius border"
-            ></div>
-        </div>
-
-        <div class="flex pt-4 flex-row gap-4">  {# Coordenadas container #}
-
-            <div class="flex flex-1 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-                <div class="group flex items-center w-full rounded-radius border border-outline bg-surface-alt dark:border-outline-dark dark:bg-surface-dark-alt/50 focus-within:ring-2 focus-within:ring-primary">
-                    <span class="pl-2 text-xs font-semibold opacity-50 select-none">Latitude:</span>
+                {# send btn #}
+                <div class="form-field pt-8 flex-row pl-2">
+                    <button
+                        type="submit"
+                        class="form-create-btn flex flex-row flex-2"
+                        >
+                        <i data-lucide="circle-plus"></i>
+                        Criar 
+                    </button> 
                     
-                    <input 
-                        type="text" 
-                        {# x-model="d_lat" #}
-                        x-model.debounce.500ms="d_lat"
-                        @input="manualUpdate()"
-                        class="w-full bg-transparent p-1 text-sm focus:outline-none disabled:cursor-not-allowed" 
-                        name="latitude"
-                    />
                 </div>
+
+
+            </form>
+            {% endblock form %}
+
+        </div> {# END Coluna Formulário #}
+
+        {# Coluna mapa  #}
+        <div class=" flex-1 flex h-full flex-col"
+            x-on:htmx:after-swap="show_results = true"
+        >
+
+            <div class=" flex flex-1 h-full"> {# map container  #}
+                <div {# Leafmap  #}
+                    id="map"
+                    class="w-full h-full rounded-radius border"
+                ></div>
             </div>
 
-            <div class="flex flex-1 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-                <div class="group flex items-center w-full rounded-radius border border-outline bg-surface-alt dark:border-outline-dark dark:bg-surface-dark-alt/50 focus-within:ring-2 focus-within:ring-primary">
-                    <span class="pl-2 text-xs font-semibold opacity-50 select-none">Longitude:</span>
-                    
-                    <input 
-                        type="text" 
-                        {# x-model="d_lng" #}
-                        x-model.debounce.500ms="d_lng"
-                        @input="manualUpdate()"
-                        class="w-full bg-transparent p-1 text-sm focus:outline-none disabled:cursor-not-allowed" 
-                        name="longitude"
-                    />
+            <div class="flex pt-4 flex-row gap-4">  {# Coordenadas container #}
+
+                <div class="flex flex-1 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+                    <div class="group flex items-center w-full rounded-radius border border-outline bg-surface-alt dark:border-outline-dark dark:bg-surface-dark-alt/50 focus-within:ring-2 focus-within:ring-primary">
+                        <span class="pl-2 text-xs font-semibold opacity-50 select-none">Latitude:</span>
+                        
+                        <input 
+                            type="text" 
+                            {# x-model="d_lat" #}
+                            x-model.debounce.500ms="d_lat"
+                            @input="manualUpdate()"
+                            class="w-full bg-transparent p-1 text-sm focus:outline-none disabled:cursor-not-allowed" 
+                            name="latitude"
+                        />
+                    </div>
                 </div>
+
+                <div class="flex flex-1 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+                    <div class="group flex items-center w-full rounded-radius border border-outline bg-surface-alt dark:border-outline-dark dark:bg-surface-dark-alt/50 focus-within:ring-2 focus-within:ring-primary">
+                        <span class="pl-2 text-xs font-semibold opacity-50 select-none">Longitude:</span>
+                        
+                        <input 
+                            type="text" 
+                            {# x-model="d_lng" #}
+                            x-model.debounce.500ms="d_lng"
+                            @input="manualUpdate()"
+                            class="w-full bg-transparent p-1 text-sm focus:outline-none disabled:cursor-not-allowed" 
+                            name="longitude"
+                        />
+                    </div>
+                </div>
+
             </div>
 
         </div>
-
     </div>
-</div>
 
+</div>
 
 {% endblock content %}

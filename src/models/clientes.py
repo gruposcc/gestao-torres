@@ -1,9 +1,14 @@
 import enum
-
-from sqlalchemy import Enum, Float, ForeignKey, Integer, String
+import uuid
+from sqlalchemy import Enum, Float, ForeignKey, Integer, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base import BaseSQLModel, StatusMixin, TimeStampMixin
+from typing import TYPE_CHECKING, List
+
+
+if TYPE_CHECKING:
+    from .contratos import Contrato
 
 
 class TipoCliente(enum.Enum):
@@ -13,9 +18,16 @@ class TipoCliente(enum.Enum):
 
 class Cliente(BaseSQLModel, StatusMixin):
     __tablename__ = "cliente"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     tipo: Mapped[TipoCliente] = mapped_column(
         Enum(TipoCliente, name="tipocliente"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+
+    contratos: Mapped[List["Contrato"]] = relationship(
+        "Contrato", back_populates="cliente", cascade="all, delete-orphan"
     )
 
     __mapper_args__ = {
@@ -26,7 +38,7 @@ class Cliente(BaseSQLModel, StatusMixin):
 class ClientePF(Cliente, TimeStampMixin):
     __tablename__ = "cliente_pf"
 
-    id: Mapped[int] = mapped_column(
+    id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("cliente.id", ondelete="CASCADE"),
         primary_key=True,
     )
@@ -35,7 +47,6 @@ class ClientePF(Cliente, TimeStampMixin):
     def fullname(self):
         return f"{self.name} {self.last_name}"
 
-    name: Mapped[str] = mapped_column(String(120), nullable=False)
     last_name: Mapped[str] = mapped_column(String(120), nullable=False)
     cpf: Mapped[str] = mapped_column(String(11), nullable=False, unique=True)
 
@@ -45,12 +56,11 @@ class ClientePF(Cliente, TimeStampMixin):
 class ClientePJ(Cliente, TimeStampMixin):
     __tablename__ = "cliente_pj"
 
-    id: Mapped[int] = mapped_column(
+    id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("cliente.id", ondelete="CASCADE"),
         primary_key=True,
     )
 
-    name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     cnpj: Mapped[str] = mapped_column(String(18), nullable=False, unique=True)
 
     __mapper_args__ = {"polymorphic_identity": TipoCliente.PJ}

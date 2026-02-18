@@ -37,10 +37,10 @@
     <button
       hx-get="/torre/create"
       hx-target="#content"
-      hx-swap="innerHTML" 
-      hx-push-url="true" 
+      hx-swap="innerHTML"
+      hx-push-url="true"
       href="/torre/create"
-      type="button" 
+      type="button"
       class="nav-create-btn"
     >
       <i data-lucide="circle-plus"></i>
@@ -53,17 +53,21 @@
   <div id="table-container"
      class="
       overflow-x-auto w-full
-      rounded-radius 
-      border border-outline dark:border-outline-dark
+      rounded-radius
+      border border-outline
+      transition-all duration-200 ease-in-out
+
     "
   >
-  <table id="items-table" 
-    class="
-      w-full table-fixed 
-      text-left text-sm
-      text-on-surface dark:text-on-surface-dark
-    "
-  >
+    <table id="items-table"
+      class="
+        w-full table-fixed
+        text-left text-sm
+        text-on-surface
+        transition-all duration-200 ease-in-out
+
+      "
+    >
 
       <colgroup>
         <col class="w-10 text-center border-r  border-outline">
@@ -74,31 +78,33 @@
         <col class="w-30 text-center ">
       </colgroup>
 
-      <thead 
+      <thead
         class="
-          border-b border-outline dark:border-outline-dark
+          border-b border-outline
           bg-surface-alt
-          text-sm text-on-surface-strong   dark:text-on-surface-dark-strong
+          text-sm text-on-surface-strong
+          transition-all duration-200 ease-in-out
+
         "
       >
 
-        <tr class="justify-betw">
+        <tr class="justify-between">
 
           {# TODO fazer ordenavel pelo header  #}
 
-          <th scope="col" class="py-2 w-10 text-center font-semibold border-r border-outline">#</th> {#  #}
+          <th scope="col" class="py-2 text-center font-semibold border-r border-outline">#</th> {#  #}
           <th scope="col" class="py-2 pl-3 font-semibold border-r border-outline ">Nome</th>
-          <th scope="col" class="py-2 pl-3 font-semibold border-r border-outline">Terreno</th> 
-          <th scope="col" class="py-2 pl-3 text-center font-semibold border-r border-outline  ">Altura</th> 
-          <th scope="col" class="py-2 pl-3 text-center font-semibold border-r border-outline ">Contratos</th> 
+          <th scope="col" class="py-2 pl-3 font-semibold border-r border-outline">Terreno</th>
+          <th scope="col" class="py-2 pl-3 text-center font-semibold border-r border-outline  ">Altura</th>
+          <th scope="col" class="py-2 pl-3 text-center font-semibold border-r border-outline ">Contratos</th>
           <th scope="col" class="p-2 pl-3 font-semibold  right-0 text-center">Ações</th> {#  fixar no final #}
         </tr>
 
       </thead>
 
-      <tbody id="table-body" 
-        hx-get="/torre/list/items" 
-        hx-trigger="load once" 
+      <tbody id="table-body"
+        hx-get="/torre/list/items"
+        hx-trigger="load once"
         hx-target="this"
         hx-push-url="false"
         hx-swap="innerHTML"
@@ -110,14 +116,14 @@
 
       {% block items %}
         {% if items %}
-        {% for item in items %}        
+        {% for item in items %}
           <tr id="torre-{{item.id}}">
 
-            <td class=" text-center">{{loop.index}}</td>
+            <td class="text-center">{{loop.index}}</td>
 
             <td class="px-3 py-2"> <span class="block truncate" title="{{item.name}}">
               {{item.name}} {# Popup que mostra o nome todo  #}
-            </span> </td> 
+            </span> </td>
 
             <td class="px-3 py-2  ">
               <span class="block truncate" title="{{item.terreno.name}}">
@@ -127,20 +133,20 @@
 
 
             <td class="px-3 py-2 text-center ">{{item.altura}} m</td>
-            <td class="px-3 py-2 text-center ">0</td>
+            <td class="px-3 py-2 text-center ">0</td> {# TODO  #}
 
-            <td class="p-4 text-center">
+            <td class="px-3 py-2 text-center">
                 <div class="flex justify-center gap-3">
-                    {# <button 
-                    hx-get="/torre/{{item.id}}" 
+                    {# <button
+                    hx-get="/torre/{{item.id}}"
                     class="text-on-surface/70 hover:text-primary transition-colors"
                     title="Visualizar"
                     >
                     <i data-lucide="eye" class="w-4 h-4"></i>
                     </button> #}
 
-                    <button 
-                    hx-get="/torre/view/{{item.id}}" 
+                    <button
+                    hx-get="/torre/view/{{item.id}}"
                     hx-target="#content"
                     hx-push-url="true"
                     class="text-on-surface/70 hover:text-secondary transition-colors"
@@ -150,21 +156,18 @@
                     </button>
 
 
-                    <button type="button" 
+                    <button type="button"
                         @click="$dispatch('open-delete-modal', { id: '{{item.id}}', name: '{{item.name}}' })"
                         class="text-on-surface/70 hover:text-error transition-colors">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
 
                     <button id="real-delete-{{item.id}}"
-                        hx-delete="/torre/{{item.id}}" 
-                        hx-target="#torre-{{item.id}}" 
+                        hx-delete="/torre/{{item.id}}"
+                        hx-target="#torre-{{item.id}}"
                         hx-swap="outerHTML"
                         class="hidden">
                     </button>
-
-
-
                 </div>
             </td>
           </tr>
@@ -178,34 +181,34 @@
   </div>
 
 {# MODAL EXLUSÂÔ #}{# MODAL EXCLUSÃO #}
-<div x-data="{ 
-        modalIsOpen: false, 
+<div x-data="{
+        modalIsOpen: false,
         itemName: '',
         itemID: ''
      }"
      @open-delete-modal.window="
-        modalIsOpen = true; 
+        modalIsOpen = true;
         itemName = $event.detail.name;
         itemId = $event.detail.id
      "
      class="relative z-50"> {# z-50 para garantir que fique no topo #}
-    
-    <div x-cloak x-show="modalIsOpen" 
-         x-transition.opacity.duration.200ms 
-         x-trap.inert.noscroll="modalIsOpen" 
-         @keydown.escape.window="modalIsOpen = false" 
-         class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 pb-8 backdrop-blur-sm sm:items-center lg:p-8" 
+
+    <div x-cloak x-show="modalIsOpen"
+         x-transition.opacity.duration.200ms
+         x-trap.inert.noscroll="modalIsOpen"
+         @keydown.escape.window="modalIsOpen = false"
+         class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 pb-8 backdrop-blur-sm sm:items-center lg:p-8"
          role="dialog" aria-modal="true">
-        
+
         {# Fundo clicável para fechar #}
         <div class="fixed inset-0" @click="modalIsOpen = false"></div>
 
-        <div x-show="modalIsOpen" 
-             x-transition:enter="transition ease-out duration-200" 
-             x-transition:enter-start="opacity-0 scale-95" 
-             x-transition:enter-end="opacity-100 scale-100" 
+        <div x-show="modalIsOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
              class="relative flex max-w-md w-full flex-col gap-4 overflow-hidden rounded-radius border border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark shadow-xl">
-            
+
             <div class="flex items-center justify-between border-b border-outline bg-surface-alt/60 p-4 dark:border-outline-dark dark:bg-surface-dark/20">
                 {# Usei text-red-600 caso error-dark não exista #}
                 <h3 class="font-semibold text-red-600 dark:text-red-500 flex items-center gap-2">
@@ -226,8 +229,8 @@
             <button @click="modalIsOpen = false" type="button" class="px-4 py-2">
                         Cancelar
                     </button>
-                    
-                    <button 
+
+                    <button
                         type="button"
                         class="rounded-radius bg-red-600 px-4 py-2 text-white hover:bg-red-700"
                         @click="

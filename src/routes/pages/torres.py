@@ -1,7 +1,4 @@
-import shutil
 import uuid
-import os
-from core.settings import UPLOADS_DIR
 import logging
 from decimal import Decimal
 from typing import Any, Dict, List
@@ -16,26 +13,24 @@ from fastapi import (
     Response,
     UploadFile,
 )
-from fastapi.datastructures import UploadFile
 from fastapi.responses import HTMLResponse
 from models.torre import TipoTorre
 from pydantic import ValidationError
 
-from core.schema import validate_html_form
 from core.templates import render_chunk, render_page
-from core.utils.htmx import is_htmx_request, redirect_htmx_header, update_htmx_title
+from core.utils.htmx import is_htmx_request, redirect_htmx_header
 from deps.auth import get_user_session
 from deps.db import get_db
 from schemas.torre import TorreIn
-from services.torre import TorreService, DocumentoTorreService
+from services.torre import TorreService, DocumentoTorreService, DespesaTorreSerivce
 from core.settings import MAX_SIZE_MB
-from pathlib import Path
 
 logger = logging.getLogger("app.pages.torre")
 
 router = APIRouter(prefix="/torre")
 
 
+### LIST
 @router.get("/list")
 async def list_view(
     request: Request,
@@ -44,7 +39,6 @@ async def list_view(
     template = "pages/torre/list.html"
     page = {"title": "Torres SCC - Torres"}
     context = {
-        "request": request,
         "user": user,
         "page": page,
     }
@@ -69,6 +63,9 @@ async def list_items(request: Request, db=Depends(get_db)):
     # offset = papge_atual * per page
 
     return render_chunk(request, template, context, block="items")
+
+
+### CREATE
 
 
 @router.get("/create")
@@ -152,6 +149,7 @@ async def create_torre_post(
     return redirect_htmx_header(response, path=f"/torre/view/{new_torre.id}")
 
 
+### VIEW
 @router.get("/view/{id}")
 async def view(
     id: uuid.UUID,
@@ -161,7 +159,9 @@ async def view(
 ):
     template = "pages/torre/view.html"
 
-    context: Dict[str, Any] = {"user": user}
+    initial_subpage = request.headers.get("X-Initial-Subpage", "arquivos")
+
+    context: Dict[str, Any] = {"user": user, "initial_subpage": initial_subpage}
 
     service = TorreService(dbSession)
     torre = await service.get_one_by(id=id, load_relations=["terreno", "documentos"])
@@ -175,30 +175,7 @@ async def view(
     return render_page(request, template, context)
 
 
-@router.get("/view/{torre_id}/docs")
-async def docs_supage(torre_id: uuid.UUID, request: Request, dbSession=Depends(get_db)):
-    template = "pages/torre/docs-subpage.html"
-
-    service = DocumentoTorreService(dbSession)
-    documents = await service.get_all_from_torre(torre_id)
-
-    context = {"items": documents, "torre_id": torre_id, "current_tab": "docs"}
-
-    return render_chunk(request, template, context)
-
-
-@router.get("/view/{torre_id}/despesas")
-async def despesas(torre_id: uuid.UUID, request: Request, dbSession=Depends(get_db)):
-    template = "pages/torre/despesa-subpage.html"
-
-    service = DocumentoTorreService(dbSession)
-    documents = await service.get_all_from_torre(torre_id)
-
-    context = {"items": documents, "torre_id": torre_id, "current_tab": "despesas"}
-
-    return render_chunk(request, template, context)
-
-
+### UPDATE
 @router.put("/{id}")
 async def update(
     id: uuid.UUID,
@@ -230,6 +207,7 @@ async def update(
     return redirect_htmx_header(response, path=f"/torre/view/{torre.id}")
 
 
+### DELETE
 @router.delete("/doc/{doc_id}")
 async def delete_documento(request: Request, doc_id: uuid.UUID, db=Depends(get_db)):
     service = DocumentoTorreService(db)
@@ -259,7 +237,7 @@ async def delete_documento(request: Request, doc_id: uuid.UUID, db=Depends(get_d
 
 
 @router.delete("/{torre_id}")
-async def soft_delete(torre_id: int, request: Request, db=Depends(get_db)):
+async def soft_delete(torre_id: uuid.UUID, request: Request, db=Depends(get_db)):
     service = TorreService(db)
     torre = await service.get_one_by(id=id)
 
@@ -274,12 +252,26 @@ async def soft_delete(torre_id: int, request: Request, db=Depends(get_db)):
     return response
 
 
+### SUBPAGES
+## ARQUIVOS
+@router.get("/view/{torre_id}/arquivos")
+async def arquivos(torre_id: uuid.UUID, request: Request, dbSession=Depends(get_db)):
+    template = "pages/torre/subpage/arquivos.html"
+
+    service = DocumentoTorreService(dbSession)
+    documents = await service.get_all_from_torre(torre_id)
+
+    context = {"items": documents, "torre_id": torre_id, "current_tab": "arquivos"}
+
+    return render_chunk(request, template, context)
+
+
 @router.post("/upload/doc/{torre_id}")
 async def upload_documentos(
     torre_id: uuid.UUID,
     request: Request,
-    arquivos: List[UploadFile] = File(...),
     db=Depends(get_db),
+    arquivos: List[UploadFile] = File(...),
 ):
     service = TorreService(db)
     torre = await service.get_one_by(id=torre_id, load_relations=["documentos"])
@@ -304,8 +296,6 @@ async def upload_documentos(
     torre = await service.append_docs(torre=torre, arquivos=arquivos)
 
     template = "pages/torre/docs-subpage.html"
-    # block = "doclist"
-    block = None
 
     doc_service = DocumentoTorreService(db)
     docs = await doc_service.get_all_from_torre(torre.id)
@@ -316,6 +306,7 @@ async def upload_documentos(
     return render_chunk(request, template, context)
 
 
+# TODO
 @router.patch("/doc/{doc_id}/rename")
 async def rename_documento(
     doc_id: uuid.UUID, nickname: str = Form(...), db=Depends(get_db)
@@ -337,7 +328,7 @@ async def rename_documento(
 
     return HTMLResponse(
         content=f"""
-        <input type="text" 
+        <input type="text"
                name="nickname"
                class="doc-nickname-input text-sm font-medium bg-transparent border-b border-transparent focus:border-primary outline-none w-full transition-colors"
                value="{updated_doc.nickname}"
@@ -346,3 +337,29 @@ async def rename_documento(
                oninput="handleDocEdit(this)">
         """
     )
+
+
+## DESPESAS
+@router.get("/view/{torre_id}/despesas")
+async def despesas(torre_id: uuid.UUID, request: Request, dbSession=Depends(get_db)):
+    template = "pages/torre/subpage/despesas.html"
+
+    service = DespesaTorreSerivce(dbSession)
+    despesas = await service.get_all_from_torre(torre_id)
+
+    context = {"items": despesas, "torre_id": torre_id, "current_tab": "despesas"}
+
+    return render_chunk(request, template, context)
+
+
+## CONTRATOS
+@router.get("/view/{torre_id}/contratos")
+async def contratos(torre_id: uuid.UUID, request: Request, dbSession=Depends(get_db)):
+    template = "pages/torre/subpage/contratos.html"
+
+    # service = DespesaTorreService(dbSession)
+
+    contratos = {}
+    context = {"items": contratos, "torre_id": torre_id, "current_tab": "contratos"}
+
+    return render_chunk(request, template, context)

@@ -460,7 +460,7 @@
                 focus-visible:outline-2 focus-visible:outline-offset-0 
                 focus-visible:outline-primary
                 
-                bg-surface-alt dark:bg-surface-alt/50 
+                bg-surface-alt dark:bg-surface-alt/50  
                 transition-all duration-200 ease-in-out
             }
             & .icon {
@@ -589,3 +589,5 @@
         } 
     }
 }
+
+/*  Despesa preview */
