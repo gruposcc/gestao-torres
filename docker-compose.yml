@@ -1,6 +1,7 @@
 services:
   postgres:
-    image: postgis/postgis:17-3.5
+    #image: postgis/postgis:17-3.5
+    image: postgres
     container_name: torres_db
     restart: unless-stopped
     env_file: .env
