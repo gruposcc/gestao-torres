@@ -60,9 +60,9 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        include_object=alembic_helpers.include_object,
-        process_revision_directives=alembic_helpers.writer,
-        render_item=alembic_helpers.render_item,
+        # include_object=alembic_helpers.include_object,
+        # process_revision_directives=alembic_helpers.writer,
+        # render_item=alembic_helpers.render_item,
     )
 
     with context.begin_transaction():
@@ -80,13 +80,14 @@ def do_run_migrations(connection: Connection) -> None:
     context.configure(
         connection=connection,
         target_metadata=target_metadata,
-        include_object=alembic_helpers.include_object,
-        process_revision_directives=alembic_helpers.writer,
-        render_item=alembic_helpers.render_item,
+        # include_object=alembic_helpers.include_object,
+        # process_revision_directives=alembic_helpers.writer,
+        # render_item=alembic_helpers.render_item,
         include_name=include_name,
         include_schemas=True,
         compare_type=True,
-        version_table_schema="public",
+        compare_server_default=True,
+        # version_table_schema="public",
     )
 
     with context.begin_transaction():

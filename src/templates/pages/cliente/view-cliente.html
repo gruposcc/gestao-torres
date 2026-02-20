@@ -1,0 +1,106 @@
+{% extends "layout/template.html" %}
+
+{% block content %}
+<div class="content-frame overflow-y-auto">
+    <div class="content-header">
+        <div class="title">
+            <div class="icon">
+                <i data-lucide="user"></i>
+            </div>
+            <div>
+                <h2>Detalhes do Cliente</h2>
+                <p>Visualização de registro</p>
+            </div>
+        </div>
+
+        {# Ações de cabeçalho #}
+        <div class="flex gap-2">
+            <button class="btn-secondary" hx-get="/cliente/edit/{{cliente.id}}" hx-target="#content">
+                <i data-lucide="pencil" class="w-4 h-4"></i>
+                Editar
+            </button>
+            <button class="btn-danger"
+                    hx-delete="/cliente/delete/{{cliente.id}}"
+                    hx-confirm="Tem certeza que deseja excluir este cliente?"
+                    hx-target="#content">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="w-full h-full flex gap-6 p-4">
+        {# COLUNA DA ESQUERDA: INFORMAÇÕES BÁSICAS #}
+        <div class="flex-1 flex flex-col gap-6">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                {# Bloco de Identidade #}
+                <div class="form-field">
+                    <label class="text-gray-400">Nome / Razão Social</label>
+                    <p class="text-lg font-semibold">{{ cliente.name }}</p>
+                </div>
+
+                {% if cliente.tipo.value == 'pf' %}
+                <div class="form-field">
+                    <label class="text-gray-400">Sobrenome</label>
+                    <p class="text-lg font-semibold">{{ cliente.last_name }}</p>
+                </div>
+                {% endif %}
+
+                <div class="form-field">
+                    <label class="text-gray-400">Tipo de Cliente</label>
+                    <div class="mt-1">
+                        <span class="badge uppercase {{ 'badge-blue' if cliente.tipo.value == 'pf' else 'badge-purple' }}">
+                            {{ cliente.tipo.value }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label class="text-gray-400">
+                        {{ 'CPF' if cliente.tipo.value == 'pf' else 'CNPJ' }}
+                    </label>
+                    <div class="flex items-center gap-2 mt-1">
+                        <i data-lucide="file-text" class="w-4 h-4 text-gray-400"></i>
+                        {# Aqui você pode usar um filtro Jinja para formatar se não vier formatado do banco #}
+                        <p class="font-mono text-md">{{ cliente.cpf or cliente.cnpj }}</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <hr class="border-dashed border-gray-200">
+
+            {# Seção de Metadados #}
+            <div class="flex gap-8 text-sm text-gray-500">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                    Criado em: {{ cliente.created_at.strftime('%d/%m/%Y') if cliente.created_at else 'N/A' }}
+                </div>
+                <div class="flex items-center gap-2">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    Status: <span class="text-green-600 font-medium">Ativo</span>
+                </div>
+            </div>
+        </div>
+
+        {# COLUNA DA DIREITA: ATIVIDADES OU DOCUMENTOS #}
+        <div class="w-1/3 border-l border-dashed border-gray-200 pl-6 flex flex-col gap-4">
+            <h3 class="text-sm font-bold uppercase text-gray-400 tracking-wider">Histórico Recente</h3>
+
+            {# Placeholder para uma lista de atividades ou despesas vinculadas #}
+            <div class="flex flex-col gap-3">
+                <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <p class="text-xs text-gray-400 italic text-center">Nenhuma atividade registrada para este cliente.</p>
+                </div>
+            </div>
+
+            {# Botão para ação rápida vinculada #}
+            <button class="mt-4 flex items-center justify-center gap-2 p-2 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 hover:border-blue-400 hover:text-blue-500 transition-all group">
+                <i data-lucide="plus-circle" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                <span class="text-sm font-medium">Vincular Nova Despesa</span>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock content %}

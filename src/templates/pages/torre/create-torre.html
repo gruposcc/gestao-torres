@@ -3,54 +3,15 @@
 {% block content %}
 <script>
 {
-
-    {# const handleFileUpload = (event) => {
-        const form = event.detail.elt;
-        // Só age se o post for para criar torre e o formulário existir
-        if (event.detail.path === '/torre/create') {
-            const element = document.querySelector('[x-ref="torreFormElement"]');
-            const alpineData = element ? Alpine.$data(element) : null;
-
-            if (alpineData && alpineData.documentos.length > 0) {
-                const formData = event.detail.parameters;
-
-                // LIMPEZA: O HTMX pode tentar enviar o campo vazio se houver input no form.
-                // Para garantir listas limpas, podemos deletar antes de reconstruir.
-                formData.delete('arquivos');
-                formData.delete('nomes_customizados');
-
-                // Importante: O HTMX já pode ter arquivos se houver um input file comum.
-                // Aqui garantimos que estamos enviando apenas o que está no array do Alpine.
-                alpineData.documentos.forEach((doc) => {
-                    // 1. Envia o arquivo
-                    formData.append('arquivos', doc.file);
-                    // 2. Lógica de Fallback dentro do loop
-                    // Verificamos se customName existe e não é apenas espaço
-                    const nameToSend = (doc.customName && doc.customName.trim() !== "") 
-                                        ? doc.customName 
-                                        : doc.name;
-                                    
-                    formData.append('nomes_customizados', nameToSend);
-                
-                });
-            }
-        }
-    }; #}
-
-    // Removemos qualquer listener antigo antes de adicionar o novo (evita duplicatas)
-    {# document.body.removeEventListener('htmx:configRequest', handleFileUpload);
-    document.body.addEventListener('htmx:configRequest', handleFileUpload); #}
-
-
     const torreFormComponent = (initialData = {}) => ({
         name: initialData.name || "",
         terrenoId: initialData.terrenoId || "",
-        
+
         tipotorreText: initialData.tipoTorreText || "",
         tipotorre: initialData.tipoTorre || "",
         tipoOpen: false,
 
-        altura: initialData.altura || "", 
+        altura: initialData.altura || "",
 
         {# documentos: [], #}
 
@@ -58,21 +19,9 @@
         searchQuery: initialData.terrenoText || "",
 
         init(){
-            // Sincronização com o DOM (Bug anterior de voltar página)
-            //this.$nextTick(() => {
-            //    this.name = document.getElementById('inputname')?.value || "";
-            //    this.altura = document.getElementById('inputAltura')?.value || "";
-            //});
-
-            //this.$watch('documentos', () => {
-            //    this.$nextTick(() => { window.reloadLucide(); });
-            //});
         },
 
-        // --- RESET AO SAIR ---
-        // Essa função pode ser chamada explicitamente ou via hx-on
         destroy() {
-            //this.documentos = [];
             this.terrenoId = "";
             //console.debug("Componente destruído e arquivos limpos");
         },
@@ -84,7 +33,7 @@
             this.showResults = false;
             // Limpa qualquer erro de validação manual se existir
             document.getElementsByName('terreno_id')[0].setCustomValidity('');
-            console.debug(`select terreno ${id}`)
+            //console.debug(`select terreno ${id}`)
             },
 
         selectTipo(valor, text) {
@@ -143,7 +92,7 @@
                 <h2>Nova Torre</h2>
                 <p>criação</p>
             </div>
-        </div>        
+        </div>
     </div>
 
     <div
@@ -162,7 +111,7 @@
         x-ref="torreFormElement"
         class="w-full h-full"
         >
- 
+
         <form class="w-full h-full flex gap-6"
             hx-post="/torre/create"
             hx-target="#content"
@@ -172,10 +121,10 @@
             hx-encoding="multipart/form-data"
         >
 
-            
+
             {# coluna da esquerda #}
             <div class="gap-4 w-full h-full">
-                
+
                 {# campo NOME #}
                 <div class="form-field pb-4">
 
@@ -183,7 +132,7 @@
 
                     <div class="pl-2">
                         <div class="input-field {% if form and form.name.error %}border-red-500{% endif %}">
-                            <input 
+                            <input
                                 id="inputname"
                                 class="field curor-pointer"
                                 x-model="name"
@@ -202,14 +151,14 @@
                     </div>
                 </div>
 
-                {# Campo Pesquisa TERRENO #} 
+                {# Campo Pesquisa TERRENO #}
                 <div class="form-field pb-4">
                     <label for="inputTerreno">Terreno: </label>
                         <div class="pl-2">{# Margem do campo #}
                             <div class="input-field" id="searchbar">
 
                                 <i data-lucide="land-plot" class="icon {# search-icon #} "></i> {# icone da searchbar #}
-                                
+
                                 <span {# CHEVRON #}
                                     {# @mousedown.stop="showResults = !showResults, tipoOpen = false" #}
                                     {# type="" #}
@@ -218,10 +167,10 @@
                                 </span>
 
                                 {# <i data-lucide="loader-2" class=" icon search-indicator  animate-spin "></i> #}
-                                
+
                                 <input
                                     name="searchQuery"
-                                    class="pl-8 pr-8 field " 
+                                    class="pl-8 pr-8 field "
                                     placeholder="Escolha um terreno ou digite para pesquisar"
                                     autocomplete="off"
 
@@ -230,7 +179,7 @@
                                     hx-post="/terreno/search"
                                     hx-push-url="false"
                                     hx-trigger="click,  keyup changed delay:350ms"
-                                    hx-swap="innerHTML" 
+                                    hx-swap="innerHTML"
                                     hx-target="#search-results"
 
                                     {# EVENTOS #}
@@ -241,33 +190,33 @@
 
 
                                     @blur="handleBlur()"
-                                
+
                                 >
-                                
-                                <input 
+
+                                <input
                                     type="text"
-                                    name="terreno_id" 
+                                    name="terreno_id"
                                     x-model="terrenoId"
-                                    required 
+                                    required
                                     class="value-field"
                                     oninput="this.setCustomValidity('')"
                                     oninvalid="this.setCustomValidity('Selecione um terreno da lista')"
                                 >
-                                
-                            </div> 
+
+                            </div>
 
                             {# RESULTADOS #}
                             <div class="result-anchor"> {# Ancoragem dos resultados #}
                                 <div class="search-results-container"
                                 x-show="showResults">
                                     <ul class="search-results"
-                                        id="search-results" 
+                                        id="search-results"
                                         @mousedown.away="showResults = false"
                                         x-ref="searchResults"
                                         x-cloak
                                     >
                                         {# resultados do htmx #}
-                                    
+
                                     </ul>
                                 </div>
                             </div>
@@ -290,11 +239,11 @@
                             </button>
 
                             {# <i data-lucide="loader-2" class=" icon search-indicator  animate-spin "></i> #}
-                            
-                            <input 
+
+                            <input
                                 id="selectTipo"
                                 name="selecTipo"
-                                class="pl-8 pr-8 field cursor-pointer" 
+                                class="pl-8 pr-8 field cursor-pointer"
                                 placeholder="Selecione um tipo"
                                 autocomplete="off"
                                 readonly
@@ -308,14 +257,14 @@
                                 @mousedown.away="tipoOpen = false"
                                 {# @focus="tipoOpen = true" #}
                                 @mousedown="tipoOpen = true"
-                            >      
+                            >
                             {# CAMPO DO VALOR #}
                             <input type="text" name="tipotorre" x-model="tipotorre" required class="value-field"
                                 oninput="this.setCustomValidity('')"
                                 oninvalid="this.setCustomValidity('Selecione um tipo da lista')"
                             >
-                            
-                        </div> 
+
+                        </div>
 
                         {# OPTIONS #}
                         <div class="options-anchor"> {# Ancoragem #}
@@ -325,9 +274,9 @@
                                     @mousedown.away="tipoOpen = false"
                                     x-show="tipoOpen"
                                     x-cloak
-                                >   
+                                >
                                     {% for tipo in tipos  %}
-                                    <li 
+                                    <li
                                         class="group item"
                                         @mousedown.stop="selectTipo('{{ tipo.value }}', '{{ tipo.value|replace('_', ' ')|title }}')"
                                     >
@@ -353,20 +302,20 @@
                     <div class="pl-2">
                         <div class="input-field">
                             <i data-lucide="ruler" class="icon"></i>
-                            
-                            <input 
+
+                            <input
                                 id="inputAltura"
                                 name="altura"
                                 x-model="altura"
-                                type="number" 
-                                step="1" 
+                                type="number"
+                                step="1"
                                 min="1"
                                 max="9999.99"
                                 class="pl-8 pr-2 field"
                                 placeholder="Ex: 45"
                                 required
                                 autocomplete="off"
-                                
+
                                 @input="if(altura > 9999.99) altura = 9999.99"
 
                             />
@@ -383,9 +332,9 @@
                         class="form-create-btn flex flex-row flex-2"
                         >
                         <i data-lucide="circle-plus"></i>
-                        Criar 
-                    </button> 
-                    
+                        Criar
+                    </button>
+
                 </div>
 
 
@@ -403,4 +352,3 @@
     </div>
 </div>
 {% endblock content %}
-

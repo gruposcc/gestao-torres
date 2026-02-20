@@ -8,14 +8,16 @@ from sqlalchemy import Uuid, String, Enum, DateTime, Numeric, Integer, ForeignKe
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
+from models.clientes import Cliente
+
 if TYPE_CHECKING:
     from models.torre import Torre
-    from models.clientes import Cliente
 
 
 class RecorrenciaContrato(enum.Enum):
     MENSAL = "Mensal"
     ANUAL = "Anual"
+    UNICA = "Única"
 
 
 class FaceDirecao(enum.Enum):
@@ -55,10 +57,11 @@ class Contrato(BaseSQLModel, TimeStampMixin):
     face: Mapped[FaceDirecao] = mapped_column(Enum(FaceDirecao), nullable=False)
 
     # relações
-    torre_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("torre.id"), nullable=False)
+
     torre: Mapped["Torre"] = relationship(
         "Torre", back_populates="contratos", lazy="selectin"
     )
+    torre_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("torre.id"), nullable=False)
 
     cliente_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("cliente.id"), nullable=False

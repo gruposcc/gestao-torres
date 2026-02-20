@@ -18,7 +18,7 @@ async def search(
     address_query: str = Query(..., min_length=3),
     geocoder: Nominatim = Depends(get_geocoder),
 ):
-    template = "pages/terreno/search_results.html"
+    template = "pages/terreno/addr-search-results.html"
     # param str featuretype: If present, restrict results to certain type of features.
     # Allowed values: country, state, city, settlement.
 

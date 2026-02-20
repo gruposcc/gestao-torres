@@ -1,0 +1,734 @@
+{% extends "layout/template.html" %}
+
+{% block content %}
+<script>
+{
+
+    const contratoForm = (initialData = {}) => ({
+        showNameError: {{ 'true' if form and form.name.error else 'false' }},
+
+        recorrenciaOpen: false,
+        recorrencia: initialData.recorrencia || "Única",
+        recorrenciaText: initialData.recorrenciaText || "Única",
+
+        name: initialData.name || "",
+        valor: initialData.valor || "",
+        dataInicio: initialData.dataInicio || new Date().toISOString().split('T')[0],
+        dataFinal: initialData.dataFinal || "",
+        description: initialData.description || "",
+
+        clienteSearch: '',
+        showClienteResults: false,
+        clienteId: '',
+
+        torreSearch: '',
+        showTorreResults: false,
+        torreId: '',
+
+        faceOpen: false,
+        face: '',
+        faceText: '',
+
+        novoDe: '',
+        novoAte: '',
+
+        alturas: [],
+
+        addAltura() {
+
+            if (!this.novoDe || !this.novoAte || !this.face) {
+                alert("Preencha todos os campos da altura!");
+                return;
+            };
+
+            // Adiciona ao array local
+            this.alturas.push({
+                id: Date.now(), // ID temporário para o x-for
+                metro_de: this.novoDe,
+                metro_ate: this.novoAte,
+                face: this.face,
+            });
+
+            // Limpa os campos
+            this.novoDe = '';
+            this.novoAte = '';
+            this.face = '';
+            this.faceText = '';
+        },
+
+        removeAltura(id) {
+            this.alturas = this.alturas.filter(i => i.id !== id);
+        },
+
+        selectFace(name){
+            this.face = name;
+            this.faceText = name;
+
+            this.faceOpen = false;
+        },
+
+        selectTorre(id, name) {
+            this.torreId = id;
+            this.torreSearch = name;
+            this.showTorreResults = false;
+
+            document.getElementsByName('torre_id')[0].setCustomValidity('');
+        },
+
+
+        selectCliente(id, name) {
+            this.clienteId = id;
+            this.clienteSearch = name;
+            this.showClienteResults = false;
+
+            document.getElementsByName('cliente_id')[0].setCustomValidity('');
+
+        },
+
+        selectRecorrencia(valor, text) {
+            this.recorrencia = valor;
+            this.recorrenciaText = text;
+            this.recorrenciaOpen = false;
+            if (valor === 'Única') {
+                this.dataFinal = ""
+            };
+
+            //console.debug(`select ${this.recorrencia}`)
+        },
+        // Função auxiliar para garantir que o picker abra
+        openDatePicker(event) {
+            try {
+                event.target.showPicker();
+            } catch (error) {
+                // Fallback para navegadores antigos que não suportam showPicker
+                console.log("Browser não suporta showPicker programático");
+            }
+        },
+
+        formatarValor() {
+            if (this.valor) {
+                // Garante que o valor tenha no máximo 2 casas decimais enquanto digita
+                const partes = this.valor.toString().split('.');
+                if (partes[1] && partes[1].length > 2) {
+                    this.valor = parseFloat(this.valor).toFixed(2);
+                }
+            }
+        },
+
+        formatDate(dateString) {
+            if (!dateString) return "Não informada";
+            const [year, month, day] = dateString.split('-');
+            return `${day}/${month}/${year}`;
+        },
+
+        validarDatas() {
+            if (this.dataFinal && this.dataFinal < this.dataInicio) {
+                this.dataFinal = this.dataInicio;
+            }
+        },
+
+        handleBlurClienteSearch() {
+            // Aguarda 200ms para ver se um item da lista foi clicado
+            setTimeout(() => {
+            if (!this.clienteId) {
+                this.clienteSearch = "";
+            }
+                this.showClienteResults = false;
+            }, 200);
+        },
+
+        // GETTER para calcular a quantidade de parcelas/períodos
+        get calculos() {
+            if (!this.valor || !this.dataInicio) return { parcelas: 0, total: 0 };
+
+            const valorNum = parseFloat(this.valor);
+            if (this.recorrencia.toUpperCase() === 'ÚNICA' || !this.dataFinal) {
+                return { parcelas: 1, total: valorNum };
+            }
+
+            const inicio = new Date(this.dataInicio);
+            const fim = new Date(this.dataFinal);
+
+            if (fim <= inicio) return { parcelas: 1, total: valorNum };
+
+            let parcelas = 0;
+            const diffTime = Math.abs(fim - inicio);
+
+            // Lógica de contagem baseada na recorrência
+            switch (this.recorrencia.toUpperCase()) {
+                case 'DIARIA':
+                    parcelas = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    break;
+                case 'SEMANAL':
+                    parcelas = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7)) + 1;
+                    break;
+                case 'MENSAL':
+                    // Cálculo aproximado de meses
+                    parcelas = (fim.getFullYear() - inicio.getFullYear()) * 12 + (fim.getMonth() - inicio.getMonth()) + 1;
+                    break;
+                case 'ANUAL':
+                    parcelas = (fim.getFullYear() - inicio.getFullYear()) + 1;
+                    break;
+                default:
+                    parcelas = 1;
+            }
+
+            return {
+                parcelas: parcelas,
+                total: parcelas * valorNum
+            };
+        },
+    });
+
+
+
+    registerComponent("contratoForm", contratoForm);
+
+}
+</script>
+
+<div class="content-frame overflow-y-auto h-full">
+    <div class="content-header">
+        <div class="title">
+            <div class="icon">
+                <i data-lucide="banknote-arrow-up"></i>
+            </div>
+            <div>
+                <h2>Novo Contrato</h2>
+                <p class="capitalize">Torre {{torre.name}}</p>
+            </div>
+        </div>
+    </div>
+
+    <div
+    {% if form %}
+        x-data="contratoForm({})"
+    {% else %}
+        x-data="contratoForm({})"
+    {% endif %}
+
+
+     class="w-full h-full flex flex-row gap-6">
+        <form
+            class="w-full h-full flex gap-6"
+            hx-post="/contrato/torre/{{torre.id}}/create"
+            hx-target="#content"
+            hx-swap="innerHTML"
+        >
+            <div class="gap-4 w-full h-full flex flex-col">
+
+                <div class="flex  gap-4 pb-4">
+                    {# campo NOME #}
+                    <div class="form-field flex-1">
+                        <label for="inputname">Nome:
+                        <template x-if="showNameError">
+                            <span class="text-red-500 text-xs text-center ml-1">
+                            {% if form %}
+                            {{form.name.error}}
+                            {% else %}
+                            {% endif %}
+                            </span>
+                        </template>
+                        </label>
+                        <div class="pl-2">
+                            <div class="input-field {% if form and form.name.error %}border-red-500{% endif %}">
+                                <input
+                                    id="inputname"
+                                    class="field curor-pointer"
+                                    x-model="name"
+                                    type="text"
+                                    name="name"
+                                    maxlength="50"
+                                    placeholder="Nome do contrato"
+                                    autocomplete="off"
+                                    required
+                                    @input="showNameError = false" {# Esconde o erro quando começar a digitar #}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    {# PESQUISA CLIENTE #}
+                    <div class="form-field flex-1">
+                        <label for="inputTerreno">Cliente: </label>
+                            <div class="">{# Margem do campo #}
+                                <div class="input-field" id="searchbar">
+
+                                    <i data-lucide="handshake" class="icon {# search-icon #} "></i> {# icone da searchbar #}
+
+                                    <span {# CHEVRON #}
+                                        {# @mousedown.stop="showClienteResults = !showClienteResults, tipoOpen = false" #}
+                                        {# type="" #}
+                                        class="toggle">
+                                        <i data-lucide="chevron-down" :class="showClienteResults ? 'rotate-180' : 'rotate-0' "></i> {# icone da searchbar #}
+                                    </span>
+
+                                    {# <i data-lucide="loader-2" class=" icon search-indicator  animate-spin "></i> #}
+
+                                    <input
+                                        name="clienteSearch"
+                                        class="pl-8 pr-8 field "
+                                        placeholder="Escolha um cliente ou digite para pesquisar"
+                                        autocomplete="off"
+
+                                        {# HTMX #}
+                                        x-model="clienteSearch"
+                                        hx-post="/cliente/search"
+                                        hx-push-url="false"
+                                        hx-trigger="click,  keyup changed delay:350ms"
+                                        hx-swap="innerHTML"
+                                        hx-target="#search-results"
+
+                                        {# EVENTOS #}
+
+                                        @input="showClienteResults = true, terrenoId = '' "
+                                        @mousedown="showClienteResults = !showClienteResults "
+                                        @mousedown.away="showClienteResults = false"
+
+
+                                        @blur="handleBlurClienteSearch()"
+
+                                    >
+
+                                    <input
+                                        type="text"
+                                        name="cliente_id"
+                                        x-model="clienteId"
+                                        required
+                                        class="value-field"
+                                        oninput="this.setCustomValidity('')"
+                                        oninvalid="this.setCustomValidity('Selecione um cliente da lista')"
+                                    >
+
+                                </div>
+
+                                {# RESULTADOS #}
+                                <div class="result-anchor"> {# Ancoragem dos resultados #}
+                                    <div class="search-results-container"
+                                    x-show="showClienteResults">
+                                        <ul class="search-results"
+                                            id="search-results"
+                                            @mousedown.away="showClienteResults = false"
+                                            x-ref="searchResults"
+                                            x-cloak
+                                        >
+                                            {# resultados do htmx #}
+
+                                        </ul>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                    </div> {# END PESQUISA CLIENTE #}
+                </div>
+
+                {# Valor e Recorrência (Lado a Lado) #}
+                <div class="flex  gap-4 pb-4">
+                    {# VALOR #}
+                    <div class="form-field flex-1 {# max-w-30 #}">
+                        <label>Valor (R$):</label>
+                        <div class="pl-2">
+                            <div class="input-field">
+                                <i data-lucide="banknote" class="icon"></i>
+                                <input
+                                    name="valor"
+                                    x-model="valor"
+                                    {# @input="formatarValor()" #}
+                                    type="number"
+                                    step="0.01"
+                                    min="1"
+                                    class="pl-8 field"
+                                    placeholder="1.00"
+                                    required
+                                >
+                                <input type="hidden" name="valor_total_calculado" :value="calculos.total">
+                            </div>
+                        </div>
+                    </div>
+                    {# RECORRENCIA #}
+                    <div class="form-field flex-1 {# max-w-60 #}"
+                        @keydown.prevent
+                        @click="recorrenciaOpen = true"
+                        @click.away="recorrenciaOpen=false"
+                    >
+                        <label>Recorrência:</label>
+                            <div class="input-field">
+
+                                <i data-lucide="rotate-cw" class="icon"></i>
+
+                                <button
+                                    {# @mousedown.stop="recorrenciaOpen = !recorrenciaOpen"  #}
+                                    type="button" class="toggle"
+                                >
+
+                                    <i data-lucide="chevron-down"
+                                    :class="recorrenciaOpen ? 'rotate-180' : ''">
+                                    </i>
+
+                                </button>
+
+                                <input
+                                name="selectRecorrencia"
+                                id="selectRecorrencia"
+                                class="field cursor-pointer pl-8 pr-8"
+                                placeholder="Selecione a recorrencia"
+                                autocomplete="off"
+                                readonly="true"
+                                x-model="recorrenciaText"
+
+                                >
+                                <input type="text" name="recorrencia" x-model="recorrencia" required class="value-field"
+                                oninput="this.setCustomValidity('')"
+                                oninvalid="this.setCustomValidity('Selecione um tipo da lista')"
+                                >
+                            </div>
+                            <div class="options-anchor">
+
+                                <div class="options-container">
+
+                                    <ul class="options"
+                                    x-show="recorrenciaOpen"
+                                    @click.away="recorrenciaOpen = false"
+                                    x-cloak
+                                    >
+                                        {% for rec in recorrencias  %}
+                                            <li class="group item"
+                                            @click.stop="
+                                                selectRecorrencia(
+                                                    '{{ rec.value }}', '{{ rec.value|replace('_', '')|title }}'
+                                                )"
+                                            >
+                                            <div class="container">
+                                                <span>{{rec.value}}</span>
+                                            </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+
+
+                                </div>
+
+
+                            </div>
+                    </div>
+
+                </div>
+
+                <!-- {# campo Descrição #}
+                <div class="form-field pb-4">
+
+                    <label for="description">Descrição: </label>
+
+                    <div class="pl-2">
+                        <div class="input-field">
+                            <textarea
+                                style="resize: none;"
+                                id="description"
+                                x-model="description"
+                                name="description"
+                                class="
+                                    w-full
+                                    rounded-radius
+                                    bg-surface-alt dark:bg-surface-dark-alt/50
+                                    px-2.5 py-2
+                                    text-sm
+
+                                    dark:focus-visible:outline-primary-dark focus-visible:outline-primary
+                                "
+                                rows="5"
+                                placeholder="..."
+                                maxlength="150"
+                                value=""
+                            ></textarea>
+                        </div>
+                    </div>
+                </div>
+                -->
+
+
+
+
+                {# Datas #}
+                <div class="flex gap-4">
+                    <div class="form-field flex-1">
+                        <label>Data Inicial:</label>
+                        <div class="pl-2">
+                            <div class="input-field group relative cursor-pointer">
+                                <i data-lucide="calendar" class="icon pointer-events-none z-10"></i>
+
+                                <input
+                                    type="date"
+                                    name="data_inicio"
+                                    x-model="dataInicio"
+
+                                    {# Comportamento: Abre calendário ao clicar ou focar #}
+                                    @click="openDatePicker($event)"
+                                    @focus="openDatePicker($event)"
+
+                                    {# Limites (Opcional): Exemplo, não permite datas anteriores a 2020 #}
+                                    min="2020-01-01"
+                                    {# max="today" (se quiser impedir datas futuras, descomente e use x-bind:max="today") #}
+
+                                    @change="validarDatas()"
+
+                                    class="pl-8 field w-full cursor-pointer appearance-none"
+                                    required
+
+                                >
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="form-field flex-1" x-show="recorrencia !== 'Única' && recorrencia !== ''" x-transition>
+                        <label>Data Final:</label>
+                        <div class="pl-2">
+                            <div class="input-field group relative cursor-pointer">
+                                <i data-lucide="calendar" class="icon pointer-events-none z-10"></i>
+
+                                <input
+                                    type="date"
+                                    name="data_final"
+                                    x-model="dataFinal"
+                                    @change="validarDatas()"
+                                    :min="dataInicio"
+                                    @click="openDatePicker($event)"
+                                    @focus="openDatePicker($event)"
+                                    class="pl-8 field w-full cursor-pointer appearance-none"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Botão Criar #}
+                <div class="pt-8 pl-2">
+                    <button type="submit" class="form-create-btn w-full justify-center">
+                        <i data-lucide="circle-plus"></i>
+                        Salvar Despesa
+                    </button>
+                </div>
+            </div>
+
+            <div class="gap-4 w-full h-full flex flex-col"> {# COLUNA DIREITA #}
+                {# PESQUISA TORRE #}
+                <div class="form-field flex-1 pb-2">
+                    <label for="inputTorre">Torre de Instalação: </label>
+                    <div class="pl-2">
+                        <div class="input-field relative">
+                            <i data-lucide="tower-control" class="icon"></i> {# Ícone de torre #}
+
+                            <input
+                                name="torreSearch"
+                                class="pl-8 field"
+                                placeholder="Pesquise a torre para liberar os campos técnicos..."
+                                autocomplete="off"
+                                x-model="torreSearch"
+
+                                {# HTMX para buscar torres #}
+                                hx-post="/torre/search"
+                                hx-trigger="keyup changed delay:350ms, click"
+                                hx-target="#torre-results"
+                                hx-swap="innerHTML"
+
+                                @input="showTorreResults = true, torreId = ''"
+                                @mousedown="showTorreResults = true"
+                                @click.away="showTorreResults = false"
+                            >
+
+                            <input type="hidden" name="torre_id" x-model="torreId" required>
+
+                            <span class="toggle" @click="showTorreResults = !showTorreResults">
+                                <i data-lucide="chevron-down" :class="showTorreResults ? 'rotate-180' : ''"></i>
+                            </span>
+
+                            {# RESULTADOS TORRE #}
+                            <div class="result-anchor" x-show="showTorreResults" x-cloak>
+                                <div class="search-results-container">
+                                    <ul class="search-results" id="torre-results">
+                                        {# Resultados do HTMX virão aqui #}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# SEÇÃO TÉCNICA (SÓ APARECE SE TORRE_ID TIVER VALOR) #}
+                <div
+                    x-show="torreId"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 transform -translate-y-2"
+                    x-transition:enter-end="opacity-100 transform translate-y-0"
+                    class="flex flex-col gap-4 border rounded-radius  border-outline mb-4 ml-2 h-full transition-all duration-200 ease-in-out "
+                >
+                    {# CARD PARA AS ALTURAS #}
+                    <div class="flex flex-col h-full w-full bg-surface rounded-radius overflow-hidden shadow-sm transition-all duration-200 ease-in-out">
+
+                    {# FORMULÁRIO DE ADIÇÃO (FIXO NO TOPO) #}
+                    <div class="border-b border-outline flex-col w-full">
+
+                        <div class="flex flex-row flex-1 w-full px-4 py-2 border-b border-outline bg-surface-alt dark:bg-surface-alt/50
+                                    transition-all duration-200 ease-in-out">
+
+                        <span class=" text-on-surface gap-2 flex flex-row flex-1">
+                            <i data-lucide="plus-circle" class="size-4"></i>
+                            <p class="text-xs font-semibold">Adicionar Faixa de Altura</p>
+                        </span>
+                        </div>
+
+
+                        <div class="flex flex-row items-end gap-2 w-full px-4 py-2.5">
+                            {# INPUT DE #}
+                            <div class="form-field flex-1 max-w-40">
+                            <label class="text-xs">Altura inicial:</label>
+                                <div class="input-field">
+
+                                    <input type="number" x-model="novoDe" placeholder="0" class="field">
+                                </div>
+                            </div>
+
+                            {# INPUT ATÉ #}
+                            <div class="form-field flex-1 max-w-40">
+                                <label class="text-xs">Altura final:</label>
+                                <div class="input-field ">
+                                    <input type="number" x-model="novoAte" placeholder="10" class="field">
+                                </div>
+                            </div>
+
+                            {# SELECT FACE #}
+                            <div class="form-field flex-1 {# max-w-60 #}"
+                                @keydown.prevent
+                                @click="faceOpen = true"
+                                @click.away="faceOpen=false"
+                            >
+                                <label class="text-xs">Face:</label>
+
+                                <div class="relative">
+
+
+                                    <div class="input-field">
+
+                                        <i data-lucide="rotate-cw" class="icon"></i>
+
+                                        <button
+                                            type="button" class="toggle"
+                                        >
+
+                                            <i data-lucide="chevron-down"
+                                            :class="faceOpen ? 'rotate-180' : ''">
+                                            </i>
+
+                                        </button>
+
+                                            <input
+                                            name="selectFace"
+                                            id="selectFace"
+                                            class="field cursor-pointer pl-8 pr-8"
+                                            placeholder="Selecione a Face"
+                                            autocomplete="off"
+                                            readonly="true"
+                                            x-model="faceText"
+
+                                            >
+                                            <input type="text" name="face" x-model="face" required class="value-field"
+                                            oninput="this.setCustomValidity('')"
+                                            oninvalid="this.setCustomValidity('Selecione um tipo da lista')"
+                                            >
+                                    </div>
+
+                                    <div class="options-anchor">
+
+                                        <div class="options-container absolute">
+
+                                            <ul class="options"
+                                            x-show="faceOpen"
+                                            @click.away="faceOpen = false"
+                                            x-cloak
+                                            >
+                                                {% for fac in faces  %}
+                                                    <li class="group item"
+                                                    @click.stop="
+                                                        selectFace(
+                                                            '{{ fac.value }}', '{{ fac.value }}'
+                                                        )"
+                                                    >
+                                                    <div class="container">
+                                                        <span>{{fac.value}}</span>
+                                                    </div>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                                <div class="form-field flex-row flex-1">
+                                <button
+                                    @click=""
+                                    type="button"
+                                    class="form-create-btn flex flex-row p-1 text-sm"
+                                    >
+                                    <i data-lucide="circle-plus"></i>
+                                    Adicionar
+                                </button>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+
+
+                {# LISTA SCROLLABLE #}
+                <div class="flex-1 overflow-y-auto p-4 custom-scrollbar bg-surface/50">
+                    <div class="space-y-2">
+
+                        <template x-for="item in alturas" :key="item.id">
+
+                            <div class="group flex items-center gap-4 p-3 rounded-radius border border-outline bg-surface hover:border-primary/50 transition-all">
+                                <div class="p-2 bg-slate-100 rounded text-slate-500">
+                                    <i data-lucide="layers" class="size-4"></i>
+                                </div>
+
+                                <div class="flex-1">
+                                    <div class="text-sm font-semibold text-on-surface" x-text="item.face_nome"></div>
+                                    <div class="text-[11px] text-on-surface-variant">
+                                        <span x-text="item.metro_de"></span>m — <span x-text="item.metro_ate"></span>m
+                                    </div>
+                                </div>
+
+                                {# Hidden input para o POST do form principal #}
+                                <input type="hidden" name="alturas[]" :value="JSON.stringify(item)">
+
+                                <button type="button" @click="removeAltura(item.id)"
+                                        class="p-2 text-on-surface-variant hover:text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                                    <i data-lucide="trash-2" class="size-4"></i>
+                                </button>
+                            </div>
+                        </template>
+
+                        {# Empty State #}
+                        <div x-show="alturas.length === 0" class="py-12 flex flex-col items-center justify-center text-on-surface-variant/40 gap-2 border-2 border-dashed border-outline/30 rounded-radius">
+                            <i data-lucide="database" class="size-8"></i>
+                            <p class="text-[11px] font-medium">Nenhuma especificação técnica</p>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+
+
+                    </div>
+            </div>
+        </form>
+
+
+</div>
+
+
+{% endblock content %}

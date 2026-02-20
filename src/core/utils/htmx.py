@@ -26,7 +26,7 @@ def redirect_htmx_header(
 
     if extra_headers:
         headers = {"headers": extra_headers}
-        hx_location_header.update(headers)
+        hx_location_header.update(headers)  # pyright: ignore[reportCallIssue, reportArgumentType]
 
     response.headers["HX-location"] = json.dumps(hx_location_header)
 

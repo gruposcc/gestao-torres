@@ -34,7 +34,7 @@
                 this.dataFinal = "";
             }
 
-            console.debug(`select ${this.recorrencia}`)
+            //console.debug(`select ${this.recorrencia}`)
         },
 
         // Função auxiliar para garantir que o picker abra
@@ -160,8 +160,8 @@
         >
             <div class="gap-4 w-full h-full flex flex-col">
 
-            {# campo NOME #}
-                    <div class="form-field pb-4">
+                {# campo NOME #}
+                <div class="form-field pb-4">
 
 
                     <label for="inputname">Nome:
@@ -351,24 +351,24 @@
                         </div>
                     </div>
                     <div class="form-field flex-1" x-show="recorrencia !== 'Única' && recorrencia !== ''" x-transition>
-    <label>Data Final:</label>
-    <div class="pl-2">
-        <div class="input-field group relative cursor-pointer">
-            <i data-lucide="calendar" class="icon pointer-events-none z-10"></i>
+                        <label>Data Final:</label>
+                        <div class="pl-2">
+                            <div class="input-field group relative cursor-pointer">
+                                <i data-lucide="calendar" class="icon pointer-events-none z-10"></i>
 
-            <input
-                type="date"
-                name="data_final"
-                x-model="dataFinal"
-                @change="validarDatas()"
-                :min="dataInicio"
-                @click="openDatePicker($event)"
-                @focus="openDatePicker($event)"
-                class="pl-8 field w-full cursor-pointer appearance-none"
-            >
-        </div>
-    </div>
-</div>
+                                <input
+                                    type="date"
+                                    name="data_final"
+                                    x-model="dataFinal"
+                                    @change="validarDatas()"
+                                    :min="dataInicio"
+                                    @click="openDatePicker($event)"
+                                    @focus="openDatePicker($event)"
+                                    class="pl-8 field w-full cursor-pointer appearance-none"
+                                >
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {# Botão Criar #}

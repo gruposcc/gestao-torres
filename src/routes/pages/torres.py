@@ -17,7 +17,7 @@ from fastapi.responses import HTMLResponse
 from models.torre import TipoTorre
 from pydantic import ValidationError
 
-from core.templates import render_chunk, render_page
+from core.templates import render_chunk, render_page, render
 from core.utils.htmx import is_htmx_request, redirect_htmx_header
 from deps.auth import get_user_session
 from deps.db import get_db
@@ -32,11 +32,11 @@ router = APIRouter(prefix="/torre")
 
 ### LIST
 @router.get("/list")
-async def list_view(
+async def list_torre(
     request: Request,
     user=Depends(get_user_session),
 ):
-    template = "pages/torre/list.html"
+    template = "pages/torre/list-torre.html"
     page = {"title": "Torres SCC - Torres"}
     context = {
         "user": user,
@@ -47,7 +47,7 @@ async def list_view(
 
 
 @router.get("/list/items")
-async def list_items(request: Request, db=Depends(get_db)):
+async def list_items_torre(request: Request, db=Depends(get_db)):
     if not is_htmx_request:
         raise HTTPException(403)
 
@@ -55,8 +55,8 @@ async def list_items(request: Request, db=Depends(get_db)):
 
     # parametros de oordenação, filtro, etc etc
     torres = await service.get_list(load_relations=["terreno"])
-    context = {"request": request, "items": torres}
-    template = "pages/torre/list.html"
+    context = {"items": torres}
+    template = "pages/torre/list-torre.html"
 
     # limit = per_page 10
     # total_pages = numero total / per page
@@ -65,14 +65,31 @@ async def list_items(request: Request, db=Depends(get_db)):
     return render_chunk(request, template, context, block="items")
 
 
+### SEARCH
+@router.post("/search")
+async def search_torre_by_name(
+    request: Request, torreSearch: str = Form(), db=Depends(get_db)
+):
+    template = "pages/torre/search-results.html"
+    context: Dict[str, Any] = {}
+
+    service = TorreService(db)
+    torres = await service.search_by_name(name=torreSearch)
+
+    if torres:
+        context.update({"results": torres})
+
+    return render(request, template, context)
+
+
 ### CREATE
 
 
 @router.get("/create")
-async def create_torre_get(
+async def get_create_torre(
     request: Request, user=Depends(get_user_session), extra_context={}
 ):
-    template = "pages/torre/create.html"
+    template = "pages/torre/create-torre.html"
     page = {"title": "Torres SCC - Nova Torre"}
 
     context: Dict[str, Any] = {
@@ -88,7 +105,7 @@ async def create_torre_get(
 
 
 @router.post("/create")
-async def create_torre_post(
+async def post_create_torre(
     request: Request,
     # FORM FIELDS
     name: str = Form(...),
@@ -136,7 +153,7 @@ async def create_torre_post(
                 "altura": {"value": valid_data.altura},
             },
         }
-        return await create_torre_get(request, extra_context=extra_context)
+        return await get_create_torre(request, extra_context=extra_context)
 
     try:
         new_torre = await service.create(valid_data)
@@ -157,7 +174,7 @@ async def view(
     dbSession=Depends(get_db),
     user=Depends(get_user_session),
 ):
-    template = "pages/torre/view.html"
+    template = "pages/torre/view-torre.html"
 
     initial_subpage = request.headers.get("X-Initial-Subpage", "arquivos")
 
@@ -175,12 +192,13 @@ async def view(
     return render_page(request, template, context)
 
 
-### UPDATE
+### UPDATE TODO
 @router.put("/{id}")
 async def update(
     id: uuid.UUID,
     request: Request,
     name: str = Form(...),
+    # TODO outros campos...
     db=Depends(get_db),
 ):
     service = TorreService(db)
@@ -202,44 +220,17 @@ async def update(
     await service.save(torre)
 
     # 5. Resposta HTMX: Redireciona para a visualização
-    # Ou você pode retornar a própria página de view renderizada
     response = Response(status_code=200)
     return redirect_htmx_header(response, path=f"/torre/view/{torre.id}")
 
 
 ### DELETE
-@router.delete("/doc/{doc_id}")
-async def delete_documento(request: Request, doc_id: uuid.UUID, db=Depends(get_db)):
-    service = DocumentoTorreService(db)
-    # Buscamos o documento
-    doc = await service.get_one_by(id=doc_id)
-    if not doc:
-        raise HTTPException(404)
-
-    torre_id = doc.torre_id
-
-    if not doc:
-        return Response(status_code=204)  # Já não existe
-
-    # 2. Remover do banco
-    await service.hard_delete(doc)
-
-    torre_service = TorreService(db)
-    torre = await torre_service.get_one_by(id=torre_id, load_relations=["documentos"])
-    if not torre:
-        raise HTTPException(404)
-
-    template = "pages/torre/docs-subpage.html"
-    context = {"items": torre.documentos, "torre_id": torre_id, "current_tab": "docs"}
-
-    # Retorna APENAS o pedaço da lista de documentos
-    return render_chunk(request, template, context)
 
 
 @router.delete("/{torre_id}")
 async def soft_delete(torre_id: uuid.UUID, request: Request, db=Depends(get_db)):
     service = TorreService(db)
-    torre = await service.get_one_by(id=id)
+    torre = await service.get_one_by(id=torre_id)
 
     if not torre:
         response = Response(status_code=204)
@@ -295,7 +286,7 @@ async def upload_documentos(
     # Salva os novos arquivo
     torre = await service.append_docs(torre=torre, arquivos=arquivos)
 
-    template = "pages/torre/docs-subpage.html"
+    template = "pages/torre/subpage/arquivos.html"
 
     doc_service = DocumentoTorreService(db)
     docs = await doc_service.get_all_from_torre(torre.id)
@@ -306,13 +297,42 @@ async def upload_documentos(
     return render_chunk(request, template, context)
 
 
+@router.delete("/doc/{doc_id}")
+async def delete_documento(request: Request, doc_id: uuid.UUID, db=Depends(get_db)):
+    # HARD DELETE
+    service = DocumentoTorreService(db)
+    # Buscamos o documento
+    doc = await service.get_one_by(id=doc_id)
+    if not doc:
+        raise HTTPException(404)
+
+    torre_id = doc.torre_id
+
+    if not doc:
+        return Response(status_code=204)  # Já não existe
+
+    await service.hard_delete(doc)
+
+    torre_service = TorreService(db)
+    torre = await torre_service.get_one_by(id=torre_id, load_relations=["documentos"])
+    if not torre:
+        raise HTTPException(404)
+
+    # template = "pages/torre/docs-subpage.html"
+    # context = {"items": torre.documentos, "torre_id": torre_id, "current_tab": "docs"}
+
+    # Retorna APENAS o pedaço da lista de documentos
+    # return render_chunk(request, template, context)
+    return Response("", 200)
+
+
 # TODO
 @router.patch("/doc/{doc_id}/rename")
 async def rename_documento(
-    doc_id: uuid.UUID, nickname: str = Form(...), db=Depends(get_db)
+    doc_id: uuid.UUID, request: Request, nickname: str = Form(...), db=Depends(get_db)
 ):
+    template = "pages/torre/subpage/partials/rename-arquivo.html"
     service = DocumentoTorreService(db)
-
     if not nickname.strip():
         return HTMLResponse(content="Nome não pode ser vazio", status_code=400)
 
@@ -325,18 +345,9 @@ async def rename_documento(
     # Como seu JS no template já lida com o sucesso (afterRequest),
     # basta retornar o input atualizado ou o valor seco.
     # Vamos retornar o input com o novo 'data-original-value' para o JS resetar o botão 'save'.
+    context = {"doc": updated_doc}
 
-    return HTMLResponse(
-        content=f"""
-        <input type="text"
-               name="nickname"
-               class="doc-nickname-input text-sm font-medium bg-transparent border-b border-transparent focus:border-primary outline-none w-full transition-colors"
-               value="{updated_doc.nickname}"
-               data-original-value="{updated_doc.nickname}"
-               placeholder="Nome do documento"
-               oninput="handleDocEdit(this)">
-        """
-    )
+    return render(request, template, context)
 
 
 ## DESPESAS

@@ -1,0 +1,270 @@
+{% extends "layout/template.html" %}
+
+{% block content %}
+<script>
+{
+    const clienteForm = (initialData = {}) => ({
+        tipoOpen: false,
+        tipo: initialData.tipo || "pf",
+        tipoText: initialData.tipoText || "pf",
+        name: initialData.name || "",
+        ultimoNome: initialData.ultimoNome || "",
+        documento: initialData.documento || "",
+
+        // --- ADICIONE ESTAS DUAS LINHAS NO RETORNO ---
+        showNameError: {{ 'true' if form and form.name.error else 'false' }},
+        showDocError: {{ 'true' if form and form.documento.error else 'false' }},
+        // ---------------------------------------------
+
+        selectTipo(valor, text) {
+            this.tipo = valor;
+            this.tipoText = text;
+            this.tipoOpen = false;
+            if (valor === "PJ") {
+                this.ultimoNome = "";
+            }
+        },
+    });
+
+
+    registerComponent("clienteForm", clienteForm)
+
+}
+</script>
+
+<div class="content-frame overflow-y-auto ">
+    <div class="content-header">
+        {# TITLE #}
+        <div class="title">
+            <div class="icon">
+                <i data-lucide="handshake"></i>
+            </div>
+            <div>
+                <h2>Novo Cliente</h2>
+                <p>criação</p>
+            </div>
+        </div>
+    </div>
+
+    <div
+        {% if form %}
+        x-data="clienteForm({
+            name: '{{form.name.value|default('')}}',
+            ultimoNome: '{{form.last_name.value|default('')}}',
+            tipo: '{{form.tipo.value|default('')}}',
+            tipoText: '{{form.tipo.value|default('')}}',
+            documento: '{{form.documento.value|default('')}}'
+        })"
+        {% else %}
+            x-data="clienteForm({})"
+        {% endif %}
+        class="w-full h-full"
+    >
+
+        <form class="w-full h-full flex gap-6"
+            hx-post="/cliente/create"
+            hx-target="#content"
+            hx-swap="innerHTML"
+            hx-push-url="true"
+        >
+
+            {# coluna da esquerda #}
+            <div class="gap-4 w-full h-full">
+
+
+
+                {# tipo, nome, last name (Lado a Lado) #}
+                <div class="flex  gap-4 pb-4 ">
+
+                    {# SELECT TIPO CLIENTE #}
+                    <div class="form-field flex-1 max-w-20"
+                        @keydown.prevent
+                        @click="tipoOpen = true"
+                        @click.away="tipoOpen=false"
+                    >
+                        <label>Tipo:</label>
+                        <div class="pl-2">
+                            <div class="input-field">
+
+                                {# <i data-lucide="rotate-cw" class="icon"></i> #}
+
+                                <button
+                                    {# @mousedown.stop="recorrenciaOpen = !recorrenciaOpen"  #}
+                                    type="button" class="toggle"
+                                >
+
+                                    <i data-lucide="chevron-down"
+                                    :class="tipoOpen ? 'rotate-180' : ''">
+                                    </i>
+
+                                </button>
+
+                                <input
+                                name="selecTipo"
+                                id="selecTipo"
+                                class="field cursor-pointer uppercase "
+                                placeholder=""
+                                autocomplete="off"
+                                readonly="true"
+                                x-model="tipoText"
+
+                                >
+                                <input type="text" name="tipo" x-model="tipo" required class="value-field"
+                                oninput="this.setCustomValidity('')"
+                                oninvalid="this.setCustomValidity('Selecione um tipo da lista')"
+                                >
+                            </div>
+                            <div class="options-anchor">
+
+                                <div class="options-container">
+
+                                    <ul class="options"
+                                    x-show="tipoOpen"
+                                    @click.away="tipoOpen = false"
+                                    x-cloak
+                                    >
+                                        {% for tipo in tipo_cliente  %}
+                                            <li class="group item"
+                                            @click.stop="
+                                                selectTipo(
+                                                    '{{ tipo.value }}', '{{ tipo.value}}'
+                                                )"
+                                            >
+                                            <div class="container">
+                                                <span class="uppercase">{{tipo.value}}</span>
+                                            </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+
+
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                    {# END SELECT TIPO CLIENTE  #}
+
+                    {# campo NOME #}
+                    <div
+                    x-transition:enter.duration.200ms
+                    class="form-field flex-1 transition-all duration-200 ease-in-out">
+
+                        <label for="inputname">Nome:
+                        <template x-if="showNameError">
+                            <span class="text-red-500 text-xs text-center ml-1">
+                            {% if form %}
+                            {{form.name.error}}
+                            {% else %}
+                            {% endif %}
+                            </span>
+                        </template>
+                        </label>
+                        <div class="">
+                            <div class="input-field {% if form and form.name.error %}border-red-500{% endif %}">
+                                <input
+                                    id="inputname"
+                                    class="field curor-pointer"
+                                    x-model="name"
+                                    type="text"
+                                    name="name"
+                                    maxlength="50"
+                                    placeholder="Nome do cliente"
+                                    autocomplete="off"
+                                    required
+                                    @input="showNameError = false"
+
+                                />
+                            </div>
+
+                        </div>
+                    </div>
+
+                    {# APARECE SE TIPO FOR PF #}
+
+                    {# campo lastname - APARECE APENAS SE TIPO FOR PF #}
+                    <div
+                    x-transition:enter.duration.200ms
+                    x-show="tipo === 'pf'" x-cloak class="form-field flex-1 transition-all duration-200 ease-in-out" >
+                        <label for="inputLastName">Último Nome:
+                        </label>
+                        <div class="input-field">
+                            <input
+                                id="inputLastName"
+                                class="field cursor-pointer"
+                                x-model="ultimoNome"
+                                type="text"
+                                name="last_name"
+                                placeholder="Sobrenome"
+                                autocomplete="off"
+                                :required="tipo === 'pf'"
+                            />
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+
+                {# CAMPO DOCUMENTO DINÂMICO #}
+                <div class="form-field pb-4">
+                    <label>
+                        <span x-text="tipo === 'pf' ? 'CPF:' : 'CNPJ:'"></span>
+
+                        <template x-if="showDocError">
+                            <span class="text-red-500 text-xs text-center ml-1">
+                            {% if form and form.documento.error %}
+                                {{ form.documento.error }}
+                            {% endif %}
+                            </span>
+                        </template>
+                    </label>
+                    <div class="pl-2">
+                        <div class="input-field">
+                            <i data-lucide="file-text" class="icon"></i>
+                            <input
+                                id="inputDocumento"
+                                :name="tipo === 'pf' ? 'cpf' : 'cnpj'"
+                                x-model="documento"
+                                type="text"
+                                class="field pl-8"
+                                {# Aplica a máscara baseada no tipo #}
+                                x-mask:dynamic="tipo === 'pf' ? '999.999.999-99' : '99.99.999/9999-99'"
+                                :placeholder="tipo === 'pf' ? '000.000.000-00' : '00.000.000/0000-00'"
+                                required
+                                @input="showDocError = false"  {# <--- ADICIONE ISSO #}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+
+                {# Botão Criar #}
+                <div class="pt-8 pl-2">
+                    <button type="submit" class="form-create-btn w-full justify-center">
+                        <i data-lucide="circle-plus"></i>
+                        Salvar Cliente
+                    </button>
+                </div>
+
+
+
+            </div>
+
+
+            {# COLUNA DA DIREITA: DOCUMENTOS #}
+            <div class="w-full h-full flex flex-col gap-4">
+                {# TODO, foto ? #}
+
+            </div>
+
+        </form>
+    </div>
+</div>
+
+
+
+
+{% endblock content %}

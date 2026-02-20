@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
-from core.templates import TResponse, render_chunk, render_html, render_page
+from core.templates import TResponse, render, render_page
 from deps.auth import get_user_session
 from deps.db import get_db
 from schemas.auth import UserAuthForm
@@ -32,7 +32,7 @@ async def login_page(request: Request):
     page = {"title": "SCC Torres - Login"}
     context = {"request": request, "page": page, "error": None}
 
-    return render_html(request, template, context)
+    return render(request, template, context)
 
 
 @router.post("/login")

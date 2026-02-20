@@ -1,10 +1,10 @@
 
 {% for result in results %}
-<li 
-    class="group 
+<li
+    class="group
     p-3
     hover:bg-info
-    
+
     cursor-pointer border-b border-outline dark:border-outline-dark last:border-0 transition-colors
     "
     @click="
@@ -12,7 +12,7 @@
         lat: {{ result.latitude }},
         lng: {{ result.longitude }},
         selectedAddress: '{{ result.address }}'
-    }); 
+    });
     show_results = false;"
 >
 
@@ -38,11 +38,3 @@
 
 
 {% endfor %}
-
-
-{# 
-<li class="p-2 hover:bg-indigo-100 cursor-pointer border-b border-gray-100 text-sm"
-    @click="selectAddress({{lat: {{result.latitude}}, lng: {{result.longitude}}, address: '{result}'}})">
-    <div class="font-medium text-gray-800">{result}</div>
-</li>
- #}

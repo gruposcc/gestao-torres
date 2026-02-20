@@ -4,14 +4,15 @@ import Alpine from 'alpinejs'
 import persist from '@alpinejs/persist'
 //mport { TriangleDashed } from 'lucide';
 import focus from '@alpinejs/focus'
+import mask from '@alpinejs/mask'
 
 // Caution, this will import all the icons and bundle them.
 createIcons({ icons });
 
 
-/* 
+/*
 *
-* @param {string} name - Nome do componenete (x-data) 
+* @param {string} name - Nome do componenete (x-data)
 * @param {function} component - Func que retorna objeto do componente
 *
 */
@@ -31,7 +32,7 @@ window.registerComponent = registerComponent; */
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  //listner para alterar o titulo da pagina 
+  //listner para alterar o titulo da pagina
   window.addEventListener('updateTitle', (e) => {
     console.debug("aoooooooooo caralho mudando titulo")
     console.debug(e.detail)
@@ -69,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   });
 
-  //Ouvir o popstate para botões Voltar/Avançar 
+  //Ouvir o popstate para botões Voltar/Avançar
   window.addEventListener('popstate', () => {
     //currentPath = window.location.pathname;
     if (window.Alpine) {
@@ -87,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 Alpine.plugin(persist)
 Alpine.plugin(focus)
+Alpine.plugin(mask)
 // Recommended way, to include only the icons you need.
 /* import { createIcons, Menu, ArrowRight, Globe } from 'lucide';
 
@@ -121,7 +123,7 @@ Alpine.store('messages', {
         try {
             // Os dados do servidor são uma string JSON (devido ao json.dumps no Python)
             const notificationData = JSON.parse(event.data);
-            
+
             // O payload do Python é: {"message": str, "level": str, "title": str}
             const { message, level, title } = notificationData;
 
@@ -179,12 +181,12 @@ Alpine.store('theme', {
     if (window.matchMedia('(prefers-color-scheme: dark)').matches && !localStorage.getItem("darkMode")) {
       this.darkMode = true;
     }
-  }, 
+  },
 
 })
 
 Alpine.store('sidebar', {
-  currentPath: window.location.pathname, 
+  currentPath: window.location.pathname,
   isSidebarOpen: Alpine.$persist(false).as("isSidebarOpen"),
 
   toggle() {

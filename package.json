@@ -2,6 +2,7 @@
   "packageManager": "pnpm@10.26.1+sha512.664074abc367d2c9324fdc18037097ce0a8f126034160f709928e9e9f95d98714347044e5c3164d65bd5da6c59c6be362b107546292a8eecb7999196e5ce58fa",
   "dependencies": {
     "@alpinejs/focus": "^3.15.2",
+    "@alpinejs/mask": "^3.15.8",
     "@alpinejs/persist": "^3.15.2",
     "@tailwindcss/cli": "^4.1.17",
     "alpinejs": "^3.15.2",
@@ -16,9 +17,11 @@
     "build.css": "pnpx @tailwindcss/cli -i ./src/static/css/app.css -o ./src/dist/css/app.css",
     "build.js": "esbuild src/static/js/main.js --bundle --outdir=./src/dist/js --outbase=./src/static/js --format=esm --splitting=true",
     "watch.js": "nodemon --watch ./src/static/js --ext js --exec \"pnpm run build.js\"",
-    "dev": "concurrently --names \"CSS,JS\" --prefix-colors \"yellow,magenta\" \"pnpm run watch.css.nodemon\" \"pnpm run watch.js\""  ,
+    "dev": "concurrently --names \"CSS,JS\" --prefix-colors \"yellow,magenta\" \"pnpm run watch.css.nodemon\" \"pnpm run watch.js\"",
     "watch.css": "nodemon --exec \"pnpm run watch.css || exit 0 \" ",
-    "watch.css.nodemon" : "nodemon --watch ./src/static/css --ext css --exec \"pnpm run build.css --watch\""
+    "watch.css.nodemon": "nodemon --watch ./src/static/css --ext css --exec \"pnpm run build.css --watch\""
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
   }
 }
-

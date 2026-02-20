@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, List
 
 
 if TYPE_CHECKING:
-    from .contratos import Contrato
+    from models.contrato import Contrato
 
 
 class TipoCliente(enum.Enum):

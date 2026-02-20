@@ -2,16 +2,15 @@ import json
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import Response
 from pydantic import ValidationError
 
 from core.notifier import Notifier, get_notifier
-from core.templates import TResponse, render_chunk, render_html, render_page
+from core.templates import TResponse, render_page
 from core.utils.htmx import is_htmx_request
 from deps.auth import get_user_session
 from deps.db import get_db
-from schemas.auth import UserAuthForm
 from schemas.user import UserIn, UserOut
 from services.user import UserService
 

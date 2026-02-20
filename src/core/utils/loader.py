@@ -1,6 +1,6 @@
 import pkgutil
 from importlib import import_module
-
+from sqlalchemy.orm import configure_mappers
 from core.settings import BASE_DIR
 
 MODELS_DIR = str(BASE_DIR / "models")
@@ -18,3 +18,4 @@ def load_models():
 
         module_name = f"models.{module_info.name}"
         _module = import_module(module_name)
+    configure_mappers()

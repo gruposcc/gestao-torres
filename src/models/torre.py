@@ -21,9 +21,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base import BaseSQLModel, StatusMixin, TimeStampMixin
 
-if TYPE_CHECKING:
-    from .terreno import Terreno
-    from .contratos import Contrato
+
+from models.terreno import Terreno
+from models.contrato import Contrato
 
 
 class TipoTorre(enum.Enum):
@@ -37,7 +37,6 @@ class TipoTorre(enum.Enum):
 class Torre(BaseSQLModel, StatusMixin, TimeStampMixin):
     __tablename__ = "torre"
 
-    # id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     id: Mapped[uuid.UUID] = mapped_column(
         Uuid[UUID](as_uuid=True), primary_key=True, default=uuid.uuid4
     )
@@ -63,7 +62,7 @@ class Torre(BaseSQLModel, StatusMixin, TimeStampMixin):
         "DespesaTorre", back_populates="torre", cascade="all, delete-orphan"
     )
 
-    contratos: Mapped[List[Contrato]] = relationship(
+    contratos: Mapped[List["Contrato"]] = relationship(
         "Contrato", back_populates="torre", cascade="all, delete-orphan"
     )
 

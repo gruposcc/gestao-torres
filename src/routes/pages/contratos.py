@@ -22,7 +22,9 @@ from core.utils.htmx import is_htmx_request, redirect_htmx_header
 from deps.auth import get_user_session
 from deps.db import get_db
 from schemas.despesa import DespesaTorreIn
-from services.torre import TorreService, DespesaTorreSerivce
+from services.torre import TorreService
+from services.contrato import ContratoService
+from models.contrato import RecorrenciaContrato, FaceDirecao
 from core.settings import MAX_SIZE_MB
 
 logger = logging.getLogger("app.pages.contratos")
@@ -38,7 +40,7 @@ async def get_create_contrato_torre(
     db=Depends(get_db),
     error_context: Dict | None = None,
 ):
-    template = "pages/contrato/new_contrato_torre.html"
+    template = "pages/contrato/create-contrato-torre.html"
     torre = None
 
     if not error_context:
@@ -53,6 +55,8 @@ async def get_create_contrato_torre(
         "user": user,
         "page": page,
         "torre": torre,
+        "recorrencias": list[RecorrenciaContrato](RecorrenciaContrato),
+        "faces": list[FaceDirecao](FaceDirecao),
     }
 
     if error_context:
@@ -61,120 +65,21 @@ async def get_create_contrato_torre(
     return render_page(request, template, context)
 
 
-""" @router.post("/torre/{torre_id}/create")
-async def post_create_despesa_torre(
-    request: Request,
-    torre_id: uuid.UUID,
-    user=Depends(get_user_session),
-    db=Depends(get_db),
-    # FORM
-    name: str = Form(...),
-    valor: Decimal = Form(...),
-    recorrencia: str = Form(...),
-    data_inicio: date = Form(...),
-    data_final: str = Form(None),
-    valor_total_calculado: Decimal = Form(...),
-    description: str = Form(None),
-):
-    try:
-        dt_final = None
-        if data_final and data_final.strip():
-            try:
-                dt_final = date.fromisoformat(data_final)
-            except ValueError:
-                # Caso o usuário digite algo inválido manualmente
-                raise HTTPException(status_code=400, detail="Data final inválida")
+@router.get("/list")
+async def list_contrato(request: Request, user=Depends(get_user_session)):
+    template = "pages/contrato/list-contrato.html"
+    page = {"title": "Torres SCC - Clientes"}
+    context = {"user": user, "page": page}
 
-        # logger.error(valor_total_calculado)
-
-        data = {
-            "name": name,
-            "valor": valor,
-            "recorrencia": recorrencia,
-            "data_inicio": data_inicio,
-            "data_final": dt_final,
-            "description": description,
-            "torre_id": torre_id,
-            "valor_total": valor_total_calculado,
-        }
-
-        valid_data = DespesaTorreIn.model_validate(data)
-
-    except ValidationError as ve:
-        # TODO
-        logger.warning(ve)
-
-    torre_service = TorreService(db)
-
-    torre = await torre_service.get_one_by(id=torre_id)
-    if not torre:
-        raise HTTPException(404)
-
-    despesa_service = DespesaTorreSerivce(db)
-    exists = await despesa_service.get_one_by(name=valid_data.name, torre_id=torre.id)
-
-    if exists:
-        error_context = {
-            "torre": torre,
-            "form": {
-                "name": {"value": valid_data.name, "error": "Nome em uso"},
-                "valor": {"value": valid_data.valor},
-                "recorrencia": {"value": valid_data.recorrencia.value},
-                "recorrencia_text": {"value": valid_data.recorrencia.value},
-                "data_inicio": {"value": valid_data.data_inicio},
-                "data_final": {"value": valid_data.data_final},
-                "description": {"value": valid_data.description},
-                # OUTROS CAMPOS
-            },
-        }
-        return await get_create_despesatorre(
-            request,
-            torre_id,
-            user=user,
-            error_context=error_context,
-        )
-
-    try:
-        new_despesa = await despesa_service.create(valid_data)
-
-    except Exception as e:
-        logger.warning(e)
-        raise HTTPException(500, "erro criando a despesa")
-
-    response = Response(status_code=200)
-    # COM a mensagem
-
-    initial_subpage_header = {"X-Initial-Subpage": "despesas"}
-
-    return redirect_htmx_header(
-        response, path=f"/torre/view/{torre_id}", extra_headers=initial_subpage_header
-    )
+    return render_page(request, template, context)
 
 
-@router.delete("/torre/{despesa_id}")
-async def delete_torre_despesa(request: Request, despesa_id: int, db=Depends(get_db)):
-    service = DespesaTorreSerivce(db)
+@router.get("/list/items")
+async def list_cliente_items(request: Request, db=Depends(get_db)):
+    service = ContratoService(db)
+    contratos = await service.get_list()
 
-    despesa = await service.get_one_by(id=despesa_id)
-    if not despesa:
-        raise HTTPException(404)
+    context = {"items": contratos}
+    template = "pages/contrato/list-contrato.html"
 
-    await service.hard_delete(despesa)
-
-    torre_id = despesa.torre_id
-    torre_service = TorreService(db)
-
-    torre = await torre_service.get_one_by(id=torre_id, load_relations=["despesas"])
-    if not torre:
-        raise HTTPException(404)
-
-    template = "pages/torre/despesa-subpage.html"
-    context = {
-        "items": torre.despesas,
-        "torre_id": torre.id,
-        "current_tab": "despesas",
-        "initial_subpage": "despesas",
-    }
-
-    return render_chunk(request, template, context)
- """
+    return render_chunk(request, template, context, block="items")

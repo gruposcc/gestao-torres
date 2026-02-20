@@ -35,7 +35,7 @@ async def get_create_despesa_torre(
     db=Depends(get_db),
     error_context: Dict | None = None,
 ):
-    template = "pages/despesa/create_despesa_torre.html"
+    template = "pages/despesa/create-despesa-torre.html"
 
     torre = None
     if not error_context:
@@ -166,12 +166,12 @@ async def delete_torre_despesa(request: Request, despesa_id: int, db=Depends(get
     if not torre:
         raise HTTPException(404)
 
-    template = "pages/torre/despesa-subpage.html"
+    template = "pages/torre/subpage/despesas.html"
     context = {
         "items": torre.despesas,
         "torre_id": torre.id,
         "current_tab": "despesas",
-        "initial_subpage": "despesas",
+        # "initial_subpage": "despesas",
     }
 
     return render_chunk(request, template, context)

@@ -1,28 +1,28 @@
 <!-- This allows screen readers to skip the sidebar and go directly to the main content. -->
 <a class="sr-only" href="#content">skip to the main content</a>
-    
+
 <!-- dark overlay for when the sidebar is open on smaller screens  -->
-{# <div class="fixed inset-0 z-10 bg-surface-dark/10 backdrop-blur-xs md:hidden" aria-hidden="true" x-on:click="showSidebar = false" x-transition.opacity></div> 
+{# <div class="fixed inset-0 z-10 bg-surface-dark/10 backdrop-blur-xs md:hidden" aria-hidden="true" x-on:click="showSidebar = false" x-transition.opacity></div>
  #}
-<nav 
+<nav
     id="nav-sidebar"
     class="
         sidebar
-    " 
+    "
     :class=" {# SIDEBAR W TOGGLE #}
         { 'open': $store.sidebar.isSidebarOpen, 'close' : !$store.sidebar.isSidebarOpen}
     "
     {# remove a classe do pai #}
     x-init="document.documentElement.classList.remove('sidebar-expanded')"
 >
-    <div {# sidebar items container #} 
+    <div {# sidebar items container #}
         id="sidebar-items-container"
         class="
-            sidebar-container 
+            sidebar-container
         "
     >
         {# HOME #}
-        <a 
+        <a
             hx-get="/home"
             hx-target="#content"
             hx-swap="innerHTML"
@@ -35,11 +35,11 @@
         >
             <div>
                 <i data-lucide="house"></i>
-                <span 
+                <span
                     x-cloak
-                    :class="{ 
-                        'open': $store.sidebar.isSidebarOpen, 
-                        'close': !$store.sidebar.isSidebarOpen 
+                    :class="{
+                        'open': $store.sidebar.isSidebarOpen,
+                        'close': !$store.sidebar.isSidebarOpen
                     }"
                 >
                 Home
@@ -47,13 +47,13 @@
             </div>
         </a>
 
-        {# USER #}
-        <a 
-            hx-get="/user" 
+        <!--{# USER #}
+        <a
+            hx-get="/user"
             hx-target="#content"
             hx-swap="innerHTML"
             hx-push-url="true"
-            href="/user" 
+            href="/user"
             class=" sidebar-item "
             :class="{
                 'active' : $store.sidebar.currentPath === '/user/'
@@ -62,25 +62,25 @@
         >
             <div>
                 <i data-lucide="users-round"></i>
-                <span 
+                <span
                     x-cloak
-                    :class="{ 
-                        'open': $store.sidebar.isSidebarOpen, 
-                        'close': !$store.sidebar.isSidebarOpen 
+                    :class="{
+                        'open': $store.sidebar.isSidebarOpen,
+                        'close': !$store.sidebar.isSidebarOpen
                     }"
                 >
                 Usuários
                 </span>
             </div>
-        </a>
+        </a>-->
 
         {# TERRENO #}
-        <a 
-            hx-get="/terreno/list" 
+        <a
+            hx-get="/terreno/list"
             hx-target="#content"
             hx-swap="innerHTML"
             hx-push-url="true"
-            href="/terreno/list" 
+            href="/terreno/list"
             class=" sidebar-item "
             :class="{
                 'active' : $store.sidebar.currentPath.startsWith('/terreno')
@@ -88,11 +88,11 @@
         >
             <div>
                 <i data-lucide="land-plot"></i>
-                <span 
+                <span
                     x-cloak
-                    :class="{ 
-                        'open': $store.sidebar.isSidebarOpen, 
-                        'close': !$store.sidebar.isSidebarOpen 
+                    :class="{
+                        'open': $store.sidebar.isSidebarOpen,
+                        'close': !$store.sidebar.isSidebarOpen
                     }"
                 >
                 Terrenos
@@ -101,7 +101,7 @@
         </a>
 
         {# TORRE #}
-        <a 
+        <a
             hx-get="/torre/list"
             hx-target="#content"
             hx-swap="innerHTML"
@@ -114,14 +114,67 @@
         >
             <div >
                 <i data-lucide="radio-tower"></i>
-                <span 
+                <span
                     x-cloak
-                    :class="{ 
-                        'open': $store.sidebar.isSidebarOpen, 
-                        'close': !$store.sidebar.isSidebarOpen 
+                    :class="{
+                        'open': $store.sidebar.isSidebarOpen,
+                        'close': !$store.sidebar.isSidebarOpen
                     }"
                 >
                 Torres
+                </span>
+            </div>
+        </a>
+
+        {# CLIENTES #}
+        <a
+            hx-get="/cliente/list"
+            hx-target="#content"
+            hx-swap="innerHTML"
+            hx-push-url="true"
+            href="/cliente/list"
+            class=" sidebar-item"
+            :class="{
+                'active' : $store.sidebar.currentPath.startsWith('/cliente')
+            }"
+        >
+            <div>
+                <i data-lucide="handshake"></i>
+                <span
+                    x-cloak
+                    :class="{
+                        'open': $store.sidebar.isSidebarOpen,
+                        'close': !$store.sidebar.isSidebarOpen
+                    }"
+                >
+                Clientes
+                </span>
+            </div>
+        </a>
+
+
+        {# CONTRATOS #}
+        <a
+            hx-get="/contrato/list"
+            hx-target="#content"
+            hx-swap="innerHTML"
+            hx-push-url="true"
+            href="/contrato/list"
+            class=" sidebar-item"
+            :class="{
+                'active' : $store.sidebar.currentPath.startsWith('/contrato')
+            }"
+        >
+            <div>
+                <i data-lucide="banknote-arrow-up"></i>
+                <span
+                    x-cloak
+                    :class="{
+                        'open': $store.sidebar.isSidebarOpen,
+                        'close': !$store.sidebar.isSidebarOpen
+                    }"
+                >
+                Contratos
                 </span>
             </div>
         </a>

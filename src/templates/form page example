@@ -1,0 +1,19 @@
+{% extends "layout/template.html" %}
+
+{% block content %}
+<script>
+{
+const createForm = (initialData = {}) => ({
+
+});
+
+registerComponent("createForm", createForm)
+
+}
+</script>
+
+
+
+
+
+{% endblock content %}

@@ -3,7 +3,7 @@
 {% if results %}
 {% for item in results  %}
 <li class="item "
-@mousedown.stop="selectTerreno( '{{ item.id }}', '{{ item.name }}')"
+@mousedown.stop="selectTorre( '{{ item.id }}', '{{ item.name }}')"
 
 >
     <div class="container">

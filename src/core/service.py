@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.schema import BaseSchema, ModelSchema
 from models.base import BaseSQLModel, ObjectStatus
+from sqlalchemy import Select
 
 logger = logging.getLogger("app.core.service")
 
@@ -103,10 +104,12 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
     async def get_list(
         self,
         out_schema: ModelSchema | None = None,
-        only_enable=True,
+        only_enabled=True,
         load_relations: list | None = None,
+        stmt: Select | None = None,
     ):
-        stmt = select(self.model)
+        if stmt is None:
+            stmt = select(self.model)
 
         if load_relations:
             for rel in load_relations:
@@ -119,7 +122,7 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
                 else:
                     pass
 
-        if only_enable and hasattr(self.model, "status"):
+        if only_enabled and hasattr(self.model, "status"):
             status = getattr(self.model, "status")
             stmt = stmt.where(status == ObjectStatus.ENABLE)
 
@@ -158,7 +161,7 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
         raw_result = await self.dbSession.execute(stmt)
         result = raw_result.scalar()
 
-        self.logger.debug(result)
+        # self.logger.debug(result)
         return result
 
     async def soft_delete(self, obj: T) -> bool:

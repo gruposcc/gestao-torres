@@ -5,13 +5,13 @@ from typing import Any, Dict
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from pydantic import ValidationError
 
-# from core.schema import validate_html_form TODO
-from core.templates import TResponse, render_chunk, render_page
+from core.templates import TResponse, render_chunk, render_page, render
 from core.utils.htmx import is_htmx_request
 from deps.auth import get_user_session
 from deps.db import get_db
 from schemas.terreno import TerrenoIn
 from services.terreno import TerrenoService
+from core.utils.htmx import redirect_htmx_header
 
 logger = logging.getLogger("app.pages.terreno")
 
@@ -19,12 +19,11 @@ router = APIRouter(prefix="/terreno")
 
 
 @router.get("/list")
-async def list_view(
+async def list_terreno(
     request: Request,
     session=Depends(get_user_session),
-    dbSession=Depends(get_db),
 ):
-    template = "pages/terreno/list.html"
+    template = "pages/terreno/list-terreno.html"
     page = {"title": "Torres SCC - Terrenos"}
     context = {"user": session, "page": page}
 
@@ -32,7 +31,7 @@ async def list_view(
 
 
 @router.get("/list/items")
-async def list_post(request: Request, db=Depends(get_db)):
+async def list_items_terreno(request: Request, db=Depends(get_db)):
     if not is_htmx_request:
         raise HTTPException(403)
 
@@ -40,15 +39,15 @@ async def list_post(request: Request, db=Depends(get_db)):
 
     # TODO, parametros de ordenação, paginação e filtro
     terrenos = await service.get_list(load_relations=["torres"])
-    template = "pages/terreno/list.html"
+    template = "pages/terreno/list-terreno.html"
     context = {"request": request, "items": terrenos}
 
     return render_chunk(request, template, context, block="items")
 
 
 @router.get("/create")
-async def create(request: Request, session=Depends(get_user_session)):
-    template = "pages/terreno/create.html"
+async def get_create_terreno(request: Request, session=Depends(get_user_session)):
+    template = "pages/terreno/create-terreno.html"
     page = {"title": "Torres SCC - Novo Terreno"}
     context = {"request": request, "user": session, "page": page}
 
@@ -56,9 +55,8 @@ async def create(request: Request, session=Depends(get_user_session)):
 
 
 @router.post("/create")
-async def post_create(
+async def post_create_terreno(
     request: Request,
-    user_session=Depends(get_user_session),
     db_session=Depends(get_db),
 ):
     if not is_htmx_request:
@@ -70,7 +68,6 @@ async def post_create(
 
     data = await request.form()
     # logger.debug(data)
-
     try:
         valid_data = TerrenoIn.model_validate(data)
 
@@ -113,15 +110,8 @@ async def post_create(
         # await notifier.push bla bla
         # prepara o redirecionamento
         response = Response(status_code=200)
-        response.headers["HX-location"] = json.dumps(
-            {
-                "path": f"/terreno/view/{new_terreno.id}",
-                "target": "#content",
-                "swap": "innerHTML",
-            }
-        )
 
-        return response
+        return redirect_htmx_header(response, f"/terreno/view/{new_terreno.id}")
 
     except Exception as e:
         logger.warning(e)
@@ -130,7 +120,7 @@ async def post_create(
 
 @router.get("/view/{terreno_id}")
 async def view_terreno(terreno_id: int, request: Request, dbSession=Depends(get_db)):
-    template = "pages/terreno/view.html"
+    template = "pages/terreno/view-terreno.html"
     context: Dict[str, Any] = {"request": request}
 
     # try:
@@ -163,21 +153,20 @@ async def search_terreno(
     searchQuery: str = Form(),
     db_session=Depends(get_db),
 ):
-    template = "pages/torre/search-result.html"
-    context: Dict[str, Any] = {"request": request}
-
-    logger.debug(searchQuery)
+    template = "pages/terreno/terreno-search-results.html"
+    context = {}
+    # logger.debug(searchQuery)
 
     # sanitizar a query
 
     service = TerrenoService(db_session)
     terrenos = await service.search_by_name(name=searchQuery)
 
-    logger.debug(terrenos)
+    # logger.debug(terrenos)
     if terrenos:
         context.update({"results": terrenos})
 
     if not isinstance(terrenos, list):
         terrenos = [terrenos]
 
-    return TResponse(template, context)
+    return render(request, template, context)

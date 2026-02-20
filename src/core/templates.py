@@ -59,5 +59,6 @@ def render_chunk(
     return response
 
 
-def render_html(request: Request, template: str, context: dict):
+def render(request: Request, template: str, context: dict):
+    context.update({"request": request})
     return TResponse(template, context)

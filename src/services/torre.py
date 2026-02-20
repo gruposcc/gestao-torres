@@ -173,7 +173,9 @@ class DocumentoTorreService(AbstractModelService[DocumentoTorre]):
             return None
 
         doc.nickname = nickname
-        return await self.save(doc)
+        obj = await self.save(doc)
+        await self.dbSession.refresh(obj)
+        return obj
 
     async def get_all_from_torre(self, torre_id, only_enabled: bool = True):
         stmt = select(self.model).where(self.model.torre_id == torre_id)
