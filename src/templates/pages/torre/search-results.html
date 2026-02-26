@@ -3,11 +3,12 @@
 {% if results %}
 {% for item in results  %}
 <li class="item "
-@mousedown.stop="selectTorre( '{{ item.id }}', '{{ item.name }}')"
+@mousedown.prevent="selectTorre( '{{ item.id }}', '{{ item.name }}', '{{ item.altura }}')"
 
 >
     <div class="container">
         <span >{{ item.name }}</span>
+        <span class="text-gray-400">alt: {{ item.altura }}m</span>
         <span class="text-gray-400">lat: {{ item.lat }}</span>
         <span class="text-gray-400">lng: {{ item.lng }}</span>
     </div>
@@ -16,7 +17,7 @@
 {% else %}
 {# ERROR #}
 <li class="item p-1.5"
-@mousedown.stop="searchQuery = ''"
+@mousedown.prevent="searchQuery = ''"
 >
     <div class="container">
         Nenhum resultado

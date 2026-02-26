@@ -90,8 +90,8 @@ async def get_create(
     return render_page(request, template, context)
 
 
-@router.post("/create")
-async def post_create_contrato(
+@router.post("/create/torre")
+async def post_create_contrato_torre(
     request: Request,
     name: str = Form(...),
     cliente_id: uuid.UUID = Form(...),
@@ -157,7 +157,9 @@ async def post_create_contrato(
     except ValidationError as e:
         logger.error(f"Validation error creating contrato: {e.errors()}")
         error_context["errors"] = [f"Erro de validação ao criar contrato: {e.errors()}"]
-        return await get_create_contrato_torre(the c)
+        return await get_create_contrato_torre(
+            request, torre_id, user, db, error_context
+        )
     except Exception as e:
         logger.error(f"Error creating contrato: {e}")
         error_context["errors"] = [f"Erro ao criar contrato: {e}"]

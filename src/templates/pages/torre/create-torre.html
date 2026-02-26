@@ -31,9 +31,8 @@
             this.terrenoId = id;
             this.searchQuery = name;
             this.showResults = false;
-            // Limpa qualquer erro de validação manual se existir
+            document.getElementById('search-results').innerHTML = '';
             document.getElementsByName('terreno_id')[0].setCustomValidity('');
-            //console.debug(`select terreno ${id}`)
             },
 
         selectTipo(valor, text) {

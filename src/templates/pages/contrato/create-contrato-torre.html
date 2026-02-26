@@ -17,15 +17,11 @@
         dataFinal: initialData.dataFinal || "",
         description: initialData.description || "",
 
-        {% if torre %}
-        alturaMaxima: {{ torre.altura|default(0) }},
-        {% else %}
-        alturaMaxima: 0
-        {% endif %}
+        alturaMaxima: initialData.alturaMaxima || 0,
 
-        clienteSearch: '',
+        clienteSearch: initialData.clienteSearch || '',
         showClienteResults: false,
-        clienteId: '',
+        clienteId: initialData.clienteId || '',
 
         torreSearch: initialData.torreSearch || '',
         showTorreResults: false,
@@ -71,13 +67,26 @@
                 return;
             }
 
-            // 4. Adiciona ao array local se passar em tudo
+            // 4. Validação: Verificar se a faixa já existe
+            const alturaExistente = this.alturas.find(item => {
+                const existingDe = item.metro_de;
+                const existingAte = item.metro_ate;
+                // Verifica se há sobreposição entre intervalos
+                return (de < existingAte && ate > existingDe);
+            });
+
+            if (alturaExistente) {
+                alert(`Erro: Esta faixa de altura (${de}m - ${ate}m) já está adicionada ou sobrepõe uma faixa existente.`);
+                return;
+            }
+
+            // 5. Adiciona ao array local se passar em tudo
             this.alturas.push({
                 id: Date.now(),
                 metro_de: de,
                 metro_ate: ate,
                 face: this.face,
-                face_nome: this.faceText // Adicionado para exibir o nome correto na lista
+                face_nome: this.faceText
             });
 
             // Limpa os campos
@@ -105,13 +114,12 @@
             this.faceOpen = false;
         },
 
-        selectTorre(id, name) {
+        selectTorre(id, name, altura) {
             this.torreId = id;
             this.torreSearch = name;
             this.showTorreResults = false;
-
-            //atualizar a alturaMaxima
-
+            document.getElementById('torre-results').innerHTML = '';
+            this.alturaMaxima = altura || 0;
             document.getElementsByName('torre_id')[0].setCustomValidity('');
         },
 
@@ -120,9 +128,8 @@
             this.clienteId = id;
             this.clienteSearch = name;
             this.showClienteResults = false;
-
+            document.getElementById('search-results').innerHTML = '';
             document.getElementsByName('cliente_id')[0].setCustomValidity('');
-
         },
 
         selectRecorrencia(valor, text) {
@@ -174,6 +181,16 @@
                 this.clienteSearch = "";
             }
                 this.showClienteResults = false;
+            }, 200);
+        },
+
+        handleBlurTorreSearch() {
+            // Aguarda 200ms para ver se um item da lista foi clicado
+            setTimeout(() => {
+            if (!this.torreId) {
+                this.torreSearch = "";
+            }
+                this.showTorreResults = false;
             }, 200);
         },
 
@@ -235,8 +252,12 @@
             </div>
             <div>
                 <h2>Novo Contrato</h2>
-                {% if torre %}
+                {% if torre and cliente %}
+                <p class="capitalize">{{torre.name}} - {{cliente.nome}}</p>
+                {% elif torre %}
                 <p class="capitalize">Torre {{torre.name}}</p>
+                {% elif cliente %}
+                <p class="capitalize">Cliente {{cliente.nome}}</p>
                 {% else %}
                 <p class="capitalize">Criação</p>
                 {% endif %}
@@ -244,19 +265,17 @@
         </div>
     </div>
 
-    <div
-    {% if form %}
-        x-data="contratoForm({})"
-    {% else %}
-        x-data="contratoForm({
-
-            {% if torre %}
-            'torreSearch': '{{torre.name}}',
-            'torreId': '{{torre.id}}'})
-            {% endif %}
-
-        "
-    {% endif %}
+    <div x-data="contratoForm({
+        {% if torre %}
+        'torreSearch': '{{torre.name}}',
+        'torreId': '{{torre.id}}',
+        'alturaMaxima': {{ torre.altura|default(0) }},
+        {% endif %}
+        {% if cliente %}
+        'clienteSearch': '{{cliente.nome}}',
+        'clienteId': '{{cliente.id}}',
+        {% endif %}
+    })"
 
 
      class="w-full h-full flex flex-row gap-6">
@@ -532,7 +551,14 @@
                     </div>
 
 
-                    <div class="form-field flex-1" x-cloak x-show="recorrencia !== 'Única' && recorrencia !== ''" x-transition>
+                    <div class="form-field flex-1" x-cloak x-show="recorrencia !== 'Única' && recorrencia !== ''" 
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0"
+                    >
                         <label>Data Final:</label>
                         <div class="pl-2">
                             <div class="input-field group relative cursor-pointer">
@@ -576,14 +602,20 @@
                         <div class="input-field relative">
                             <i data-lucide="tower-control" class="icon"></i> {# Ícone de torre #}
 
+                            <span class="toggle">
+                                <i data-lucide="chevron-down" :class="showTorreResults ? 'rotate-180' : 'rotate-0'"></i>
+                            </span>
+
                             <input
                                 name="torreSearch"
-                                class="pl-8 field"
-                                placeholder="Pesquise a torre para liberar os campos técnicos..."
+                                class="pl-8 pr-8 field"
+                                placeholder="Escolha uma torre ou digite para pesquisar"
                                 autocomplete="off"
                                 x-model="torreSearch"
 
+                                {% if torre %}
                                 disabled
+                                {% endif %}
 
                                 {# HTMX para buscar torres #}
                                 hx-post="/torre/search"
@@ -591,9 +623,10 @@
                                 hx-target="#torre-results"
                                 hx-swap="innerHTML"
 
-                                {# @input="showTorreResults = true, torreId = ''"
-                                @click="showTorreResults = true"
-                                @click.away="showTorreResults = false" #}
+                                @input="showTorreResults = true, torreId = ''"
+                                @mousedown="showTorreResults = !showTorreResults"
+                                @mousedown.away="showTorreResults = false"
+                                @blur="handleBlurTorreSearch()"
                             >
 
                             <input type="hidden" name="torre_id" x-model="torreId" required>
@@ -620,6 +653,9 @@
                     x-transition:enter="transition ease-out duration-300"
                     x-transition:enter-start="opacity-0 transform -translate-y-2"
                     x-transition:enter-end="opacity-100 transform translate-y-0"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 transform translate-y-0"
+                    x-transition:leave-end="opacity-0 transform -translate-y-2"
                     class="flex flex-col gap-4 border rounded-radius  border-outline mb-4 ml-2 h-full transition-all duration-200 ease-in-out "
                 >
                     {# CARD PARA AS ALTURAS #}
