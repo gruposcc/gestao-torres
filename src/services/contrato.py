@@ -1,5 +1,5 @@
 from core.service import AbstractModelService
-from models.contrato import Contrato
+from models.contrato import Contrato, Altura
 from sqlalchemy import select
 from models.base import ObjectStatus
 
@@ -7,17 +7,19 @@ from models.base import ObjectStatus
 class ContratoService(AbstractModelService[Contrato]):
     model = Contrato
 
-    """ async def search_by_name(self, name: str, limit: int = 3):
-        # Se o nome estiver vazio, podemos retornar os mais recentes
-        if not name or len(name.strip()) == 0:
-            stmt = select(self.model).order_by(self.model.created_at.desc())
-        else:
-            # O .contains() gera automaticamente o '%termo%'
-            stmt = select(self.model).filter(self.model.name.ilike(f"%{name}%"))
+    async def create(self, contrato_in: ContratoIn, user_id: UUID) -> Contrato:
+        alturas_data = contrato_in.alturas
+        contrato_data = contrato_in.model_dump(exclude={'alturas'})
 
-        stmt = stmt.filter(self.model.status == ObjectStatus.ENABLE).limit(limit)
+        new_contrato = self.model(**contrato_data, created_by=user_id)
+        self.dbSession.add(new_contrato)
+        await self.dbSession.flush() # Flush to get the new_contrato.id
 
-        # self.logger.debug(f"SEARCH BY: {stmt}")
-        result = await self.dbSession.execute(stmt)
-        return result.scalars().all()
- """
+        for altura_in_data in alturas_data:
+            new_altura = Altura(**altura_in_data.model_dump(), contrato_id=new_contrato.id, created_by=user_id)
+            self.dbSession.add(new_altura)
+        
+        await self.dbSession.commit()
+        await self.dbSession.refresh(new_contrato)
+        return new_contrato
+

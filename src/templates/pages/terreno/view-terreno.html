@@ -1,200 +1,132 @@
 {% extends "layout/template.html" %}
 
 {% block content %}
+{# <script>
+/**
+ * Monitora o input para mostrar o botão de salvar do HTMX
+ */
+function handleDocEdit(input) {
+    const originalValue = input.getAttribute('data-original-value');
+    const row = input.closest('li');
+    const saveBtn = row.querySelector('.save-doc-btn');
 
-<!--
-<div class="flex flex-col gap-4 p-2">
+    if (input.value !== originalValue) {
+        saveBtn.classList.remove('hidden');
+    } else {
+        saveBtn.classList.add('hidden');
+    }
+}
 
-  {# content header #}
-  <div class="flex flex-row items-center justify-between gap-4">
+document.body.addEventListener('htmx:afterRequest', function(evt) {
+    const path = evt.detail.pathInfo?.path || "";
+    const target = evt.detail.target;
 
-    {# TITLE #}
-    <div class="flex items-center gap-3">
-      <div class="px-2 rounded-radius">
-      {# <div class="p-2 bg-primary/10 dark:bg-primary-dark/20 rounded-lg text-primary dark:text-primary-dark"> #}
-        <i data-lucide="land-plot" class="size-6"></i>
-      </div>
+    if (target?.classList?.contains('doc-nickname-input') || path.includes('rename')) {
+        const row = target.closest('li');
+        if (!row) return;
 
-      <div>
-        <h2 class="text-xl font-bold text-on-surface-strong dark:text-on-surface-dark-strong leading-none">
-            Terreno {{item.name}}
-        </h2>
-        <p class="text-xs text-on-surface/60 dark:text-on-surface-dark/60 mt-1">
-            Gerenciamento e listagem
-        </p>
-      </div>
-    </div>
+        const input = row.querySelector('.doc-nickname-input');
+        if (evt.detail.successful && input) {
+            input.setAttribute('data-original-value', input.value);
+        }
+    }
+});
 
+document.body.addEventListener('htmx:responseError', function(evt) {
+    if (evt.detail.xhr.status === 400) {
+        const errorDiv = document.getElementById('upload-error');
+        errorDiv.innerText = evt.detail.xhr.responseText;
+        setTimeout(() => { errorDiv.innerText = ''; }, 5000);
+    }
+});
+</script> #}
 
-    {# TODO #}
-    {# SEARCH BAR QUE FILTRA OS CAMPOS DA TABELA ABAIXO #}
-
-
-    {# RIGHT BUTTON #}
-    <button id="nav-create-terreno"
-      hx-get="/terreno/create"
-      hx-target="#content"
-      hx-swap="innerHTML" 
-      hx-push-url="true" 
-      href="/terreno/create"
-      type="button" 
-      class="
-        inline-flex 
-        justify-center 
-        items-center gap-2 
-        whitespace-nowrap 
-        rounded-radius
-        bg-primary border border-primary dark:border-primary-dark 
-        px-4 py-2 
-        text-sm font-medium 
-        tracking-wide
-        text-on-primary 
-        cursor-pointer
-        transition
-        hover:opacity-75
-        hover:shadow-md 
-        text-center focus-visible:outline 
-        focus-visible:outline-offset-2
-        focus-visible:outline-primary  dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark
-        max-w-30
-      "
-    >
-      <i data-lucide="circle-plus" class="size-5"></i>
-      Novo
-    </button>
-
-  </div>{# END CONTENT HEADER #}
-</div>
--->
 
 <div class="content-frame overflow-y-auto">
     <div class="content-header">
         <div class="title">
             <div class="icon">
-                <i data-lucide="map"></i>
+                <i data-lucide="land-plot"></i>
             </div>
             <div>
-                <h2>Terreno: {{item.nome}}</h2>
-                <p>ID: #{{item.id}} • <span class="text-primary font-medium">{{item.cidade}}/{{item.uf}}</span></p>
+                <h2>Terreno {{item.name}}</h2>
+                <p>Gerencia</p>
             </div>
         </div>
-        
-        {# Badge de Status Dinâmico #}
-        {# <div class="flex items-center gap-2 px-3 py-1 rounded-full {% if item.torres|length >= item.capacidade_max %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} text-xs font-bold uppercase">
-            <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 {% if item.torres|length >= item.capacidade_max %}bg-red-400{% else %}bg-green-400{% endif %}"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 {% if item.torres|length >= item.capacidade_max %}bg-red-500{% else %}bg-green-500{% endif %}"></span>
-            </span>
-            {{ "Capacidade Esgotada" if item.torres|length >= item.capacidade_max else "Disponível para Instalação" }}
-        </div> #}
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start mt-6">
-        
-        {# COLUNA ESQUERDA: DADOS TÉCNICOS (2/3 da largura) #}
-        <div class="lg:col-span-2 flex flex-col gap-6">
-            <form action="" method="POST" class="bg-surface border border-outline p-6 rounded-radius shadow-sm">
-                <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
-                    <i data-lucide="info" class="size-4 text-primary"></i> 
-                    Informações Gerais
-                </h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {# Nome #}
+    {# MAIN GRID #}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start mt-4 h-full">
+
+        {# COLUNA ESQUERDA: FORMULÁRIO #}
+        <div class="flex flex-col gap-4 h-full">
+            <form action="" method="POST" class="flex flex-col gap-6">
+
+                {# PRIMEIRA LINHA: NOME + ALTURA #}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="form-field md:col-span-2">
-                        <label for="inputname">Nome do Terreno</label>
-                        <div class="input-field group">
-                            <input id="inputname" class="field" type="text" name="name" value="{{ item.nome }}" required />
+                        <label for="inputname">Nome do terreno</label>
+                        <div class="input-field group {% if form and form.name.error %}border-red-500{% endif %}">
+                            <input id="inputname" class="field" type="text" name="name" maxlength="50" placeholder="Ex: Torre Alvorada" value="{{ item.name }}" autocomplete="off" required />
                         </div>
+                        {% if form and form.name.error %}
+                            <span class="text-red-500 text-xs mt-1 block italic">{{ form.name.error }}</span>
+                        {% endif %}
                     </div>
 
-                    {# Localização Geográfica #}
-                    <div class="form-field">
-                        <label>Coordenadas (Lat, Long)</label>
-                        <div class="flex gap-2">
-                            <div class="input-field bg-surface-alt flex-1 flex items-center px-3 gap-2">
-                                <i data-lucide="navigation" class="size-4 text-gray-400"></i>
-                                <input disabled class="field text-xs" placeholder="{{ item.latitude }}, {{ item.longitude }}">
-                            </div>
-                            <a href="https://www.google.com/maps?q={{item.latitude}},{{item.longitude}}" target="_blank" class="p-2 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors" title="Ver no Mapa">
-                                <i data-lucide="external-link" class="size-5"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    {# Área #}
-                    <div class="form-field">
-                        <label>Área Total</label>
+                    {# <div class="form-field">
+                        <label class="opacity-70">Altura</label>
                         <div class="input-field bg-surface-alt flex items-center px-3 gap-2">
-                            <i data-lucide="maximize" class="size-4 text-gray-400"></i>
-                            <input disabled class="field" placeholder="{{ item.area_m2 }} m²">
+                            <i data-lucide="ruler" class="size-4 text-gray-400"></i>
+                            <input disabled class="field" placeholder="{{ item.altura }} metros">
+                        </div>
+                    </div> #}
+                </div>
+
+                {# SEGUNDA LINHA: TERRENO + TIPO #}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-field">
+                        <label class="opacity-70">Latitude</label>
+                        <div class="input-field bg-surface-alt flex items-center px-3 gap-2">
+                            <i data-lucide="land-plot" class="size-4 text-gray-400"></i>
+                            <input disabled class="field" placeholder="{{ item.lat }}">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label class="opacity-70">Longitude</label>
+                        <div class="input-field bg-surface-alt flex items-center px-3 gap-2">
+                            <i data-lucide="radio-tower" class="size-4 text-gray-400"></i>
+                            <input disabled class="field" placeholder="{{ item.lng }}">
                         </div>
                     </div>
                 </div>
 
-                <button type="submit" class="form-create-btn mt-6 w-full md:w-fit">
+                <button type="submit" class="form-create-btn">
                     <i data-lucide="save" class="size-4"></i>
-                    Atualizar Cadastro
+                    Salvar Alterações
                 </button>
             </form>
-
-            {# SEÇÃO DE TORRES INSTALADAS NO TERRENO #}
-            <div class="bg-surface border border-outline rounded-radius p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-sm font-semibold flex items-center gap-2">
-                        <i data-lucide="radio-tower" class="size-4 text-primary"></i> 
-                        Torres Instaladas ({{ item.torres|length }})
-                    </h3>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {% for torre in item.torres %}
-                    <a href="/torre/view/{{torre.id}}" class="flex items-center p-3 border border-outline rounded-md hover:border-primary transition-all group">
-                        <div class="size-10 rounded bg-surface-alt flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                            <i data-lucide="radio-tower" class="size-5"></i>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium">{{ torre.name }}</p>
-                            <p class="text-xs text-gray-500">{{ torre.altura }}m • {{ torre.tipo.value }}</p>
-                        </div>
-                    </a>
-                    {% else %}
-                    <div class="col-span-2 py-8 text-center border-2 border-dashed border-outline rounded-md">
-                        <p class="text-sm text-gray-400">Nenhuma torre instalada neste terreno.</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
         </div>
 
-        {# COLUNA DIREITA: DOCUMENTAÇÃO E CARDS RÁPIDOS (1/3 da largura) #}
-        <div class="flex flex-col gap-6">
-            
-            {# Card de Resumo de Ocupação #}
-            <div class="bg-primary text-white p-6 rounded-radius shadow-md relative overflow-hidden">
-                <i data-lucide="layers" class="absolute -right-4 -bottom-4 size-24 opacity-10"></i>
-                <h4 class="text-xs uppercase tracking-wider opacity-80 font-bold">Ocupação do Solo</h4>
-                <div class="mt-4 flex items-end gap-2">
-                    <span class="text-4xl font-bold">30%</span>
-                    <span class="text-sm mb-1 opacity-80">Capacidade</span>
-                </div>
-                <div class="w-full bg-white/20 h-2 rounded-full mt-4">
-                    <div class="bg-white h-full rounded-full" style="width: 300%"></div>
-                </div>
-            </div>
+        {# COLUNA DIREITA: DOCUMENTOS COM ABAS #}
+        <div class="flex flex-col gap-4 h-full">
+            <div class="bg-surface border border-outline shadow-sm rounded-radius flex flex-col h-[600px]">
 
-            {# Área de Documentos (HTMX) #}
-            <div class="bg-surface border border-outline shadow-sm rounded-radius flex flex-col min-h-[400px]">
-                <div id="subpage-card" class="w-full h-full flex flex-col" 
-                     hx-get="/terreno/view/{{item.id}}/docs" 
-                     hx-target="this" 
-                     hx-trigger="load once">
-                    <div class="p-8 flex justify-center items-center">
-                        <span class="loading-spinner">Carregando documentos...</span>
-                    </div>
+
+                <div id="subpage-card" class="w-full h-full flex flex-col" {# hx-get="/torre/view/{{item.id}}/{{initial_subpage}}" #} hx-target="this" hx-trigger="load once" hx-swap="innerHTML"> {# HTMX SUBSTITUI TUDO #}
+                {# {% block subpage %}
+                {% endif %}     #}
                 </div>
+
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+</style>
 {% endblock content %}

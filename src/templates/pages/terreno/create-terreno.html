@@ -4,8 +4,8 @@
 
 {# leaflet #}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
-crossorigin=""></script> 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+crossorigin=""></script>
 
 
 
@@ -57,7 +57,7 @@ crossorigin=""></script>
             //});
         },
         init() {
-            // Em vez de um loop while, usamos um pequeno delay ou 
+            // Em vez de um loop while, usamos um pequeno delay ou
             // verificamos se o Leaflet (L) já está disponível.
             const checkLeaflet = setInterval(() => {
                 if (typeof L !== 'undefined') {
@@ -84,7 +84,7 @@ crossorigin=""></script>
 
         async geocode(lat, lng){
             try {
-                //geocoding reverso para atualizar o texto 
+                //geocoding reverso para atualizar o texto
                 const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=${this.zoom_level}&addressdetails=1&extratags=1&accept-language=pt-BR`);
 
                 const r_data = await response.json();
@@ -150,7 +150,7 @@ crossorigin=""></script>
                 return;
             };
 
-            //se mapa e marcador 
+            //se mapa e marcador
             if (this.map && this.marker) {
                 //altualiza coordenadas reais e display
                 //this.updatelatlng(p_lat, p_lng)
@@ -159,7 +159,7 @@ crossorigin=""></script>
                 // Atualiza as variáveis internas
                 this.lat = p_lat;
                 this.lng = p_lng;
-                
+
                 // Atualiza o display (d_lat/d_lng) APENAS se a diferença for significativa
                 // Isso evita que o cursor pule enquanto o usuário digita
                 if (Math.abs(this.d_lat - p_lat) > 0.00001) {
@@ -168,8 +168,8 @@ crossorigin=""></script>
                 if (Math.abs(this.d_lng - p_lng) > 0.00001) { //0.0001
                     this.d_lng = p_lng.toFixed(this.f_lat_lng);
                 }
-                
-                //mover o mapa e o marcador para coordenadas reais 
+
+                //mover o mapa e o marcador para coordenadas reais
                 this.update_map_marker()
                 //busca o novo texto do endereço
                 this.s_addr_txt = "Buscando endereço...";
@@ -185,7 +185,7 @@ crossorigin=""></script>
             this.s_addr_txt = data.selectedAddress;
             this.search_query = data.selectSearchAddress;
 
-            this.updatelatlng(n_lat, n_lng)        
+            this.updatelatlng(n_lat, n_lng)
             this.update_map_marker()
             //this.map.setView([this.lat, this.lng], this.zoom_level);
             //this.marker.setLatLng([this.lat, this.lng]);
@@ -211,14 +211,14 @@ crossorigin=""></script>
 
         //formatMoeda(e) {
         //    let value = this.valorAluguel.replace(/\D/g, ""); // Remove tudo que não é dígito
-            
+
             // Converte para decimal (centavos)
         //    value = (value / 100).toFixed(2) + "";
-            
+
             // Troca ponto por vírgula e adiciona separador de milhar
         //    let parts = value.split(".");
         //    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            
+
         //    this.valorAluguel = parts.join(",");
         //},
 
@@ -227,7 +227,7 @@ crossorigin=""></script>
         //    if (!this.valorAluguel) return 0;
         //    // Remove pontos de milhar e troca a vírgula decimal por ponto
         //    return parseFloat(this.valorAluguel.replace(/\./g, '').replace(',', '.'));
-        //},         
+        //},
     })
 
     registerComponent("newTerrenoForm", terrenoFormComponent)
@@ -247,31 +247,31 @@ x-data="newTerrenoForm">
                 <h2>Novo Terreno</h2>
                 <p>criação</p>
             </div>
-        </div>      
+        </div>
         </div>
         <div class=" w-1/2"
         x-on:htmx:after-swap="show_results = true">{# ALINHADA NA DIREITA #}
         {# SearchBar Container #}
-            <div 
+            <div
                 id="pesquisaEndereco"
                 class="
-                    relative 
+                    relative
                     text-on-surface dark:text-on-surface-dark
-                    flex w-full flex-col 
+                    flex w-full flex-col
                     pl-2 pr-2
                 "
-            > 
+            >
                 <input id="pesquisaEnderecoInput"  {# SearchBar #}
-                    name="address_query" 
+                    name="address_query"
                     type="text"
                     placeholder="Pesquiar endereço" aria-label="pesquisar endereco"
-                    
+
                     {# HMTX #}
                     x-model="search_query"
-                    hx-get="/htmx/address/search" 
+                    hx-get="/htmx/address/search"
                     hx-trigger="keyup changed delay:300ms"
-                    hx-swap="innerHTML" 
-                    hx-target="#search-results" 
+                    hx-swap="innerHTML"
+                    hx-target="#search-results"
                     hx-indicator=".htmx-indicator"
                     {# EVENTOS #}
                     @input="show_results = false"
@@ -283,19 +283,19 @@ x-data="newTerrenoForm">
                     {# CSS #}
                     class="
                         w-full
-                        rounded-radius 
+                        rounded-radius
                         border border-outline dark:border-outline-dark
                         bg-surface-alt dark:bg-surface-dark-alt/50
-                        py-2 pl-10 pr-2 
+                        py-2 pl-10 pr-2
                         text-sm
                         focus-visible:outline focus-visible:outline-offset-1
-                        focus-visible:outline-dark dark:focus-visible:outline                    
+                        focus-visible:outline-dark dark:focus-visible:outline
                     "/>
 
-                    <i data-lucide="search" 
+                    <i data-lucide="search"
                     class="
                         size-5
-                        absolute left-4.5 top-1/2 -translate-y-1/2 
+                        absolute left-4.5 top-1/2 -translate-y-1/2
                         text-on-surface/50 dark:text-on-surface-dark/50"></i>
                     <span id="loading-wrapper" class="htmx-indicator absolute right-2.5 top-1/2 -translate-y-1/2">
                         {# ÍCONE (Controlado pelo Lucide e Tailwind) #}
@@ -303,20 +303,20 @@ x-data="newTerrenoForm">
                     </span>
 
             </div>
-    
+
 
             <div class="relative"> {# result container #}
-                <div 
+                <div
                     class="
                         absolute z-1001 px-2
                         w-full top-full
                         flex flex-col "
                     style="margin-top: 6px;"
                 >
-                    <ul id="search-results" 
-                        class=" 
+                    <ul id="search-results"
+                        class="
                             bg-surface-alt dark:bg-surface-dark-alt
-                            border border-outline dark:border-outline-dark 
+                            border border-outline dark:border-outline-dark
                             shadow-2xl
                             rounded-radius
                         "
@@ -324,10 +324,10 @@ x-data="newTerrenoForm">
                         x-show="show_results"
                         x-ref="searchResults"
                     >{% block search_results %}{% endblock search_results %}</ul>
-                </div> 
+                </div>
             </div>
-        
-        </div>  
+
+        </div>
     </div>
 
 
@@ -335,14 +335,14 @@ x-data="newTerrenoForm">
 
 
 
-    <div 
+    <div
         class="flex flex-row h-full overflow-x-auto gap-4"
     >
 
 
         <!-- Coluna do formulário -->
         <div class="flex flex-col flex-1 gap-4 h-full">
-            
+
             {% block form %}
 
             <form hx-post="/terreno/create"
@@ -355,7 +355,7 @@ x-data="newTerrenoForm">
                 {# address: s_addr_txt, #}
                 "
                 class=" flex flex-col  justify-between"
-            >       
+            >
 
                 {# campo NOME #}
                 <div class="form-field pb-4">
@@ -364,14 +364,14 @@ x-data="newTerrenoForm">
 
                     <div class="pl-2">
                         <div class="input-field {% if form and form.name.error %}border-red-500{% endif %}">
-                            <input 
+                            <input
                                 id="name"
                                 class="field curor-pointer"
                                 x-model="name"
                                 type="text"
                                 name="name"
                                 maxlength="80"
-                                placeholder="Nome da terreno"
+                                placeholder="Nome do terreno"
                                 autocomplete="off"
                                 required
                                 {% if name and name.value %}
@@ -389,7 +389,7 @@ x-data="newTerrenoForm">
 
                 {# Endereço selecionado #}
                 <div class="form-field pb-6">
-                    <label 
+                    <label
                         for="textselectedaddr"
                         class="
                         w-fit pl-0.5 text-sm">
@@ -401,27 +401,27 @@ x-data="newTerrenoForm">
                         style="resize: none;"
                         disabled
                         x-model="s_addr_txt"
-                        id="textselectedaddr" 
+                        id="textselectedaddr"
                         class="
-                            w-full 
+                            w-full
                             rounded-radius border
                             border-outline dark:border-outline-dark
                             bg-surface-alt  dark:bg-surface-dark-alt/50
-                            px-2.5 py-2 
-                            text-sm 
-                            focus-visible:outline-2 focus-visible:outline-offset-2 
+                            px-2.5 py-2
+                            text-sm
+                            focus-visible:outline-2 focus-visible:outline-offset-2
                             disabled:cursor-not-allowed
                             disabled:opacity-75
                             dark:focus-visible:outline-primary-dark focus-visible:outline-primary
-                        " 
-                        rows="5" 
+                        "
+                        rows="5"
                         placeholder="...">
                     </textarea>
                     </div>
                 </div>
                     {# end endereço selecionado #}
 
-                
+
                 {# end field container #}
 
                 {# send btn #}
@@ -431,9 +431,9 @@ x-data="newTerrenoForm">
                         class="form-create-btn flex flex-row flex-2"
                         >
                         <i data-lucide="circle-plus"></i>
-                        Criar 
-                    </button> 
-                    
+                        Criar
+                    </button>
+
                 </div>
 
 
@@ -459,13 +459,13 @@ x-data="newTerrenoForm">
                 <div class="flex flex-1 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
                     <div class="group flex items-center w-full rounded-radius border border-outline bg-surface-alt dark:border-outline-dark dark:bg-surface-dark-alt/50 focus-within:ring-2 focus-within:ring-primary">
                         <span class="pl-2 text-xs font-semibold opacity-50 select-none">Latitude:</span>
-                        
-                        <input 
-                            type="text" 
+
+                        <input
+                            type="text"
                             {# x-model="d_lat" #}
                             x-model.debounce.500ms="d_lat"
                             @input="manualUpdate()"
-                            class="w-full bg-transparent p-1 text-sm focus:outline-none disabled:cursor-not-allowed" 
+                            class="w-full bg-transparent p-1 text-sm focus:outline-none disabled:cursor-not-allowed"
                             name="latitude"
                         />
                     </div>
@@ -474,13 +474,13 @@ x-data="newTerrenoForm">
                 <div class="flex flex-1 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
                     <div class="group flex items-center w-full rounded-radius border border-outline bg-surface-alt dark:border-outline-dark dark:bg-surface-dark-alt/50 focus-within:ring-2 focus-within:ring-primary">
                         <span class="pl-2 text-xs font-semibold opacity-50 select-none">Longitude:</span>
-                        
-                        <input 
-                            type="text" 
+
+                        <input
+                            type="text"
                             {# x-model="d_lng" #}
                             x-model.debounce.500ms="d_lng"
                             @input="manualUpdate()"
-                            class="w-full bg-transparent p-1 text-sm focus:outline-none disabled:cursor-not-allowed" 
+                            class="w-full bg-transparent p-1 text-sm focus:outline-none disabled:cursor-not-allowed"
                             name="longitude"
                         />
                     </div>

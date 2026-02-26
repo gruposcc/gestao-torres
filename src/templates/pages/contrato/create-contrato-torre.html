@@ -17,13 +17,16 @@
         dataFinal: initialData.dataFinal || "",
         description: initialData.description || "",
 
+        alturaMaxima: {{ torre.altura|default(0) }},
+
+
         clienteSearch: '',
         showClienteResults: false,
         clienteId: '',
 
-        torreSearch: '',
+        torreSearch: initialData.torreSearch || '',
         showTorreResults: false,
-        torreId: '',
+        torreId: initialData.torreId || '',
 
         faceOpen: false,
         face: '',
@@ -33,20 +36,45 @@
         novoAte: '',
 
         alturas: [],
+        activeDeleteId: null, // <-- Adicione esta linha
+
+        modalIsOpen: false,
 
         addAltura() {
-
+            // 1. Validação de campos vazios
             if (!this.novoDe || !this.novoAte || !this.face) {
                 alert("Preencha todos os campos da altura!");
                 return;
-            };
+            }
 
-            // Adiciona ao array local
+            // Convertendo para número para evitar erros de comparação de string
+            const de = parseFloat(this.novoDe);
+            const ate = parseFloat(this.novoAte);
+
+            // 2. Validação: De vs Até
+            if (ate <= de) {
+                alert("A altura final (Até) deve ser maior que a altura inicial (De).");
+                return;
+            }
+
+            // 3. Validação: Limite da Torre
+            if (ate > this.alturaMaxima) {
+                alert(`Erro: A altura final (${ate}m) excede o limite da torre (${this.alturaMaxima}m).`);
+                return;
+            }
+
+            if (de < 0) {
+                alert("A altura inicial não pode ser negativa.");
+                return;
+            }
+
+            // 4. Adiciona ao array local se passar em tudo
             this.alturas.push({
-                id: Date.now(), // ID temporário para o x-for
-                metro_de: this.novoDe,
-                metro_ate: this.novoAte,
+                id: Date.now(),
+                metro_de: de,
+                metro_ate: ate,
                 face: this.face,
+                face_nome: this.faceText // Adicionado para exibir o nome correto na lista
             });
 
             // Limpa os campos
@@ -54,6 +82,13 @@
             this.novoAte = '';
             this.face = '';
             this.faceText = '';
+
+            // Aguarda a renderização do DOM e recarrega os ícones
+            this.$nextTick(() => {
+                if (typeof window.reloadLucide === 'function') {
+                    window.reloadLucide();
+                }
+            });
         },
 
         removeAltura(id) {
@@ -204,14 +239,17 @@
     {% if form %}
         x-data="contratoForm({})"
     {% else %}
-        x-data="contratoForm({})"
+        x-data="contratoForm({
+            'torreSearch': '{{torre.name}}',
+            'torreId': '{{torre.id}}'})
+        "
     {% endif %}
 
 
      class="w-full h-full flex flex-row gap-6">
         <form
             class="w-full h-full flex gap-6"
-            hx-post="/contrato/torre/{{torre.id}}/create"
+            hx-post="/contrato/create"
             hx-target="#content"
             hx-swap="innerHTML"
         >
@@ -481,7 +519,7 @@
                     </div>
 
 
-                    <div class="form-field flex-1" x-show="recorrencia !== 'Única' && recorrencia !== ''" x-transition>
+                    <div class="form-field flex-1" x-cloak x-show="recorrencia !== 'Única' && recorrencia !== ''" x-transition>
                         <label>Data Final:</label>
                         <div class="pl-2">
                             <div class="input-field group relative cursor-pointer">
@@ -503,10 +541,16 @@
                 </div>
 
                 {# Botão Criar #}
-                <div class="pt-8 pl-2">
-                    <button type="submit" class="form-create-btn w-full justify-center">
+                <div class="pt-8 pl-2 relative">
+                    <button id="realsubmit" type="submit" class="hidden absolute w-full justify-center">
+
+                    </button>
+                     <button {# @click="modalIsOpen: true" #}
+                        type="submit"
+                        type="button"
+                        class="form-create-btn w-full justify-center">
                         <i data-lucide="circle-plus"></i>
-                        Salvar Despesa
+                        Criar Contrato
                     </button>
                 </div>
             </div>
@@ -514,7 +558,7 @@
             <div class="gap-4 w-full h-full flex flex-col"> {# COLUNA DIREITA #}
                 {# PESQUISA TORRE #}
                 <div class="form-field flex-1 pb-2">
-                    <label for="inputTorre">Torre de Instalação: </label>
+                    <label for="inputTorre">Torre: </label>
                     <div class="pl-2">
                         <div class="input-field relative">
                             <i data-lucide="tower-control" class="icon"></i> {# Ícone de torre #}
@@ -526,22 +570,24 @@
                                 autocomplete="off"
                                 x-model="torreSearch"
 
+                                disabled
+
                                 {# HTMX para buscar torres #}
                                 hx-post="/torre/search"
                                 hx-trigger="keyup changed delay:350ms, click"
                                 hx-target="#torre-results"
                                 hx-swap="innerHTML"
 
-                                @input="showTorreResults = true, torreId = ''"
-                                @mousedown="showTorreResults = true"
-                                @click.away="showTorreResults = false"
+                                {# @input="showTorreResults = true, torreId = ''"
+                                @click="showTorreResults = true"
+                                @click.away="showTorreResults = false" #}
                             >
 
                             <input type="hidden" name="torre_id" x-model="torreId" required>
 
-                            <span class="toggle" @click="showTorreResults = !showTorreResults">
+                            {# <span class="toggle" @click="showTorreResults = !showTorreResults">
                                 <i data-lucide="chevron-down" :class="showTorreResults ? 'rotate-180' : ''"></i>
-                            </span>
+                            </span> #}
 
                             {# RESULTADOS TORRE #}
                             <div class="result-anchor" x-show="showTorreResults" x-cloak>
@@ -591,7 +637,7 @@
 
                             {# INPUT ATÉ #}
                             <div class="form-field flex-1 max-w-40">
-                                <label class="text-xs">Altura final:</label>
+                                <label class="text-xs">Altura final (Máx: <span x-text="alturaMaxima"></span>m):</label>
                                 <div class="input-field ">
                                     <input type="number" x-model="novoAte" placeholder="10" class="field">
                                 </div>
@@ -623,7 +669,6 @@
                                         </button>
 
                                             <input
-                                            name="selectFace"
                                             id="selectFace"
                                             class="field cursor-pointer pl-8 pr-8"
                                             placeholder="Selecione a Face"
@@ -632,10 +677,10 @@
                                             x-model="faceText"
 
                                             >
-                                            <input type="text" name="face" x-model="face" required class="value-field"
+                                            {# <input type="text" name="face" x-model="face" required class="value-field"
                                             oninput="this.setCustomValidity('')"
                                             oninvalid="this.setCustomValidity('Selecione um tipo da lista')"
-                                            >
+                                            > #}
                                     </div>
 
                                     <div class="options-anchor">
@@ -666,12 +711,12 @@
                             </div>
                                 <div class="form-field flex-row flex-1">
                                 <button
-                                    @click=""
+                                    @click="addAltura()"
                                     type="button"
-                                    class="form-create-btn flex flex-row p-1 text-sm"
+                                    class="form-create-btn flex flex-row p-1.5 text-sm text-center"
                                     >
-                                    <i data-lucide="circle-plus"></i>
-                                    Adicionar
+                                    <i class="size-5" data-lucide="circle-plus"></i>
+                                    <p>Adicionar</p>
                                 </button>
                             </div>
 
@@ -682,38 +727,96 @@
 
 
                 {# LISTA SCROLLABLE #}
-                <div class="flex-1 overflow-y-auto p-4 custom-scrollbar bg-surface/50">
-                    <div class="space-y-2">
-
+                <div class="flex-1 p-4 custom-scrollbar bg-surface/50">
+                    <div class="space-y-2 h-full w-full  ">
                         <template x-for="item in alturas" :key="item.id">
+                            <div
+                                :class="activeDeleteId === item.id ? 'bg-red-50/50 border-red-200' : 'bg-surface border-outline'"
+                                class="group flex flex-col p-3 rounded-radius border hover:border-primary/30 hover:shadow-md transition-all duration-300 overflow-hidden relative min-h-[64px] justify-center"
+                            >
 
-                            <div class="group flex items-center gap-4 p-3 rounded-radius border border-outline bg-surface hover:border-primary/50 transition-all">
-                                <div class="p-2 bg-slate-100 rounded text-slate-500">
-                                    <i data-lucide="layers" class="size-4"></i>
-                                </div>
+                                <input type="hidden" name="alturas" :value="JSON.stringify(item)">
 
-                                <div class="flex-1">
-                                    <div class="text-sm font-semibold text-on-surface" x-text="item.face_nome"></div>
-                                    <div class="text-[11px] text-on-surface-variant">
-                                        <span x-text="item.metro_de"></span>m — <span x-text="item.metro_ate"></span>m
+                                {# CONTEÚDO PRINCIPAL (Informações da Altura) #}
+                                <div x-show="activeDeleteId !== item.id"
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0"
+                                    x-transition:enter-end="opacity-100"
+                                    class="flex items-center gap-4">
+
+                                    <div class="p-2 bg-slate-100 rounded text-slate-500 flex-shrink-0">
+                                        <i data-lucide="layers" class="size-4"></i>
+                                    </div>
+
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-sm font-semibold text-on-surface" x-text="item.face_nome"></div>
+                                        <div class="text-[11px] text-on-surface-variant">
+                                            <span x-text="item.metro_de"></span>m — <span x-text="item.metro_ate"></span>m
+                                        </div>
+                                    </div>
+
+                                    {# AÇÕES EM HOVER (O Botão que desliza) #}
+                                    <div class="flex items-center">
+                                        <div class="flex items-center w-0 opacity-0 group-hover:w-12 group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out overflow-hidden">
+                                            <div class="flex gap-1 border-l border-outline pl-2">
+                                                <button type="button"
+                                                        @click.stop="activeDeleteId = item.id"
+                                                        class="p-1.5 hover:bg-red-50 hover:text-red-600 rounded transition-colors text-on-surface-variant">
+                                                    <i data-lucide="trash-2" class="size-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {# Hidden input para o POST do form principal #}
-                                <input type="hidden" name="alturas[]" :value="JSON.stringify(item)">
+                                {# INTERFACE DE CONFIRMAÇÃO DE DELEÇÃO #}
+                                <div x-show="activeDeleteId === item.id"
+                                    x-transition:enter="transition ease-out duration-200 delay-100"
+                                    x-transition:enter-start="opacity-0 scale-95"
+                                    x-transition:enter-end="opacity-100 scale-100"
+                                    class="absolute inset-x-4 flex items-center justify-between" x-cloak>
 
-                                <button type="button" @click="removeAltura(item.id)"
-                                        class="p-2 text-on-surface-variant hover:text-red-600 hover:bg-red-50 rounded-md transition-colors">
-                                    <i data-lucide="trash-2" class="size-4"></i>
-                                </button>
+                                    <div class="flex items-center gap-2">
+                                        <div class="p-1.5 bg-red-100 text-red-600 rounded-full">
+                                            <i data-lucide="alert-triangle" class="size-4"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-red-700 leading-none">Remover faixa?</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex gap-2">
+                                        <button type="button" @click.stop="activeDeleteId = null"
+                                                class="px-2 py-1 text-[10px] font-semibold text-slate-500 hover:bg-slate-200/50 rounded-md transition-colors">
+                                            Cancelar
+                                        </button>
+                                        <button type="button" @click="removeAltura(item.id); activeDeleteId = null"
+                                                class="px-2 py-1 text-[10px] font-bold bg-red-600 text-white hover:bg-red-700 rounded-md shadow-sm transition-all">
+                                            Confirmar
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {# Hidden input para o POST do form #}
+                                <input type="hidden" name="alturas[]" :value="JSON.stringify(item)">
                             </div>
                         </template>
 
-                        {# Empty State #}
-                        <div x-show="alturas.length === 0" class="py-12 flex flex-col items-center justify-center text-on-surface-variant/40 gap-2 border-2 border-dashed border-outline/30 rounded-radius">
-                            <i data-lucide="database" class="size-8"></i>
-                            <p class="text-[11px] font-medium">Nenhuma especificação técnica</p>
-                        </div>
+                    {# Empty State #}
+                    <div x-show="alturas.length === 0" class="relative bg-surface-alt flex flex-col flex-1 h-full items-center justify-center ext-on-surface-variant opacity-50 gap-2 border-2 border-dashed border-outline rounded-radius">
+                        <i data-lucide="info" class="mb-2"></i>
+
+                        <input type="text"
+                            :value="alturas.length > 0 ? 'tem_item' : ''"
+                            required
+                            class="absolute inset-0 opacity-0 pointer-events-none"
+                            oninvalid="this.setCustomValidity('Adicione pelo menos uma faixa de altura à lista')"
+                            oninput="this.setCustomValidity('')">
+
+                        <p class="text-xs">Nenhuma faixa de altura adicionada.</p>
+                    </div>
+
+
                     </div>
                 </div>
 
@@ -727,6 +830,64 @@
             </div>
         </form>
 
+
+
+
+
+<div
+     class="relative z-50"> {# z-50 para garantir que fique no topo #}
+
+    <div x-cloak x-show="modalIsOpen"
+         x-transition.opacity.duration.200ms
+         x-trap.inert.noscroll="modalIsOpen"
+         @keydown.escape.window="modalIsOpen = false"
+         class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 pb-8 backdrop-blur-sm sm:items-center lg:p-8"
+         role="dialog" aria-modal="true">
+
+        {# Fundo clicável para fechar #}
+        <div class="fixed inset-0" @click="modalIsOpen = false"></div>
+
+        <div x-show="modalIsOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             class="relative flex max-w-md w-full flex-col gap-4 overflow-hidden rounded-radius border border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark shadow-xl">
+
+            <div class="flex items-center justify-between border-b border-outline bg-surface-alt/60 p-4 dark:border-outline-dark dark:bg-surface-dark/20">
+                {# Usei text-red-600 caso error-dark não exista #}
+                <h3 class="font-semibold text-red-600 dark:text-red-500 flex items-center gap-2">
+                    <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                    Confirmar Exclusão
+                </h3>
+                <button @click="modalIsOpen = false" class="hover:opacity-70 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="px-6 py-4">
+                <p>Tem certeza que deseja excluir a torre <strong>aaaaaaa</strong>?</p>
+                <p class="text-xs text-on-surface/60 mt-2">Esta ação não pode ser desfeita.</p>
+            </div>
+
+            <div class="flex justify-end gap-3 p-4 bg-surface-alt/30 border-t border-outline dark:border-outline-dark">
+            <button @click="modalIsOpen = false" type="button" class="px-4 py-2">
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="button"
+                        class="rounded-radius bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                        @click="
+                            document.getElementById('realsubmit').click();
+                            modalIsOpen = false;
+                        "
+                    >
+                        Confirmar Exclusão
+                    </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 </div>
 

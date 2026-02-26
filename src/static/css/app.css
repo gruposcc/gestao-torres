@@ -41,7 +41,7 @@
 
     /* border radius */
     --radius-radius: var(--radius-md);
-}  
+}
 
 /* 3. Sobrescreva as variáveis para Dark Mode fora do @theme */
 .dark {
@@ -112,7 +112,7 @@
 .sidebar {
     @apply
         px-2.5
-        fixed left-0 z-10 flex shrink-0 flex-col 
+        fixed left-0 z-10 flex shrink-0 flex-col
         md:translate-x-0 md:relative
         transition-all
         duration-250
@@ -135,7 +135,7 @@
 }
 
 
-.sidebar-container { 
+.sidebar-container {
     @apply
         flex flex-col
         gap-1 items-center
@@ -145,7 +145,7 @@
 
 @layer components {
     .sidebar-item{
-        @apply  
+        @apply
             flex items-center rounded-radius flex-row
             w-full
             h-10  pl-2.5
@@ -164,7 +164,7 @@
         /* .sidebar-item>div>svg */
         & svg {
             @apply
-                relative 
+                relative
                 size-5 shrink-0
                 transition-all duration-300 ease-in-out
             ;
@@ -207,16 +207,16 @@
             @apply
                 w-10 h-10 pl-2.5 absolute
                 flex items-center rounded-radius
-                text-on-surface hover:text-on-surface-strong 
+                text-on-surface hover:text-on-surface-strong
                 hover:bg-primary/5
-                transition-all duration-200 ease-in-out  
+                transition-all duration-200 ease-in-out
         };
         & svg {
             @apply
-                relative 
+                relative
                 size-5 shrink-0
                 transition-all duration-250 ease-in-out
-                
+
             ;
         };
 
@@ -228,7 +228,7 @@
 .top-navbar {
     @apply
         sticky top-0 z-20
-        flex flex-row justify-between 
+        flex flex-row justify-between
         h-15 py-2.5
     ;
 }
@@ -251,12 +251,12 @@
 /* UTILS */
 .default-focus {
     @apply
-    focus-visible:outline-2 focus-visible:outline-offset-0 
+    focus-visible:outline-2 focus-visible:outline-offset-0
     focus-visible:outline-primary
 }
 
 .default-transition {
-    @apply 
+    @apply
     transition-all
     ease-in-out
     duration-200
@@ -287,14 +287,14 @@
         h-full
     }
 
-    
+
 
 
     .content-frame {
-        @apply 
+        @apply
             flex flex-col
             gap-4 p-2
-            w-full 
+            w-full
             min-h-0
         ;
         & .content-header {
@@ -302,39 +302,39 @@
                 flex flex-row
                 items-center justify-between
                 gap-4 h-10
-            
+
         };
         & .title {
-            @apply 
+            @apply
                 transition-all duration-200 ease-in-out
-                flex items-center gap-3 
+                flex items-center gap-3
             ;
             & svg {
                 @apply
                     transition-all duration-200 ease-in-out
                     text-primary
                     size-6
-                
+
             }
             & .icon {
                 @apply
                     transition-all duration-200 ease-in-out
                     px-2 rounded-radius
-                
-            } 
+
+            }
             & h2 {
                 @apply
                     text-xl font-bold
                     text-on-surface-strong
                     leading-none
                     transition-all duration-200 ease-in-out
-                
+
             }
             & p {
-                @apply 
+                @apply
                     transition-all duration-200 ease-in-out
                     text-xs text-on-surface/60 mt-1 min-h-[1rem]
-                
+
             }
         }
 
@@ -382,12 +382,12 @@
             bg-primary  hover:opacity-75 hover:shadow-md shadow-none shadow-primary/60 dark:shadow-primary/40
             text-center items-center justify-between
 
-            /* focus-visible:outline 
+            /* focus-visible:outline
             focus-visible:outline-offset-2
             focus-visible:outline-primary
             */
-            
-            w-full 
+
+            w-full
             max-w-40
         ;
         & svg {
@@ -410,12 +410,12 @@
         bg-primary  hover:opacity-75 hover:shadow-md shadow-none shadow-primary/60 dark:shadow-primary/40
         text-center items-center justify-between
 
-        /* focus-visible:outline 
+        /* focus-visible:outline
         focus-visible:outline-offset-2
           focus-visible:outline-primary
          */
-        
-        w-full 
+
+        w-full
     }
 
 
@@ -445,8 +445,9 @@
             @apply
             rounded-radius
             relative
-            border border-outline 
-            text-sm 
+            border border-outline
+            text-sm
+
             w-full
             transition-all duration-200 ease-in-out
             ;
@@ -457,10 +458,11 @@
                 p-1.5 /* 2 */
 
                 /* FOCUS */
-                focus-visible:outline-2 focus-visible:outline-offset-0 
+                focus-visible:outline-2 focus-visible:outline-offset-0
                 focus-visible:outline-primary
-                
-                bg-surface-alt dark:bg-surface-alt/50  
+                cursor-pointer
+                disabled:cursor-not-allowed disabled:opacity-75
+                bg-surface-alt dark:bg-surface-alt/50
                 transition-all duration-200 ease-in-out
             }
             & .icon {
@@ -474,13 +476,13 @@
             }
             & .toggle {
                 @apply
-                absolute 
+                absolute
                 top-1/2 -translate-y-1/2
-                right-1.5 items-center 
+                right-1.5 items-center
                 justify-between
                 p-1
-                transition-all ease-in-out duration-200 
-                m-0 rounded-xl hover:bg-on-surface/10 
+                transition-all ease-in-out duration-200
+                m-0 rounded-xl hover:bg-on-surface/10
                 ;
                 & svg{
                     @apply
@@ -488,7 +490,7 @@
                     size-4
                     transition-all duration-200 ease-in-out
                 }
-            
+
             }
             & .value-field {
                 @apply
@@ -527,11 +529,11 @@
         ;
         & .item {
             @apply
-            /* group */ 
+            /* group */
             flex justify-between items-center
             cursor-pointer
             hover:bg-info/20
-            p-1.5 
+            p-1.5
             text-sm text-on-surface hover:text-primary
             border-b border-outline last:border-0
             transition-all duration-200 ease-in-out
@@ -539,10 +541,10 @@
             ;
             & .container {
                 @apply
-                flex items-start gap-3 pl-2 
+                flex items-start gap-3 pl-2
                 transition-all duration-200 ease-in-out
             }
-        } 
+        }
     }
 }
 
@@ -571,10 +573,10 @@
         ;
         & .item {
             @apply
-            /* group */ 
+            /* group */
             flex justify-between items-center
             cursor-pointer
-            p-1.5 
+            p-1.5
             hover:bg-info/20
             text-sm text-on-surface hover:text-primary
             border-b border-outline last:border-0
@@ -583,10 +585,10 @@
             ;
             & .container {
                 @apply
-                flex items-start gap-3 pl-2 
+                flex items-start gap-3 pl-2
                 transition-all duration-200 ease-in-out
             }
-        } 
+        }
     }
 }
 

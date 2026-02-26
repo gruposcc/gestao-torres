@@ -23,3 +23,10 @@ def load_models():
 
 load_models()
 """
+
+from .base import BaseSQLModel, DeclarativeBase
+from .clientes import Cliente, ClientePF, ClientePJ
+from .contrato import Altura, Contrato
+from .terreno import Terreno
+from .torre import Torre, DespesaTorre
+from .user import User

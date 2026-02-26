@@ -13,7 +13,8 @@ from fastapi import (
     Response,
     UploadFile,
 )
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
+import json
 from models.torre import RecorrenciaDespesa
 from pydantic import ValidationError
 from datetime import date
@@ -22,6 +23,7 @@ from core.utils.htmx import is_htmx_request, redirect_htmx_header
 from deps.auth import get_user_session
 from deps.db import get_db
 from schemas.despesa import DespesaTorreIn
+from schemas.contrato import ContratoIn, AlturaContratoSchema
 from services.torre import TorreService
 from services.contrato import ContratoService
 from models.contrato import RecorrenciaContrato, FaceDirecao
@@ -63,6 +65,101 @@ async def get_create_contrato_torre(
         context.update(error_context)
 
     return render_page(request, template, context)
+
+
+@router.post("/create")
+async def post_create_contrato(
+    request: Request,
+    name: str = Form(...),
+    cliente_id: uuid.UUID = Form(...),
+    valor: Decimal = Form(...),
+    recorrencia: RecorrenciaContrato = Form(...),
+    data_inicio: date = Form(...),
+    data_final: date | None = Form(None),
+    torre_id: uuid.UUID = Form(...),
+    alturas: List[str] = Form(None, alias="alturas[]"),
+    user=Depends(get_user_session),
+    db=Depends(get_db),
+):
+    error_context = {}
+    parsed_alturas: List[AlturaContratoSchema] = []
+
+    if alturas:
+        for altura_json_str in alturas:
+            try:
+                altura_dict = json.loads(altura_json_str)
+                parsed_alturas.append(AlturaContratoSchema(**altura_dict))
+            except json.JSONDecodeError as e:
+                logger.error(f"Error decoding altura JSON: {e}")
+                error_context["errors"] = ["Erro ao processar dados de altura."]
+                return await get_create_contrato_torre(
+                    request, torre_id, user, db, error_context
+                )
+            except ValidationError as e:
+                logger.error(f"Validation error for altura: {e.errors()}")
+                error_context["errors"] = [
+                    f"Erro de validação para altura: {e.errors()}"
+                ]
+                return await get_create_contrato_torre(
+                    request, torre_id, user, db, error_context
+                )
+
+    if not parsed_alturas:
+        error_context["errors"] = [
+            "É necessário informar pelo menos uma altura para o contrato."
+        ]
+        return await get_create_contrato_torre(
+            request, torre_id, user, db, error_context
+        )
+
+    contrato_service = ContratoService(db)
+
+    # REFACTOR, each altura creates a relation with just one contract
+    # Assuming each altura creates a separate contract for simplicity based on model
+    for altura_data in parsed_alturas:
+        try:
+            contrato_in_data = {
+                "name": name,
+                "cliente_id": cliente_id,
+                "valor": valor,
+                "recorrencia": recorrencia,
+                "data_inicio": data_inicio,
+                "data_final": data_final,
+                "torre_id": torre_id,
+                "metro_inicial": altura_data.metro_de,
+                "metro_final": altura_data.metro_ate,
+                "face": altura_data.face,
+            }
+
+            # Using Pydantic for validation before passing to service
+            contrato_create_schema = ContratoIn(**contrato_in_data)
+
+            await contrato_service.create(contrato_create_schema, user.id)
+
+        except ValidationError as e:
+            logger.error(f"Validation error creating contrato: {e.errors()}")
+            error_context["errors"] = [
+                f"Erro de validação ao criar contrato: {e.errors()}"
+            ]
+            return await get_create_contrato_torre(
+                request, torre_id, user, db, error_context
+            )
+        except Exception as e:
+            logger.error(f"Error creating contrato: {e}")
+            error_context["errors"] = [f"Erro ao criar contrato: {e}"]
+            return await get_create_contrato_torre(
+                request, torre_id, user, db, error_context
+            )
+
+    # If it's an HTMX request, redirect to the list page
+    if is_htmx_request(request):
+        response = Response()
+        redirect_htmx_header(response, "/contrato/list")
+        return response
+
+    return RedirectResponse(
+        url="/contrato/list", status_code=303
+    )  # Redirect after successful creation
 
 
 @router.get("/list")

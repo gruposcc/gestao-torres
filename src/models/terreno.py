@@ -41,30 +41,35 @@ class Terreno(BaseSQLModel, StatusMixin, TimeStampMixin):
     # despesas relaçãõ
 
 
-"""  
-
- class Despesa(BaseSQLModel, TimeStampMixin): 
-
-     ## recorrente 
-
-     ## - mensal - qual dia ? - por qual periodo de tempo. / perpetua 
-
-     ## - anual - data ? - por qual periodo de tempo. / perpetua 
-
-     ## - semanal - data? - por qual periodo de tempo / - 
-
-     ## - diaria 
+class DespesaTerreno(BaseSQLModel):
+    __tablename__ = "despesa_terreno"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
 
-     ## especifica 
+"""
 
-     ## ex: manutenção, compra de equipamento, etc, possivelmente relacionada futuramente com outro modelo 
+ class Despesa(BaseSQLModel, TimeStampMixin):
+
+     ## recorrente
+
+     ## - mensal - qual dia ? - por qual periodo de tempo. / perpetua
+
+     ## - anual - data ? - por qual periodo de tempo. / perpetua
+
+     ## - semanal - data? - por qual periodo de tempo / -
+
+     ## - diaria
 
 
-     ... 
+     ## especifica
+
+     ## ex: manutenção, compra de equipamento, etc, possivelmente relacionada futuramente com outro modelo
+
+
+     ...
 
 
 
- class Renda(BaseSQLModel, TimeStampMixin): ... 
+ class Renda(BaseSQLModel, TimeStampMixin): ...
 
 """
