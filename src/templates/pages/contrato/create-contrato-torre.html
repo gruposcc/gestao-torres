@@ -17,8 +17,11 @@
         dataFinal: initialData.dataFinal || "",
         description: initialData.description || "",
 
+        {% if torre %}
         alturaMaxima: {{ torre.altura|default(0) }},
-
+        {% else %}
+        alturaMaxima: 0
+        {% endif %}
 
         clienteSearch: '',
         showClienteResults: false,
@@ -106,6 +109,8 @@
             this.torreId = id;
             this.torreSearch = name;
             this.showTorreResults = false;
+
+            //atualizar a alturaMaxima
 
             document.getElementsByName('torre_id')[0].setCustomValidity('');
         },
@@ -230,7 +235,11 @@
             </div>
             <div>
                 <h2>Novo Contrato</h2>
+                {% if torre %}
                 <p class="capitalize">Torre {{torre.name}}</p>
+                {% else %}
+                <p class="capitalize">Criação</p>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -240,8 +249,12 @@
         x-data="contratoForm({})"
     {% else %}
         x-data="contratoForm({
+
+            {% if torre %}
             'torreSearch': '{{torre.name}}',
             'torreId': '{{torre.id}}'})
+            {% endif %}
+
         "
     {% endif %}
 

@@ -67,6 +67,29 @@ async def get_create_contrato_torre(
     return render_page(request, template, context)
 
 
+@router.get("/create")
+async def get_create(
+    request: Request,
+    user=Depends(get_user_session),
+    db=Depends(get_db),
+    error_context: Dict | None = None,
+):
+    template = "pages/contrato/create-contrato-torre.html"
+
+    page = {"title": "Torres SCC - Contrato Torre "}
+    context = {
+        "user": user,
+        "page": page,
+        "recorrencias": list[RecorrenciaContrato](RecorrenciaContrato),
+        "faces": list[FaceDirecao](FaceDirecao),
+    }
+
+    if error_context:
+        context.update(error_context)
+
+    return render_page(request, template, context)
+
+
 @router.post("/create")
 async def post_create_contrato(
     request: Request,
@@ -114,46 +137,38 @@ async def post_create_contrato(
 
     contrato_service = ContratoService(db)
 
-    # REFACTOR, each altura creates a relation with just one contract
-    # Assuming each altura creates a separate contract for simplicity based on model
-    for altura_data in parsed_alturas:
-        try:
-            contrato_in_data = {
-                "name": name,
-                "cliente_id": cliente_id,
-                "valor": valor,
-                "recorrencia": recorrencia,
-                "data_inicio": data_inicio,
-                "data_final": data_final,
-                "torre_id": torre_id,
-                "metro_inicial": altura_data.metro_de,
-                "metro_final": altura_data.metro_ate,
-                "face": altura_data.face,
-            }
+    try:
+        contrato_in_data = {
+            "name": name,
+            "cliente_id": cliente_id,
+            "valor": valor,
+            "recorrencia": recorrencia,
+            "data_inicio": data_inicio,
+            "data_final": data_final,
+            "torre_id": torre_id,
+            "alturas": parsed_alturas,
+        }
 
-            # Using Pydantic for validation before passing to service
-            contrato_create_schema = ContratoIn(**contrato_in_data)
+        # Using Pydantic for validation before passing to service
+        contrato_create_schema = ContratoIn(**contrato_in_data)
 
-            await contrato_service.create(contrato_create_schema, user.id)
+        await contrato_service.create(contrato_create_schema, user.id)
 
-        except ValidationError as e:
-            logger.error(f"Validation error creating contrato: {e.errors()}")
-            error_context["errors"] = [
-                f"Erro de validação ao criar contrato: {e.errors()}"
-            ]
-            return await get_create_contrato_torre(
-                request, torre_id, user, db, error_context
-            )
-        except Exception as e:
-            logger.error(f"Error creating contrato: {e}")
-            error_context["errors"] = [f"Erro ao criar contrato: {e}"]
-            return await get_create_contrato_torre(
-                request, torre_id, user, db, error_context
-            )
+    except ValidationError as e:
+        logger.error(f"Validation error creating contrato: {e.errors()}")
+        error_context["errors"] = [f"Erro de validação ao criar contrato: {e.errors()}"]
+        return await get_create_contrato_torre(the c)
+    except Exception as e:
+        logger.error(f"Error creating contrato: {e}")
+        error_context["errors"] = [f"Erro ao criar contrato: {e}"]
+        return await get_create_contrato_torre(
+            request, torre_id, user, db, error_context
+        )
 
     # If it's an HTMX request, redirect to the list page
     if is_htmx_request(request):
         response = Response()
+        # redirect para torre com o header de subpage contratos
         redirect_htmx_header(response, "/contrato/list")
         return response
 

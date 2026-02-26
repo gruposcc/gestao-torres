@@ -15,16 +15,15 @@ create_superuser:
 	@uv run --env-file .env scripts/create_superuser.py
 
 migration:
-	@uv run --env-file .env alembic revision --autogenerate -m initial  
+	@cd ./src && uv run --env-file .env alembic revision --autogenerate -m initial
 
 migrate:
-	@uv run --env-file .env alembic upgrade head 
+	@cd ./src && uv run --env-file ../.env alembic upgrade head
 
 prune_db:
 	@docker volume rm really_aio_torres_db_data
 
 prune_migrations:
-	@rm -r ./src/migrations/versions/*.py
+	@rm -r ./src/alembic/versions/*.py
 
 .PHONY: dev migrate migration create_superuser prune_db prune_migrations dev-full
-
