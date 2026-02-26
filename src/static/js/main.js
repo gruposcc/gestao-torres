@@ -34,8 +34,7 @@ window.registerComponent = registerComponent; */
 document.addEventListener('DOMContentLoaded', () => {
   //listner para alterar o titulo da pagina
   window.addEventListener('updateTitle', (e) => {
-    console.debug("aoooooooooo caralho mudando titulo")
-    console.debug(e.detail)
+    //console.debug(e.detail)
     document.title = e.detail.value;
   });
 
@@ -44,17 +43,17 @@ document.addEventListener('DOMContentLoaded', () => {
     //evita processar o swap se nao tiver conteudo
     if (!event.detail.target) return;
 
-    const isMainContent = event.detail.target.id == 'content' //||  event.detail.target.tagName === "BODY";
-    if (isMainContent) {
-      console.debug("aaaaaaaaaa segura to voando mas nao devo chegar aqi")
-    }
+    //const isMainContent = event.detail.target.id == 'content' //||  event.detail.target.tagName === "BODY";
+    //if (isMainContent) {
+    //  console.debug("nao devo chegar aqi")
+    //}
 
     // Re-renderiza todos os ícones no DOM após o htmx trocar o conteúdo.
     //createIcons({ icons });
     //console.log("Lucide icons re-rendered after HTMX swap.");
     if (typeof createIcons === "function") {
       createIcons({icons})
-      console.debug("Lucide reloaded porra")
+      //console.debug("Lucide reloaded porra")
     }
 
     if (window.Alpine) {
@@ -64,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newPath = window.location.pathname
         Alpine.store('sidebar').currentPath = newPath
 
-        console.log('HTMX Swap Completo. Novo Caminho nessa merda:', newPath);
+        //console.log('HTMX Swap Completo. Novo Caminho nessa:', newPath);
       });
     }
 
