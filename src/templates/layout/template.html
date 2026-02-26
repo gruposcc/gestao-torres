@@ -11,30 +11,30 @@
 {% endblock head %}
 
 {% block body %}
- <div x-data 
-    class="body-container oveflow-hidden" 
-    {# background da sidebar e do header #}    
+ <div x-data
+    class="body-container oveflow-hidden"
+    {# background da sidebar e do header #}
 >
     {% include "partials/header.html" %}
 
-    <div class="flex flex-row grow pb-4 pr-4 overflow-hidden">
+    <div class="flex flex-row grow pb-4 pr-4 overflow-hidden ">
 
         {% include "partials/sidebar.html" %}
 
-        <div class="content-border">
+        <div class="content-border min-w-0 flex-1">
 
             {# moldura  #}
             <div class="content-container">
-                
+
                 <div id="content" class="overflow-hidden">
                 <!-- Add main content here  -->
                     {% block content %}
-                    
 
-                    
+
+
                     {% endblock content %}
                 </div>
-                
+
             </div>
 
         </div>
@@ -42,4 +42,3 @@
     </div>
 </div>
 {% endblock %}
-

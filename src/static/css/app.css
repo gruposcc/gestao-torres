@@ -94,7 +94,7 @@
 @layer components {
     .body-container {
         @apply
-            relative flex w-full flex-col h-svh
+            relative h-svh flex flex-col flex-1
             bg-surface-alt transition-all duration-200 ease-in-out
         ;
         & .sidebar-wrapper {
@@ -268,7 +268,7 @@
         @apply
         border border-outline
         rounded-radius
-        w-full
+        w-svw
         transition-all duration-200 ease-in-out
     }
 

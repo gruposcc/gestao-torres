@@ -1,25 +1,35 @@
 <!-- This allows screen readers to skip the sidebar and go directly to the main content. -->
 <a class="sr-only" href="#content">skip to the main content</a>
 
-<!-- dark overlay for when the sidebar is open on smaller screens  -->
-{# <div class="fixed inset-0 z-10 bg-surface-dark/10 backdrop-blur-xs md:hidden" aria-hidden="true" x-on:click="showSidebar = false" x-transition.opacity></div>
- #}
+<!-- Overlay para fechar a sidebar em telas pequenas quando estiver aberta -->
+<div
+    x-show="$store.sidebar.isSidebarOpen"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    x-cloak
+    @click="$store.sidebar.isSidebarOpen = false"
+    class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+></div>
+
 <nav
     id="nav-sidebar"
-    class="
-        sidebar
-    "
-    :class=" {# SIDEBAR W TOGGLE #}
-        { 'open': $store.sidebar.isSidebarOpen, 'close' : !$store.sidebar.isSidebarOpen}
-    "
-    {# remove a classe do pai #}
+    class="sidebar fixed md:relative z-50 h-full transition-all duration-300 ease-in-out bg-surface-alt shadow-xl md:shadow-none"
+    :class="{
+        'open translate-x-0': $store.sidebar.isSidebarOpen,
+        'close -translate-x-full md:translate-x-0': !$store.sidebar.isSidebarOpen
+    }"
+    :style="window.innerWidth >= 768 ? 'position: relative !important; transform: none !important;' : ''"
     x-init="document.documentElement.classList.remove('sidebar-expanded')"
+    x-data="{ openMenus: [] }"
 >
-    <div {# sidebar items container #}
+    <!-- Container interno -->
+    <div
         id="sidebar-items-container"
-        class="
-            sidebar-container
-        "
+        class="sidebar-container h-full border-r border-outline md:border-none transition-all duration-300"
     >
         {# HOME #}
         <a
@@ -28,103 +38,84 @@
             hx-swap="innerHTML"
             hx-push-url="true"
             href="/home"
-            class=" sidebar-item"
-            :class="{
-                'active' : $store.sidebar.currentPath === '/home'
-            }"
+            class="sidebar-item"
+            :class="{ 'active' : $store.sidebar.currentPath === '/home' }"
         >
             <div>
                 <i data-lucide="house"></i>
                 <span
                     x-cloak
-                    :class="{
-                        'open': $store.sidebar.isSidebarOpen,
-                        'close': !$store.sidebar.isSidebarOpen
-                    }"
+                    :class="{ 'open': $store.sidebar.isSidebarOpen, 'close': !$store.sidebar.isSidebarOpen }"
                 >
                 Home
                 </span>
             </div>
         </a>
 
-        <!--{# USER #}
-        <a
-            hx-get="/user"
-            hx-target="#content"
-            hx-swap="innerHTML"
-            hx-push-url="true"
-            href="/user"
-            class=" sidebar-item "
-            :class="{
-                'active' : $store.sidebar.currentPath === '/user/'
-            }"
-            {#  $store.sidebar.currentPath.startsWith('/terreno') #}
-        >
-            <div>
-                <i data-lucide="users-round"></i>
-                <span
-                    x-cloak
-                    :class="{
-                        'open': $store.sidebar.isSidebarOpen,
-                        'close': !$store.sidebar.isSidebarOpen
-                    }"
-                >
-                Usuários
-                </span>
-            </div>
-        </a>-->
+        {# ITEM COLAPSÁVEL: PATRIMÔNIO #}
+        <div class="w-full px-2" x-data="{ isOpen: false }">
+            <button
+                @click="isOpen = !isOpen"
+                class="sidebar-item w-full relative"
+                :class="{ 'active' : $store.sidebar.currentPath.startsWith('/terreno') || $store.sidebar.currentPath.startsWith('/torre') }"
+            >
+                <div class="flex items-center">
+                    <i data-lucide="layers"></i>
+                    <span
+                        x-cloak
+                        :class="{ 'open': $store.sidebar.isSidebarOpen, 'close': !$store.sidebar.isSidebarOpen }"
+                    >
+                        Patrimônio
+                    </span>
+                </div>
 
-        {# TERRENO #}
-        <a
-            hx-get="/terreno/list"
-            hx-target="#content"
-            hx-swap="innerHTML"
-            hx-push-url="true"
-            href="/terreno/list"
-            class=" sidebar-item "
-            :class="{
-                'active' : $store.sidebar.currentPath.startsWith('/terreno')
-            }"
-        >
-            <div>
-                <i data-lucide="land-plot"></i>
-                <span
+                <i
+                    data-lucide="chevron-down"
+                    class="ml-auto mr-2 transition-transform duration-300 ease-in-out size-4"
+                    :class="{ 'rotate-180': isOpen }"
+                    x-show="$store.sidebar.isSidebarOpen"
                     x-cloak
-                    :class="{
-                        'open': $store.sidebar.isSidebarOpen,
-                        'close': !$store.sidebar.isSidebarOpen
-                    }"
-                >
-                Terrenos
-                </span>
-            </div>
-        </a>
+                ></i>
+            </button>
 
-        {# TORRE #}
-        <a
-            hx-get="/torre/list"
-            hx-target="#content"
-            hx-swap="innerHTML"
-            hx-push-url="true"
-            href="/torre/list"
-            class=" sidebar-item"
-            :class="{
-                'active' : $store.sidebar.currentPath.startsWith('/torre')
-            }"
-        >
-            <div >
-                <i data-lucide="radio-tower"></i>
-                <span
-                    x-cloak
-                    :class="{
-                        'open': $store.sidebar.isSidebarOpen,
-                        'close': !$store.sidebar.isSidebarOpen
-                    }"
+            {# SUBMENU #}
+            <div
+                x-show="isOpen && $store.sidebar.isSidebarOpen"
+                x-collapse
+                x-cloak
+                class="flex flex-col gap-1 w-full mt-1"
+            >
+                {# TERRENO (Sub-item) #}
+                <a
+                    hx-get="/terreno/list"
+                    hx-target="#content"
+                    hx-swap="innerHTML"
+                    hx-push-url="true"
+                    href="/terreno/list"
+                    class="sidebar-item !pl-10 h-9"
+                    :class="{ 'active' : $store.sidebar.currentPath.startsWith('/terreno') }"
                 >
-                Torres
-                </span>
+                    <div class="!relative">
+                        <span class="text-sm opacity-80">Terrenos</span>
+                    </div>
+                </a>
+
+                {# TORRE (Sub-item) #}
+                <a
+                    hx-get="/torre/list"
+                    hx-target="#content"
+                    hx-swap="innerHTML"
+                    hx-push-url="true"
+                    href="/torre/list"
+                    class="sidebar-item !pl-10 h-9"
+                    :class="{ 'active' : $store.sidebar.currentPath.startsWith('/torre') }"
+                >
+                    <div class="!relative">
+                        <span class="text-sm opacity-80">Torres</span>
+                    </div>
+                </a>
             </div>
-        </a>
+        </div>
 
         {# CLIENTES #}
         <a
@@ -133,25 +124,19 @@
             hx-swap="innerHTML"
             hx-push-url="true"
             href="/cliente/list"
-            class=" sidebar-item"
-            :class="{
-                'active' : $store.sidebar.currentPath.startsWith('/cliente')
-            }"
+            class="sidebar-item"
+            :class="{ 'active' : $store.sidebar.currentPath.startsWith('/cliente') }"
         >
             <div>
                 <i data-lucide="handshake"></i>
                 <span
                     x-cloak
-                    :class="{
-                        'open': $store.sidebar.isSidebarOpen,
-                        'close': !$store.sidebar.isSidebarOpen
-                    }"
+                    :class="{ 'open': $store.sidebar.isSidebarOpen, 'close': !$store.sidebar.isSidebarOpen }"
                 >
                 Clientes
                 </span>
             </div>
         </a>
-
 
         {# CONTRATOS #}
         <a
@@ -160,28 +145,20 @@
             hx-swap="innerHTML"
             hx-push-url="true"
             href="/contrato/list"
-            class=" sidebar-item"
-            :class="{
-                'active' : $store.sidebar.currentPath.startsWith('/contrato')
-            }"
+            class="sidebar-item"
+            :class="{ 'active' : $store.sidebar.currentPath.startsWith('/contrato') }"
         >
             <div>
                 <i data-lucide="banknote-arrow-up"></i>
                 <span
                     x-cloak
-                    :class="{
-                        'open': $store.sidebar.isSidebarOpen,
-                        'close': !$store.sidebar.isSidebarOpen
-                    }"
+                    :class="{ 'open': $store.sidebar.isSidebarOpen, 'close': !$store.sidebar.isSidebarOpen }"
                 >
                 Contratos
                 </span>
             </div>
         </a>
+    </div>
 
-
-
-  </div>
-  {% include "partials/user_sidebar.html" %}
-
+    {% include "partials/user_sidebar.html" %}
 </nav>

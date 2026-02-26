@@ -5,7 +5,7 @@ import persist from '@alpinejs/persist'
 //mport { TriangleDashed } from 'lucide';
 import focus from '@alpinejs/focus'
 import mask from '@alpinejs/mask'
-
+import collapse from '@alpinejs/collapse'
 // Caution, this will import all the icons and bundle them.
 createIcons({ icons });
 
@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 Alpine.plugin(persist)
 Alpine.plugin(focus)
 Alpine.plugin(mask)
+Alpine.plugin(collapse)
 // Recommended way, to include only the icons you need.
 /* import { createIcons, Menu, ArrowRight, Globe } from 'lucide';
 
