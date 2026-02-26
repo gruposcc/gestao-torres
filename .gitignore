@@ -10,8 +10,7 @@ wheels/
 .venv
 .env*
 !.env.example
-src/migrations/versions/*
-!src/migrations/versions/.gitkeep
+
 
 
 #node
