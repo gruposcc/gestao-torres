@@ -14,9 +14,9 @@ wheels/
 
 
 #node
-node_modules
+node_modules/*
 
 #vscode
 .vscode/*
 
-.uploads/*
+src/uploads/*
