@@ -150,16 +150,12 @@ async def post_create_contrato_torre(
             request, torre_id, user, db, error_context
         )
 
-    # If it's an HTMX request, redirect to the list page
-    if is_htmx_request(request):
-        response = Response()
-        # redirect para torre com o header de subpage contratos
-        redirect_htmx_header(response, "/contrato/list")
-        return response
+    initial_subpage_header = {"X-Initial-Subpage": "contratos"}
+    response = Response(status_code=200)
 
-    return RedirectResponse(
-        url="/contrato/list", status_code=303
-    )  # Redirect after successful creation
+    return redirect_htmx_header(
+        response, path=f"/torre/view/{torre_id}", extra_headers=initial_subpage_header
+    )
 
 
 @router.get("/create")

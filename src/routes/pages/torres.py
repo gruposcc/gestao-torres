@@ -1,7 +1,7 @@
-import uuid
-import logging
 from decimal import Decimal
+import logging
 from typing import Any, Dict, List
+import uuid
 
 from fastapi import (
     APIRouter,
@@ -14,16 +14,17 @@ from fastapi import (
     UploadFile,
 )
 from fastapi.responses import HTMLResponse
-from models.torre import TipoTorre
 from pydantic import ValidationError
 
-from core.templates import render_chunk, render_page, render
+from core.settings import MAX_SIZE_MB
+from core.templates import render, render_chunk, render_page
 from core.utils.htmx import is_htmx_request, redirect_htmx_header
 from deps.auth import get_user_session
 from deps.db import get_db
+from models.torre import TipoTorre
 from schemas.torre import TorreIn
-from services.torre import TorreService, DocumentoTorreService, DespesaTorreSerivce
-from core.settings import MAX_SIZE_MB
+from services.contrato import ContratoService
+from services.torre import DespesaTorreSerivce, DocumentoTorreService, TorreService
 
 logger = logging.getLogger("app.pages.torre")
 
@@ -176,7 +177,7 @@ async def view(
 ):
     template = "pages/torre/view-torre.html"
 
-    initial_subpage = request.headers.get("X-Initial-Subpage", "arquivos")
+    initial_subpage = request.headers.get("X-Initial-Subpage", "contratos")
 
     context: Dict[str, Any] = {"user": user, "initial_subpage": initial_subpage}
 
@@ -368,9 +369,8 @@ async def despesas(torre_id: uuid.UUID, request: Request, dbSession=Depends(get_
 async def contratos(torre_id: uuid.UUID, request: Request, dbSession=Depends(get_db)):
     template = "pages/torre/subpage/contratos.html"
 
-    # service = DespesaTorreService(dbSession)
-
-    contratos = {}
+    service = ContratoService(dbSession)
+    contratos = await service.get_all()
     context = {"items": contratos, "torre_id": torre_id, "current_tab": "contratos"}
 
     return render_chunk(request, template, context)

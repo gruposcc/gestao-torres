@@ -25,6 +25,11 @@ class AbstractBaseService:
 class AbstractModelService(AbstractBaseService, Generic[T]):
     model: type[T]
 
+    def __init__(self, dbSession: AsyncSession):
+        super().__init__(dbSession)
+
+        self.get_all = self.get_list
+
     async def save(self, obj: T):
         try:
             self.dbSession.add(obj)
@@ -100,6 +105,11 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
         exists = False
         new_obj = await self.create(data=data)
         return exists, new_obj
+
+    # TODO
+    # get list tem paginação
+    # usada para retornar items que fazem scroll
+    # usada para retornar pagina de tabelas
 
     async def get_list(
         self,

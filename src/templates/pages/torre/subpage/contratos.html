@@ -29,11 +29,11 @@
             {% if items|length > 0 %}
                 <div id="items-grid" class="space-y-3" x-data="{ activeDeleteId: null }"">
                     {% for doc in items  %}
-                    <li :class="activeDeleteId === {{ doc.id }} ? 'bg-red-50/50 border-red-200' : 'bg-surface border-outline'"
+                    <li :class="activeDeleteId === '{{ doc.id }}'' ? 'bg-red-50/50 border-red-200' : 'bg-surface border-outline'"
                         class="group flex flex-col p-4 rounded-radius border border-outline bg-surface hover:border-primary/30 hover:shadow-md transition-all overflow-hidden relative min-h-[82px] justify-center">
 
                             {# CONTEÚDO ORIGINAL #}
-                            <div x-show="activeDeleteId !== {{ doc.id }}"
+                            <div x-show="activeDeleteId !== '{{ doc.id }}'"
                                 x-transition:enter="transition ease-out duration-200"
                                 x-transition:enter-start="opacity-0"
                                 x-transition:enter-end="opacity-100"
@@ -42,7 +42,7 @@
                                 x-transition:leave-end="opacity-0"
                                 class="flex items-center gap-4">
 
-                                <div class="p-2.5 bg-blue-50 rounded-lg text-blue-600 flex-shrink-0">
+                                <div class="p-2.5 bg-blue-50 rounded-lg text-blue-600 shrink-0">
                                     <i data-lucide="receipt-text" class="size-5"></i>
                                 </div>
 
@@ -53,7 +53,7 @@
                                     <div class="flex flex-col gap-0.5 mt-0.5">
                                         <p class="text-[11px] text-on-surface-variant flex items-center gap-1">
                                             <i data-lucide="calendar" class="size-3"></i>
-                                            {{ doc.data_inicio.strftime('%d/%m/%Y') }}
+                                            {{ doc.data_inicial.strftime('%d/%m/%Y') }}
                                             {% if doc.data_final %}
                                                 <span class="text-on-surface"> até </span>
                                                 {{ doc.data_final.strftime('%d/%m/%Y') }}
@@ -101,7 +101,7 @@
                             </div>
 
                             {# INTERFACE DE CONFIRMAÇÃO #}
-                            <div x-show="activeDeleteId === {{ doc.id }}"
+                            <div x-show="activeDeleteId === '{{ doc.id }}'"
                                 x-transition:enter="transition ease-out duration-200 delay-100"
                                 x-transition:enter-start="opacity-0 scale-95"
                                 x-transition:enter-end="opacity-100 scale-100"
@@ -133,6 +133,7 @@
                                     </button>
                                 </div>
                             </div>
+
                         </li>
                     {% endfor %}
                 </div>{# END ITEMS LIST #}
