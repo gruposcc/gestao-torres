@@ -67,20 +67,33 @@
                 return;
             }
 
-            // 4. Validação: Verificar se a faixa já existe
-            const alturaExistente = this.alturas.find(item => {
+            // 4. Validação: Verificar se a faixa já existe na mesma face
+            const alturaExistenteMesmaFace = this.alturas.find(item => {
                 const existingDe = item.metro_de;
                 const existingAte = item.metro_ate;
-                // Verifica se há sobreposição entre intervalos
-                return (de < existingAte && ate > existingDe);
+                const mesmaFace = item.face === this.face;
+                // Verifica se há sobreposição E mesma face
+                return mesmaFace && (de < existingAte && ate > existingDe);
             });
 
-            if (alturaExistente) {
-                alert(`Erro: Esta faixa de altura (${de}m - ${ate}m) já está adicionada ou sobrepõe uma faixa existente.`);
+            if (alturaExistenteMesmaFace) {
+                alert(`Erro: Esta faixa de altura (${de}m - ${ate}m) já está adicionada para a face ${this.face}. Faces diferentes podem ter a mesma faixa.`);
                 return;
             }
 
-            // 5. Adiciona ao array local se passar em tudo
+            // 5. Verificar sobreposição em outras faces (apenas warning)
+            const alturaExistenteOutraFace = this.alturas.find(item => {
+                const existingDe = item.metro_de;
+                const existingAte = item.metro_ate;
+                const outraFace = item.face !== this.face;
+                return outraFace && (de < existingAte && ate > existingDe);
+            });
+
+            if (alturaExistenteOutraFace) {
+                console.log(`Aviso: Esta faixa de altura (${de}m - ${ate}m) sobrepõe uma faixa existente na face ${alturaExistenteOutraFace.face}`);
+            }
+
+            // 6. Adiciona ao array local se passar em tudo
             this.alturas.push({
                 id: Date.now(),
                 metro_de: de,
@@ -281,7 +294,7 @@
      class="w-full h-full flex flex-row gap-6">
         <form
             class="w-full h-full flex gap-6"
-            hx-post="/contrato/create"
+            hx-post="/contrato/create/torre"
             hx-target="#content"
             hx-swap="innerHTML"
         >
@@ -551,7 +564,7 @@
                     </div>
 
 
-                    <div class="form-field flex-1" x-cloak x-show="recorrencia !== 'Única' && recorrencia !== ''" 
+                    <div class="form-field flex-1" x-cloak x-show="recorrencia !== 'Única' && recorrencia !== ''"
                         x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="opacity-0"
                         x-transition:enter-end="opacity-100"

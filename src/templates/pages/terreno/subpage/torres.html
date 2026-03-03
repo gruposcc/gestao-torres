@@ -1,0 +1,56 @@
+<div class="flex flex-col h-full bg-surface rounded-radius overflow-hidden transition-all duration-200 ease-in-out">
+
+    <div class="
+        px-5 border-b border-outline flex justify-between items-center bg-surface-alt/50 rounded-t-radius min-h-[56px]"
+    >
+        <div class="text-on-surface flex items-center gap-2 whitespace-nowrap">
+            <i data-lucide="radio-tower" class="size-6"></i>
+            <h3 class="font-semibold">
+                Torres
+            </h3>
+            <span class="px-2 py-0.5 text-[11px] text-center items-center bg-primary/10 rounded-full border border-primary/20">
+                {{ item.torres|length }}
+            </span>
+        </div>
+
+        <div class="flex gap-1 overflow-x-auto max-w-full no-scrollbar" role="tablist">
+            {% include "pages/terreno/subpage/partials/subpage-navigation.html" %}
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-0">
+        {% if item.torres|length > 0 %}
+            <div class="space-y-3">
+                {% for torre in item.torres %}
+                <div class="group flex items-center p-4 rounded-radius border border-outline bg-surface hover:border-primary/30 hover:shadow-md transition-all duration-300">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                            <i data-lucide="radio-tower" class="size-5"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-medium text-on-surface truncate">{{ torre.name }}</h4>
+                            <p class="text-xs text-on-surface/50">
+                                {{ torre.tipo.value if torre.tipo else 'Tipo não definido' }} - {{ torre.altura }}m
+                            </p>
+                        </div>
+                    </div>
+                    <a href="/torre/view/{{ torre.id }}" 
+                       class="p-2 text-on-surface/50 hover:text-primary transition-colors"
+                       title="Ver detalhes">
+                        <i data-lucide="eye" class="size-4"></i>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="flex flex-col items-center justify-center h-full text-on-surface/50 gap-2">
+                <i data-lucide="radio-tower" class="size-12 opacity-30"></i>
+                <p class="text-sm">Nenhuma torre neste terreno</p>
+                <a href="/torre/create?terreno_id={{ item.id }}" 
+                   class="text-primary hover:text-primary/80 text-sm font-medium mt-2">
+                    + Adicionar torre
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>

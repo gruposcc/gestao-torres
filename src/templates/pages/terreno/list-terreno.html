@@ -1,11 +1,5 @@
 {% extends "layout/template.html" %}
 
-{# {% if page and page.title %}
-  {% block title %}
-    {{page.title}}
-  {% endblock title %}
-{% endif %} #}
-
 {% block content  %}
 <div class="content-frame">
 
@@ -133,7 +127,7 @@
 
             <td class="text-center">{{item.lat}}</td>
             <td class="text-center">{{item.lng}}</td>
-            <td class="text-center">0</td>
+            <td class="text-center">{{item.torres|length}}</td>
 
             <td class="px-3 py-2 text-center">
               <div class="flex justify-center gap-3">

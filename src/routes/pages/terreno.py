@@ -123,15 +123,11 @@ async def view_terreno(terreno_id: int, request: Request, dbSession=Depends(get_
     template = "pages/terreno/view-terreno.html"
     context: Dict[str, Any] = {"request": request}
 
-    # try:
-    #    terreno = await service.get_terreno
-    # except:
-    # em caso de erro uma resposta diferente
+    initial_subpage = request.headers.get("X-Initial-Subpage", "mapa")
+    context["initial_subpage"] = initial_subpage
 
     service = TerrenoService(dbSession)
     terreno = await service.get_one_by(id=terreno_id, load_relations=["torres"])
-
-    ##colocar dentro do schema ?
 
     context.update({"item": terreno})
 
@@ -170,3 +166,56 @@ async def search_terreno(
         terrenos = [terrenos]
 
     return render(request, template, context)
+
+
+### SUBPAGES
+
+
+@router.get("/view/{terreno_id}/mapa")
+async def subpage_mapa(terreno_id: int, request: Request, dbSession=Depends(get_db)):
+    template = "pages/terreno/subpage/mapa.html"
+    context: Dict[str, Any] = {}
+
+    service = TerrenoService(dbSession)
+    terreno = await service.get_one_by(id=terreno_id)
+
+    if not terreno:
+        raise HTTPException(404)
+
+    context = {"item": terreno, "terreno_id": terreno_id, "current_tab": "mapa"}
+
+    return render_chunk(request, template, context)
+
+
+@router.get("/view/{terreno_id}/torres")
+async def subpage_torres(terreno_id: int, request: Request, dbSession=Depends(get_db)):
+    template = "pages/terreno/subpage/torres.html"
+    context: Dict[str, Any] = {}
+
+    service = TerrenoService(dbSession)
+    terreno = await service.get_one_by(id=terreno_id, load_relations=["torres"])
+
+    if not terreno:
+        raise HTTPException(404)
+
+    context = {"item": terreno, "terreno_id": terreno_id, "current_tab": "torres"}
+
+    return render_chunk(request, template, context)
+
+
+@router.get("/view/{terreno_id}/documentos")
+async def subpage_documentos(
+    terreno_id: int, request: Request, dbSession=Depends(get_db)
+):
+    template = "pages/terreno/subpage/documentos.html"
+    context: Dict[str, Any] = {}
+
+    service = TerrenoService(dbSession)
+    terreno = await service.get_one_by(id=terreno_id)
+
+    if not terreno:
+        raise HTTPException(404)
+
+    context = {"item": terreno, "terreno_id": terreno_id, "current_tab": "documentos"}
+
+    return render_chunk(request, template, context)

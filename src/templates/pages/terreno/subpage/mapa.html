@@ -1,0 +1,55 @@
+<div class="flex flex-col h-full bg-surface rounded-radius overflow-hidden transition-all duration-200 ease-in-out">
+
+    <div class="
+        px-5 border-b border-outline flex justify-between items-center bg-surface-alt/50 rounded-t-radius min-h-[56px]"
+    >
+        <div class="text-on-surface flex items-center gap-2 whitespace-nowrap">
+            <i data-lucide="map" class="size-6"></i>
+            <h3 class="font-semibold">
+                Mapa
+            </h3>
+        </div>
+
+        <div class="flex gap-1 overflow-x-auto max-w-full no-scrollbar" role="tablist">
+            {% include "pages/terreno/subpage/partials/subpage-navigation.html" %}
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-hidden p-4">
+        <div class="flex flex-col gap-2 h-full">
+            <div class="flex items-center gap-2 text-xs text-on-surface/50">
+                <i data-lucide="map-pin" class="size-3"></i>
+                <span>Lat: {{ item.lat }} | Lng: {{ item.lng }}</span>
+            </div>
+
+            <div id="view-map" class="flex-1 w-full h-full min-h-[250px] rounded-radius border border-outline"></div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mapElement = document.getElementById('view-map');
+    if (!mapElement) return;
+
+    const lat = {{ item.lat }};
+    const lng = {{ item.lng }};
+
+    const map = L.map('view-map').setView([lat, lng], 16);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    L.marker([lat, lng]).addTo(map)
+        .bindPopup('{{ item.name }}')
+        .openPopup();
+
+    setTimeout(() => {
+        map.invalidateSize();
+    }, 100);
+});
+</script>

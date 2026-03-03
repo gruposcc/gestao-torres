@@ -1,0 +1,51 @@
+
+    <!-- Aba Mapa -->
+    <button
+        hx-get="/terreno/view/{{terreno_id}}/mapa"
+        hx-target="#subpage-card"
+        hx-swap="innerHTML"
+        class="flex items-center gap-2 px-3 py-4 text-xs font-normal transition-all duration-200 ease-in-out border-b-2 whitespace-nowrap
+        {% if current_tab == 'mapa' %}
+            text-primary border-primary
+        {% else %}
+            text-on-surface/50 border-transparent hover:text-on-surface  hover:border-on-surface/50
+        {% endif %}
+        "
+        type="button">
+        <i data-lucide="map" class="size-3.5"></i>
+        Mapa
+    </button>
+
+    <!-- Aba Torres -->
+    <button
+        hx-get="/terreno/view/{{terreno_id}}/torres"
+        hx-target="#subpage-card"
+        hx-swap="innerHTML"
+        class="flex items-center gap-2 px-3 py-4 text-xs font-normal transition-all duration-200 ease-in-out border-b-2 whitespace-nowrap
+        {% if current_tab == 'torres' %}
+            text-primary border-primary
+        {% else %}
+            text-on-surface/50 border-transparent hover:text-on-surface  hover:border-on-surface/50
+        {% endif %}
+        "
+        type="button">
+        <i data-lucide="radio-tower" class="size-3.5"></i>
+        Torres
+    </button>
+
+    <!-- Aba Documentos -->
+    <button
+        hx-get="/terreno/view/{{terreno_id}}/documentos"
+        hx-target="#subpage-card"
+        hx-swap="innerHTML"
+        class="flex items-center gap-2 px-3 py-4 text-xs font-normal transition-all duration-200 ease-in-out border-b-2 whitespace-nowrap
+        {% if current_tab == 'documentos' %}
+            text-primary border-primary
+        {% else %}
+            text-on-surface/50 border-transparent hover:text-on-surface  hover:border-on-surface/50
+        {% endif %}
+        "
+        type="button">
+        <i data-lucide="file-text" class="size-3.5"></i>
+        Documentos
+    </button>

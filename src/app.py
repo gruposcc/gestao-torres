@@ -47,6 +47,11 @@ app.include_router(htmx_router)
 app.mount("/api", api_app, name="api")
 
 # estaticos
+app.mount(
+    "/static/img",
+    StaticFiles(directory=str(BASE_DIR / "static/img")),
+    name="static_images",
+)
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "dist")), name="static")
 
 

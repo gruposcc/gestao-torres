@@ -33,6 +33,7 @@ class Altura(BaseSQLModel, TimeStampMixin):
     id: Mapped[uuid.UUID] = mapped_column(
         Uuid[UUID](as_uuid=True), primary_key=True, default=uuid.uuid4
     )
+
     metro_inicial: Mapped[int] = mapped_column(Integer, nullable=False)
     metro_final: Mapped[int] = mapped_column(Integer, nullable=False)
     face: Mapped[FaceDirecao] = mapped_column(Enum(FaceDirecao), nullable=False)
@@ -40,6 +41,7 @@ class Altura(BaseSQLModel, TimeStampMixin):
     contrato_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("contrato.id"), nullable=False
     )
+
     contrato: Mapped["Contrato"] = relationship(
         "Contrato", back_populates="alturas", lazy="selectin"
     )
@@ -60,7 +62,7 @@ class Contrato(BaseSQLModel, TimeStampMixin):
         DateTime(timezone=True), default=None, nullable=False
     )
     data_final: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=None, nullable=False
+        DateTime(timezone=True), default=None, nullable=True
     )
 
     recorrencia: Mapped[RecorrenciaContrato] = mapped_column(
@@ -84,3 +86,7 @@ class Contrato(BaseSQLModel, TimeStampMixin):
         ForeignKey("cliente.id"), nullable=False
     )
     cliente: Mapped["Cliente"] = relationship("Cliente", back_populates="contratos")
+
+    # TODO
+    # created_by
+    # mixin ownable

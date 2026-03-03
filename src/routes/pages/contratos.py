@@ -67,29 +67,6 @@ async def get_create_contrato_torre(
     return render_page(request, template, context)
 
 
-@router.get("/create")
-async def get_create(
-    request: Request,
-    user=Depends(get_user_session),
-    db=Depends(get_db),
-    error_context: Dict | None = None,
-):
-    template = "pages/contrato/create-contrato-torre.html"
-
-    page = {"title": "Torres SCC - Contrato Torre "}
-    context = {
-        "user": user,
-        "page": page,
-        "recorrencias": list[RecorrenciaContrato](RecorrenciaContrato),
-        "faces": list[FaceDirecao](FaceDirecao),
-    }
-
-    if error_context:
-        context.update(error_context)
-
-    return render_page(request, template, context)
-
-
 @router.post("/create/torre")
 async def post_create_contrato_torre(
     request: Request,
@@ -98,7 +75,7 @@ async def post_create_contrato_torre(
     valor: Decimal = Form(...),
     recorrencia: RecorrenciaContrato = Form(...),
     data_inicio: date = Form(...),
-    data_final: date | None = Form(None),
+    # data_final: date | None = Form(None),
     torre_id: uuid.UUID = Form(...),
     alturas: List[str] = Form(None, alias="alturas[]"),
     user=Depends(get_user_session),
@@ -106,6 +83,12 @@ async def post_create_contrato_torre(
 ):
     error_context = {}
     parsed_alturas: List[AlturaContratoSchema] = []
+
+    # ISSO AQUI TA HORRIVEL
+    form_data = await request.form()
+    logger.debug(form_data)
+
+    data_final = form_data.get("data_final", None)
 
     if alturas:
         for altura_json_str in alturas:
@@ -177,6 +160,29 @@ async def post_create_contrato_torre(
     return RedirectResponse(
         url="/contrato/list", status_code=303
     )  # Redirect after successful creation
+
+
+@router.get("/create")
+async def get_create(
+    request: Request,
+    user=Depends(get_user_session),
+    db=Depends(get_db),
+    error_context: Dict | None = None,
+):
+    template = "pages/contrato/create-contrato-torre.html"
+
+    page = {"title": "Torres SCC - Contrato Torre "}
+    context = {
+        "user": user,
+        "page": page,
+        "recorrencias": list[RecorrenciaContrato](RecorrenciaContrato),
+        "faces": list[FaceDirecao](FaceDirecao),
+    }
+
+    if error_context:
+        context.update(error_context)
+
+    return render_page(request, template, context)
 
 
 @router.get("/list")
