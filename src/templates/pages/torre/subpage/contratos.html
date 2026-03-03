@@ -29,7 +29,7 @@
             {% if items|length > 0 %}
                 <div id="items-grid" class="space-y-3" x-data="{ activeDeleteId: null }"">
                     {% for doc in items  %}
-                    <li :class="activeDeleteId === '{{ doc.id }}'' ? 'bg-red-50/50 border-red-200' : 'bg-surface border-outline'"
+                    <li :class="activeDeleteId === '{{ doc.id }}' ? 'bg-red-50/50 border-red-200' : 'bg-surface border-outline'"
                         class="group flex flex-col p-4 rounded-radius border border-outline bg-surface hover:border-primary/30 hover:shadow-md transition-all overflow-hidden relative min-h-[82px] justify-center">
 
                             {# CONTEÚDO ORIGINAL #}
@@ -92,7 +92,7 @@
                                                 <i data-lucide="pencil" class="size-4"></i>
                                             </button>
                                             <button class="p-1.5 hover:bg-red-50 hover:text-red-600 rounded transition-colors"
-                                                    @click="activeDeleteId = {{ doc.id }}">
+                                                    @click="activeDeleteId = '{{ doc.id }}'">
                                                 <i data-lucide="trash-2" class="size-4"></i>
                                             </button>
                                         </div>
