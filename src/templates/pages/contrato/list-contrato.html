@@ -7,7 +7,7 @@
 {% endif %} #}
 
 {% block content  %}
-<div class="content-frame">
+<div class="content-frame h-full">
 
   {# content header #}
   <div class="content-header">
@@ -49,213 +49,289 @@
 
   </div>{# END CONTENT HEADER #}
 
-  {# TABLE CONTAINER #}
-  <div id="table-container"
-     class="
-      overflow-x-auto w-full
-      rounded-radius
-      border border-outline
-      transition-all duration-200 ease-in-out
+  <div class="flex flex-row flex-1 gap-6 max-h-16">
 
-    "
-  >
-    <table id="items-table"
+    <div class="flex flex-1 max-w-60 h-full">
+      <div class="bg-surface-alt dark:bg-surface-dark-alt p-2 w-full h-full rounded-radius border border-outline overflow-hidden group">
+          <div class="flex justify-between items-start">
+              <div class="space-y-1">
+                  <span class="text-[10px] font-black text-on-surface/50 uppercase">Contratos ativos</span>
+                  <p class="text-2xl font-black text-green-500">{{contratos_ativos}}</p>
+              </div>
+              <div class="p-2 bg-green-500/10 rounded-lg text-green-500">
+                  <i data-lucide="trending-up" class="w-4 h-4"></i>
+              </div>
+          </div>
+          <div class="mt-4 flex items-center gap-2">
+              <span class="text-xs font-bold text-green-500">+12.5%</span>
+              <span class="text-[10px] text-on-surface/40">vs mês anterior</span>
+          </div>
+      </div>
+    </div>
+
+        <div class="flex flex-1 max-w-60 max-h-16">
+      <div class="bg-surface-alt dark:bg-surface-dark-alt p-2 w-full h-full rounded-radius border border-outline overflow-hidden group">
+          <div class="flex justify-between items-start">
+              <div class="space-y-1">
+                  <span class="text-[10px] font-black text-on-surface/50 uppercase">Lucro Líquido</span>
+                  <p class="text-2xl font-black text-green-500">R$ 45.200</p>
+              </div>
+              <div class="p-2 bg-green-500/10 rounded-lg text-green-500">
+                  <i data-lucide="trending-up" class="w-4 h-4"></i>
+              </div>
+          </div>
+          <div class="mt-4 flex items-center gap-2">
+              <span class="text-xs font-bold text-green-500">+12.5%</span>
+              <span class="text-[10px] text-on-surface/40">vs mês anterior</span>
+          </div>
+      </div>
+    </div>
+
+
+
+  </div>
+
+
+  <div class="flex flex-col flex-1 h-full">
+    {# TABLE CONTAINER #}
+    <div id="table-container"
       class="
-        w-full table-fixed
-        text-left text-sm
-        text-on-surface
+        overflow-x-auto w-full
+
+        rounded-radius
+        border border-outline
         transition-all duration-200 ease-in-out
+        flex flex-col
 
       "
     >
-
-      <colgroup>
-        <col class="w-10 text-center border-r  border-outline">
-        <col class="w-100 border-r  border-outline">
-        <col class="w-10 text-center border-r  border-outline">
-
-        <col class="w-25 text center border-r border-outline">
-        <col class="w-30 text-center ">
-      </colgroup>
-
-      <thead
+      <table id="items-table"
         class="
-          border-b border-outline
-          bg-surface-alt
-          text-sm text-on-surface-strong
+          w-full table-fixed
+          text-left text-sm
+          text-on-surface
           transition-all duration-200 ease-in-out
 
         "
-      >
+        >
 
-        <tr class="justify-between">
+        <colgroup>
+          <col class="w-10 text-center border-r  border-outline">
+          <col class="w-100 border-r  border-outline">
+          <col class="w-10 text-center border-r  border-outline">
 
-          {# TODO fazer ordenavel pelo header  #}
+          <col class="w-25 text center border-r border-outline">
+          <col class="w-30 text-center ">
+        </colgroup>
 
-          <th scope="col" class="py-2 text-center font-semibold border-r border-outline">#</th> {#  #}
-          <th scope="col" class="py-2 pl-3 font-semibold border-r border-outline ">Nome</th>
-          <th scope="col" class="py-2 text-center font-semibold border-r border-outline">Tipo</th>
-          <th scope="col" class="py-2 text-center font-semibold border-r border-outline  ">Contratos</th>
-          <th scope="col" class="p-2 font-semibold  right-0 text-center">Ações</th> {#  fixar no final #}
-        </tr>
+        <thead
+          class="
+            border-b border-outline
+            bg-surface-alt
+            text-sm text-on-surface-strong
+            transition-all duration-200 ease-in-out
 
-      </thead>
+          "
+        >
 
-      <tbody id="table-body"
-        hx-get="/cliente/list/items"
-        hx-trigger="load once"
-        hx-target="this"
-        hx-push-url="false"
-        hx-swap="innerHTML"
-        {# ADICIONAR OS PARAMS DE ORDENAÇÂO E PAGINAÇÃO #}
-        class="
-          divide-y divide-outline dark:divide-outline-dark
-        "
-      >
+          <tr class="justify-between">
 
-      {% block items %}
-        {% if items and items|length > 0%}
-        {% for item in items %}
-          <tr id="cliente-{{item.id}}">
+            {# TODO fazer ordenavel pelo header  #}
 
-            <td class="text-center">{{loop.index}}</td>
-
-            <td class="px-3 py-2"> <span class="block truncate" title="{{item.name}}">
-
-              {% if item.tipo.value == "pf" %}
-                {{item.name}} {{item.last_name}}
-              {% else %}
-                {{item.name}}
-              {% endif %}
-            </span> </td>
-
-            <td class="px-3 py-2 text-center">
-              <span class="block truncate uppercase" title="{{item.name}}">
-                  {{item.tipo.value}}
-              </span>
-            </td> {# TRUNCAR O NOME E POPUP PARA VER COMPLETO #}
-
-
-            {# <td class="px-3 py-2 text-center ">{{item.altura}} m</td> #}
-            <td class="px-3 py-2 text-center ">0</td> {# TODO  #}
-
-            <td class="px-3 py-2 text-center">
-                <div class="flex justify-center gap-3">
-                    {# <button
-                    hx-get="/torre/{{item.id}}"
-                    class="text-on-surface/70 hover:text-primary transition-colors"
-                    title="Visualizar"
-                    >
-                    <i data-lucide="eye" class="w-4 h-4"></i>
-                    </button> #}
-
-                    <button
-                    hx-get="/torre/view/{{item.id}}"
-                    hx-target="#content"
-                    hx-push-url="true"
-                    class="text-on-surface/70 hover:text-secondary transition-colors"
-                    title="Editar"
-                    >
-                    <i data-lucide="pencil" class="w-4 h-4"></i>
-                    </button>
-
-
-                    <button type="button"
-                        @click="$dispatch('open-delete-modal', { id: '{{item.id}}', name: '{{item.name}}' })"
-                        class="text-on-surface/70 hover:text-error transition-colors">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
-
-                    <button id="real-delete-{{item.id}}"
-                        hx-delete="/cliente/{{item.id}}"
-                        hx-target="#cliente-{{item.id}}"
-                        hx-swap="outerHTML"
-                        class="hidden">
-                    </button>
-                </div>
-            </td>
+            <th scope="col" class="py-2 text-center font-semibold border-r border-outline">#</th> {#  #}
+            <th scope="col" class="py-2 pl-3 font-semibold border-r border-outline ">Nome</th>
+            <th scope="col" class="py-2 text-center font-semibold border-r border-outline">Tipo</th>
+            <th scope="col" class="py-2 text-center font-semibold border-r border-outline  ">Contratos</th>
+            <th scope="col" class="p-2 font-semibold  right-0 text-center">Ações</th> {#  fixar no final #}
           </tr>
-        {% endfor %}
-        {%else%}
-        {# nenhum resultado #}
-        {% endif %}
+
+        </thead>
+
+        <tbody id="table-body"
+          hx-get="/contrato/list/items"
+          hx-trigger="load once"
+          hx-target="this"
+          hx-push-url="false"
+          hx-swap="innerHTML"
+          {# ADICIONAR OS PARAMS DE ORDENAÇÂO E PAGINAÇÃO #}
+          class="
+            divide-y divide-outline dark:divide-outline-dark
+          "
+        >
+
+          {% block items %}
+            {% if items and items|length > 0%}
+            {% for item in items %}
+              <tr id="cliente-{{item.id}}">
+
+                <td class="text-center">{{loop.index}}</td>
+
+                <td class="px-3 py-2"> <span class="block truncate" title="{{item.name}}">
+                  {{item.name}}
+                </span> </td>
+
+                <td class="px-3 py-2 text-center">
+                  <span class="block truncate uppercase" title="{{item.name}}">
+
+                  </span>
+                </td> {# TRUNCAR O NOME E POPUP PARA VER COMPLETO #}
 
 
-      {% endblock items %}
-      </tbody>
-    </table>
+                {# <td class="px-3 py-2 text-center ">{{item.altura}} m</td> #}
+                <td class="px-3 py-2 text-center ">0</td> {# TODO  #}
+
+                <td class="px-3 py-2 text-center">
+                    <div class="flex justify-center gap-3">
+                        {# <button
+                        hx-get="/torre/{{item.id}}"
+                        class="text-on-surface/70 hover:text-primary transition-colors"
+                        title="Visualizar"
+                        >
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button> #}
+
+                        <button
+                        hx-get="/torre/view/{{item.id}}"
+                        hx-target="#content"
+                        hx-push-url="true"
+                        class="text-on-surface/70 hover:text-secondary transition-colors"
+                        title="Editar"
+                        >
+                        <i data-lucide="pencil" class="w-4 h-4"></i>
+                        </button>
+
+
+                        <button type="button"
+                            @click="$dispatch('open-delete-modal', { id: '{{item.id}}', name: '{{item.name}}' })"
+                            class="text-on-surface/70 hover:text-error transition-colors">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+
+                        <button id="real-delete-{{item.id}}"
+                            hx-delete="/cliente/{{item.id}}"
+                            hx-target="#cliente-{{item.id}}"
+                            hx-swap="outerHTML"
+                            class="hidden">
+                        </button>
+                    </div>
+                </td>
+              </tr>
+            {% endfor %}
+            {%else%}
+            {# ESTADO VAZIO QUANDO NÃO HÁ ITENS #}
+            <tr>
+              <td colspan="5" class="py-12">
+                <div class="flex flex-col items-center justify-center text-on-surface/40 gap-2">
+                  <i data-lucide="search-x" class="w-8 h-8 opacity-20"></i>
+                  <div class="text-center">
+                    <p class="font-medium text-sm">Nenhum contrato encontrado</p>
+                    <p class="text-[11px]">Tente ajustar seus filtros ou cadastre um novo.</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            {% endif %}
+          {% endblock items %}
+
+        </tbody>
+      </table>
+
+      {# PAGINAÇÃO FIXADA NO RODAPÉ DA TABELA #}
+      <div class="flex items-center justify-between px-4 py-3 bg-surface-alt border-t border-outline text-xs text-on-surface/70">
+        <div class="flex items-center gap-4">
+          <span>Mostrando <strong>1-10</strong> de <strong>{{items|length}}</strong></span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button class="p-1 hover:bg-outline/20 rounded disabled:opacity-30" title="Anterior">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+          <div class="flex gap-1">
+            <span class="px-2 py-1 bg-primary/10 text-primary rounded font-bold">1</span>
+            <button class="px-2 py-1 hover:bg-outline/20 rounded">2</button>
+          </div>
+          <button class="p-1 hover:bg-outline/20 rounded" title="Próximo">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+
+    </div>
+
+
+
+
+
   </div>
 
-{# MODAL EXLUSÂÔ #}{# MODAL EXCLUSÃO #}
-<div x-data="{
-        modalIsOpen: false,
-        itemName: '',
-        itemID: ''
-     }"
-     @open-delete-modal.window="
-        modalIsOpen = true;
-        itemName = $event.detail.name;
-        itemId = $event.detail.id
-     "
-     class="relative z-50"> {# z-50 para garantir que fique no topo #}
 
-    <div x-cloak x-show="modalIsOpen"
-         x-transition.opacity.duration.200ms
-         x-trap.inert.noscroll="modalIsOpen"
-         @keydown.escape.window="modalIsOpen = false"
-         class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 pb-8 backdrop-blur-sm sm:items-center lg:p-8"
-         role="dialog" aria-modal="true">
+  {# MODAL EXLUSÂÔ #}{# MODAL EXCLUSÃO #}
+  <div x-data="{
+          modalIsOpen: false,
+          itemName: '',
+          itemID: ''
+      }"
+      @open-delete-modal.window="
+          modalIsOpen = true;
+          itemName = $event.detail.name;
+          itemId = $event.detail.id
+      "
+      class="relative z-50"> {# z-50 para garantir que fique no topo #}
 
-        {# Fundo clicável para fechar #}
-        <div class="fixed inset-0" @click="modalIsOpen = false"></div>
+      <div x-cloak x-show="modalIsOpen"
+          x-transition.opacity.duration.200ms
+          x-trap.inert.noscroll="modalIsOpen"
+          @keydown.escape.window="modalIsOpen = false"
+          class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 pb-8 backdrop-blur-sm sm:items-center lg:p-8"
+          role="dialog" aria-modal="true">
 
-        <div x-show="modalIsOpen"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100"
-             class="relative flex max-w-md w-full flex-col gap-4 overflow-hidden rounded-radius border border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark shadow-xl">
+          {# Fundo clicável para fechar #}
+          <div class="fixed inset-0" @click="modalIsOpen = false"></div>
 
-            <div class="flex items-center justify-between border-b border-outline bg-surface-alt/60 p-4 dark:border-outline-dark dark:bg-surface-dark/20">
-                {# Usei text-red-600 caso error-dark não exista #}
-                <h3 class="font-semibold text-red-600 dark:text-red-500 flex items-center gap-2">
-                    <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-                    Confirmar Exclusão
-                </h3>
-                <button @click="modalIsOpen = false" class="hover:opacity-70 transition">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
+          <div x-show="modalIsOpen"
+              x-transition:enter="transition ease-out duration-200"
+              x-transition:enter-start="opacity-0 scale-95"
+              x-transition:enter-end="opacity-100 scale-100"
+              class="relative flex max-w-md w-full flex-col gap-4 overflow-hidden rounded-radius border border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark shadow-xl">
 
-            <div class="px-6 py-4">
-                <p>Tem certeza que deseja excluir o cliente <strong x-text="itemName"></strong>?</p>
-                <p class="text-xs text-on-surface/60 mt-2">Esta ação não pode ser desfeita.</p>
-            </div>
+              <div class="flex items-center justify-between border-b border-outline bg-surface-alt/60 p-4 dark:border-outline-dark dark:bg-surface-dark/20">
+                  {# Usei text-red-600 caso error-dark não exista #}
+                  <h3 class="font-semibold text-red-600 dark:text-red-500 flex items-center gap-2">
+                      <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                      Confirmar Exclusão
+                  </h3>
+                  <button @click="modalIsOpen = false" class="hover:opacity-70 transition">
+                      <i data-lucide="x" class="w-5 h-5"></i>
+                  </button>
+              </div>
 
-            <div class="flex justify-end gap-3 p-4 bg-surface-alt/30 border-t border-outline dark:border-outline-dark">
-            <button @click="modalIsOpen = false" type="button" class="px-4 py-2">
-                        Cancelar
-                    </button>
+              <div class="px-6 py-4">
+                  <p>Tem certeza que deseja excluir o cliente <strong x-text="itemName"></strong>?</p>
+                  <p class="text-xs text-on-surface/60 mt-2">Esta ação não pode ser desfeita.</p>
+              </div>
 
-                    <button
-                        type="button"
-                        class="rounded-radius bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-                        @click="
-                            document.getElementById('real-delete-' + itemId).click();
-                            modalIsOpen = false;
-                        "
-                    >
-                        Confirmar Exclusão
-                    </button>
-            </div>
-        </div>
-    </div>
-</div>
+              <div class="flex justify-end gap-3 p-4 bg-surface-alt/30 border-t border-outline dark:border-outline-dark">
+              <button @click="modalIsOpen = false" type="button" class="px-4 py-2">
+                          Cancelar
+                      </button>
+
+                      <button
+                          type="button"
+                          class="rounded-radius bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                          @click="
+                              document.getElementById('real-delete-' + itemId).click();
+                              modalIsOpen = false;
+                          "
+                      >
+                          Confirmar Exclusão
+                      </button>
+              </div>
+          </div>
+      </div>
+  </div>
 
 
 </div>
 
 {% endblock %}
-
-{# {% block end_body %}
-{% include "partials/notification.html" %}
-{% endblock end_body %} #}

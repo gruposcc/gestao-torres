@@ -191,11 +191,13 @@ async def list_contrato(request: Request, user=Depends(get_user_session)):
 
 
 @router.get("/list/items")
-async def list_cliente_items(request: Request, db=Depends(get_db)):
+async def list_contrato_items(request: Request, db=Depends(get_db)):
     service = ContratoService(db)
     contratos = await service.get_list()
 
-    context = {"items": contratos}
+    total_contratos_ativos = contratos.count()
+
+    context = {"items": contratos, "contratos_ativos": total_contratos_ativos}
     template = "pages/contrato/list-contrato.html"
 
     return render_chunk(request, template, context, block="items")
