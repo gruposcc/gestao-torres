@@ -7,7 +7,7 @@
 {% endif %} #}
 
 {% block content  %}
-<div class="content-frame h-full">
+<div class="content-frame h-full overflow-y-scroll">
 
   {# content header #}
   <div class="content-header">
@@ -49,6 +49,7 @@
 
   </div>{# END CONTENT HEADER #}
 
+  {# DASHBOARDS #}
   <div class="flex flex-row flex-1 gap-6 max-h-16">
 
     <div class="flex flex-1 max-w-60 h-full">
@@ -69,7 +70,7 @@
       </div>
     </div>
 
-        <div class="flex flex-1 max-w-60 max-h-16">
+    <div class="flex flex-1 max-w-60 max-h-16">
       <div class="bg-surface-alt dark:bg-surface-dark-alt p-2 w-full h-full rounded-radius border border-outline overflow-hidden group">
           <div class="flex justify-between items-start">
               <div class="space-y-1">
@@ -86,141 +87,81 @@
           </div>
       </div>
     </div>
+  </div> {# END DASHBOARDS #}
 
 
 
-  </div>
 
 
-  <div class="flex flex-col flex-1 h-full">
-    {# TABLE CONTAINER #}
-    <div id="table-container"
-      class="
-        overflow-x-auto w-full
+  {# TABLE + PAGINAÇÃO #}
+  <div class="flex flex-col flex-1 h-full ">
 
-        rounded-radius
-        border border-outline
-        transition-all duration-200 ease-in-out
-        flex flex-col
+  {% block table %}
+  {# O HTMX vai substituir TUDO que estiver dentro deste ID #}
+  <div id="table-container" class="overflow-y-scroll w-full rounded-radius border border-outline transition-all duration-200 ease-in-out flex flex-col bg-surface">
 
-      "
-    >
-      <table id="items-table"
-        class="
-          w-full table-fixed
-          text-left text-sm
-          text-on-surface
-          transition-all duration-200 ease-in-out
-
-        "
-        >
-
+    <div class="overflow-x-auto  w-full">
+      <table id="items-table" class="w-full table-fixed text-left text-sm text-on-surface">
         <colgroup>
-          <col class="w-10 text-center border-r  border-outline">
-          <col class="w-100 border-r  border-outline">
-          <col class="w-10 text-center border-r  border-outline">
-
+          <col class="w-10 text-center border-r border-outline">
+          <col class="w-100 border-r border-outline">
+          <col class="w-10 text-center border-r border-outline">
           <col class="w-25 text center border-r border-outline">
           <col class="w-30 text-center ">
         </colgroup>
 
-        <thead
-          class="
-            border-b border-outline
-            bg-surface-alt
-            text-sm text-on-surface-strong
-            transition-all duration-200 ease-in-out
-
-          "
-        >
-
-          <tr class="justify-between">
-
-            {# TODO fazer ordenavel pelo header  #}
-
-            <th scope="col" class="py-2 text-center font-semibold border-r border-outline">#</th> {#  #}
-            <th scope="col" class="py-2 pl-3 font-semibold border-r border-outline ">Nome</th>
+        <thead class="border-b border-outline bg-surface-alt text-sm text-on-surface-strong">
+          <tr>
+            <th scope="col" class="py-2 text-center font-semibold border-r border-outline">#</th>
+            <th scope="col" class="py-2 pl-3 font-semibold border-r border-outline">Nome</th>
             <th scope="col" class="py-2 text-center font-semibold border-r border-outline">Tipo</th>
-            <th scope="col" class="py-2 text-center font-semibold border-r border-outline  ">Contratos</th>
-            <th scope="col" class="p-2 font-semibold  right-0 text-center">Ações</th> {#  fixar no final #}
+            <th scope="col" class="py-2 text-center font-semibold border-r border-outline">Contratos</th>
+            <th scope="col" class="p-2 font-semibold text-center">Ações</th>
           </tr>
-
         </thead>
 
-        <tbody id="table-body"
-          hx-get="/contrato/list/items"
-          hx-trigger="load once"
-          hx-target="this"
-          hx-push-url="false"
-          hx-swap="innerHTML"
-          {# ADICIONAR OS PARAMS DE ORDENAÇÂO E PAGINAÇÃO #}
-          class="
-            divide-y divide-outline dark:divide-outline-dark
-          "
-        >
-
-          {% block items %}
-            {% if items and items|length > 0%}
+        <tbody id="table-body" class="divide-y divide-outline dark:divide-outline-dark">
+          {% if items and items|length > 0 %}
             {% for item in items %}
-              <tr id="cliente-{{item.id}}">
+              <tr id="cliente-{{item.id}}" class="hover:bg-surface-alt/50 transition-colors">
+                {# Cálculo para manter a numeração correta entre páginas #}
+                <td class="text-center text-xs text-on-surface/50">
+                  {{ ((current_page | default(1) - 1) * 10) + loop.index }}
+                </td>
 
-                <td class="text-center">{{loop.index}}</td>
-
-                <td class="px-3 py-2"> <span class="block truncate" title="{{item.name}}">
-                  {{item.name}}
-                </span> </td>
+                <td class="px-3 py-2">
+                  <span class="block truncate font-medium" title="{{item.name}}">{{item.name}}</span>
+                </td>
 
                 <td class="px-3 py-2 text-center">
-                  <span class="block truncate uppercase" title="{{item.name}}">
-
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-outline/20 uppercase">
+                    {{ item.tipo | default('N/A') }}
                   </span>
-                </td> {# TRUNCAR O NOME E POPUP PARA VER COMPLETO #}
+                </td>
 
-
-                {# <td class="px-3 py-2 text-center ">{{item.altura}} m</td> #}
-                <td class="px-3 py-2 text-center ">0</td> {# TODO  #}
+                <td class="px-3 py-2 text-center">0</td>
 
                 <td class="px-3 py-2 text-center">
                     <div class="flex justify-center gap-3">
-                        {# <button
-                        hx-get="/torre/{{item.id}}"
-                        class="text-on-surface/70 hover:text-primary transition-colors"
-                        title="Visualizar"
-                        >
-                        <i data-lucide="eye" class="w-4 h-4"></i>
-                        </button> #}
-
-                        <button
-                        hx-get="/torre/view/{{item.id}}"
-                        hx-target="#content"
-                        hx-push-url="true"
-                        class="text-on-surface/70 hover:text-secondary transition-colors"
-                        title="Editar"
-                        >
-                        <i data-lucide="pencil" class="w-4 h-4"></i>
+                        <button hx-get="/torre/view/{{item.id}}" hx-target="#content" hx-push-url="true"
+                                class="text-on-surface/70 hover:text-secondary transition-colors" title="Editar">
+                            <i data-lucide="pencil" class="w-4 h-4"></i>
                         </button>
 
-
-                        <button type="button"
-                            @click="$dispatch('open-delete-modal', { id: '{{item.id}}', name: '{{item.name}}' })"
-                            class="text-on-surface/70 hover:text-error transition-colors">
+                        <button type="button" @click="$dispatch('open-delete-modal', { id: '{{item.id}}', name: '{{item.name}}' })"
+                                class="text-on-surface/70 hover:text-error transition-colors" title="Excluir">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
 
-                        <button id="real-delete-{{item.id}}"
-                            hx-delete="/cliente/{{item.id}}"
-                            hx-target="#cliente-{{item.id}}"
-                            hx-swap="outerHTML"
-                            class="hidden">
-                        </button>
+                        <button id="real-delete-{{item.id}}" hx-delete="/cliente/{{item.id}}" hx-target="#cliente-{{item.id}}"
+                                hx-swap="outerHTML" class="hidden"></button>
                     </div>
                 </td>
               </tr>
             {% endfor %}
-            {%else%}
-            {# ESTADO VAZIO QUANDO NÃO HÁ ITENS #}
+          {% else %}
             <tr>
-              <td colspan="5" class="py-12">
+              <td colspan="5" class="py-16">
                 <div class="flex flex-col items-center justify-center text-on-surface/40 gap-2">
                   <i data-lucide="search-x" class="w-8 h-8 opacity-20"></i>
                   <div class="text-center">
@@ -230,37 +171,51 @@
                 </div>
               </td>
             </tr>
-            {% endif %}
-          {% endblock items %}
-
+          {% endif %}
         </tbody>
       </table>
-
-      {# PAGINAÇÃO FIXADA NO RODAPÉ DA TABELA #}
-      <div class="flex items-center justify-between px-4 py-3 bg-surface-alt border-t border-outline text-xs text-on-surface/70">
-        <div class="flex items-center gap-4">
-          <span>Mostrando <strong>1-10</strong> de <strong>{{items|length}}</strong></span>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <button class="p-1 hover:bg-outline/20 rounded disabled:opacity-30" title="Anterior">
-            <i data-lucide="chevron-left" class="w-4 h-4"></i>
-          </button>
-          <div class="flex gap-1">
-            <span class="px-2 py-1 bg-primary/10 text-primary rounded font-bold">1</span>
-            <button class="px-2 py-1 hover:bg-outline/20 rounded">2</button>
-          </div>
-          <button class="p-1 hover:bg-outline/20 rounded" title="Próximo">
-            <i data-lucide="chevron-right" class="w-4 h-4"></i>
-          </button>
-        </div>
-      </div>
-
-
     </div>
 
+    {# PAGINAÇÃO (Dentro do container de substituição do HTMX) #}
+    <div class="flex items-center justify-between px-4 py-3 bg-surface-alt border-t border-outline text-xs">
+      <div class="text-on-surface/70">
+        Exibindo <strong>{{ items|length }}</strong> de <strong>{{ total_count | default(0) }}</strong> itens
+      </div>
 
+      <div class="flex items-center gap-2">
+        {# BOTÃO VOLTAR #}
+        <button
+          {% if current_page | default(1) > 1 %}
+            hx-get="/contrato/list/items?page={{ (current_page | default(1)) - 1 }}"
+            hx-target="#table-container"
+            hx-swap="outerHTML"
+          {% else %}
+            disabled
+          {% endif %}
+          class="p-1 hover:bg-outline/20 rounded disabled:opacity-30 transition-all">
+          <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        </button>
 
+        <span class="px-3 py-1 bg-surface rounded border border-outline font-bold">
+            {{ current_page | default(1) }} / {{ total_pages | default(1) }}
+        </span>
+
+        {# BOTÃO AVANÇAR #}
+        <button
+          {% if current_page | default(1) < total_pages | default(1) %}
+            hx-get="/contrato/list/items?page={{ (current_page | default(1)) + 1 }}"
+            hx-target="#table-container"
+            hx-swap="outerHTML"
+          {% else %}
+            disabled
+          {% endif %}
+          class="p-1 hover:bg-outline/20 rounded disabled:opacity-30 transition-all">
+          <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+{% endblock table %}
 
 
   </div>

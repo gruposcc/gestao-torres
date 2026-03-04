@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, Generic, Optional, Tuple, TypeVar
 
-from sqlalchemy import exists, select, delete
+from sqlalchemy import exists, select, delete, func
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -151,6 +151,35 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
         else:
             parsed = [out_schema.model_validate(item) for item in items]
             return parsed
+
+    async def get_list_paginated(
+        self,
+        page: int = 1,
+        page_size: int = 10,
+        only_enabled=True,
+    ):
+        stmt = select(self.model)
+
+        if only_enabled and hasattr(self.model, "status"):
+            # fix use model.status, use getattr
+            # TODO
+            stmt = stmt.where(self.model.status == ObjectStatus.ENABLE)  # pyright: ignore[reportAttributeAccessIssue]
+
+        # Contagem total para a paginação
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total_result = await self.dbSession.execute(count_stmt)
+        total_count = total_result.scalar() or 0
+
+        # Lógica de Offset e Limit
+        offset = (page - 1) * page_size
+        stmt = stmt.offset(offset).limit(page_size)
+
+        result = await self.dbSession.execute(stmt)
+        items = result.scalars().all()
+
+        total_pages = (total_count + page_size - 1) // page_size
+
+        return items, total_pages, total_count
 
     async def exists_by(self, **kwargs):
         stmt = select(exists(self.model))  # inicializa query do modelo

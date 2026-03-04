@@ -370,7 +370,7 @@ async def contratos(torre_id: uuid.UUID, request: Request, dbSession=Depends(get
     template = "pages/torre/subpage/contratos.html"
 
     service = ContratoService(dbSession)
-    contratos = await service.get_all()
+    contratos = await service.get_list()
     context = {"items": contratos, "torre_id": torre_id, "current_tab": "contratos"}
 
     return render_chunk(request, template, context)

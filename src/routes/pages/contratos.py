@@ -182,22 +182,44 @@ async def get_create(
 
 
 @router.get("/list")
-async def list_contrato(request: Request, user=Depends(get_user_session)):
+async def list_contrato(
+    request: Request, db=Depends(get_db), user=Depends(get_user_session)
+):
+    service = ContratoService(db)
+    # Pegamos apenas o count total para os cards iniciais
+    _, _, total_count = await service.get_list_paginated(page=1, page_size=1)
+
     template = "pages/contrato/list-contrato.html"
-    page = {"title": "Torres SCC - Clientes"}
-    context = {"user": user, "page": page}
+    page_info = {"title": "Torres SCC - Contratos"}
+    context = {
+        "user": user,
+        "page": page_info,
+        "contratos_ativos": total_count,  # Passa o valor real para o card
+        "current_page": 1,
+        "total_pages": 1,
+    }
 
     return render_page(request, template, context)
 
 
 @router.get("/list/items")
-async def list_contrato_items(request: Request, db=Depends(get_db)):
+async def list_contrato_items(request: Request, page: int = 1, db=Depends(get_db)):
     service = ContratoService(db)
-    contratos = await service.get_list()
+    page_size = 10
 
-    total_contratos_ativos = contratos.count()
+    items, total_pages, total_count = await service.get_list_paginated(
+        page=page, page_size=page_size
+    )
 
-    context = {"items": contratos, "contratos_ativos": total_contratos_ativos}
+    context = {
+        "request": request,
+        "items": items,
+        "current_page": page,
+        "total_pages": total_pages,
+        "total_count": total_count,
+    }
+
     template = "pages/contrato/list-contrato.html"
 
-    return render_chunk(request, template, context, block="items")
+    # Renderizamos o bloco 'table_content' para atualizar a tabela e os botões de paginação juntos
+    return render_chunk(request, template, context, block="table_content")
