@@ -157,7 +157,7 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
     async def get_list_paginated(
         self,
         page: int = 1,
-        page_size: int = 10,
+        per_page: int = 10,
         only_enabled=True,
     ):
         stmt = select(self.model)
@@ -173,15 +173,24 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
         total_count = total_result.scalar() or 0
 
         # Lógica de Offset e Limit
-        offset = (page - 1) * page_size
-        stmt = stmt.offset(offset).limit(page_size)
+        offset = (page - 1) * per_page
+        stmt = stmt.offset(offset).limit(per_page)
 
         result = await self.dbSession.execute(stmt)
         items = result.scalars().all()
 
-        total_pages = (total_count + page_size - 1) // page_size
+        total_pages = (total_count + per_page - 1) // per_page
 
-        return items, total_pages, total_count
+        # TODO return paginated context
+        # context = {
+        #    "request": request,
+        #    "items": items,
+        #    "current_page": page,
+        #    "total_pages": total_pages,
+        #    "total_count": total_count,
+        # }
+
+        return items, total_pages, page, per_page, total_count
 
     async def exists_by(self, **kwargs):
         stmt = select(exists(self.model))  # inicializa query do modelo
