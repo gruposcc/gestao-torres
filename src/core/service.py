@@ -152,6 +152,8 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
             parsed = [out_schema.model_validate(item) for item in items]
             return parsed
 
+    async def count(stmt): ...
+
     async def get_list_paginated(
         self,
         page: int = 1,

@@ -94,11 +94,21 @@
 
 
   {# TABLE + PAGINAÇÃO #}
-  <div class="flex flex-col flex-1 h-full ">
+  <div class="flex flex-col flex-1 h-full "
+  {% if current_page == 1 %}
+      hx-get="/contrato/list/items?page={{ current_page }}"
+      hx-target="#table-body"
+      hx-swap="innerHTML"
+      hx-trigger="load once"
+    {% endif %}
+  >
 
-  {% block table %}
   {# O HTMX vai substituir TUDO que estiver dentro deste ID #}
-  <div id="table-container" class="overflow-y-scroll w-full rounded-radius border border-outline transition-all duration-200 ease-in-out flex flex-col bg-surface">
+  <div
+   id="table-container" class="overflow-y-scroll w-full rounded-radius border border-outline transition-all duration-200 ease-in-out flex flex-col bg-surface"
+
+
+  >
 
     <div class="overflow-x-auto  w-full">
       <table id="items-table" class="w-full table-fixed text-left text-sm text-on-surface">
@@ -121,6 +131,7 @@
         </thead>
 
         <tbody id="table-body" class="divide-y divide-outline dark:divide-outline-dark">
+        {% block items %}
           {% if items and items|length > 0 %}
             {% for item in items %}
               <tr id="cliente-{{item.id}}" class="hover:bg-surface-alt/50 transition-colors">
@@ -172,23 +183,28 @@
               </td>
             </tr>
           {% endif %}
+        {% endblock items %}
         </tbody>
       </table>
     </div>
 
+
     {# PAGINAÇÃO (Dentro do container de substituição do HTMX) #}
-    <div class="flex items-center justify-between px-4 py-3 bg-surface-alt border-t border-outline text-xs">
+    {% block pagination %}
+    <div id="pagination-controls" hx-swap-oob="true" class="flex items-center justify-between px-4 py-3 bg-surface-alt border-t border-outline text-xs">
+
       <div class="text-on-surface/70">
         Exibindo <strong>{{ items|length }}</strong> de <strong>{{ total_count | default(0) }}</strong> itens
       </div>
 
+      {% if total_pages and total_pages > 1 %}
       <div class="flex items-center gap-2">
         {# BOTÃO VOLTAR #}
         <button
           {% if current_page | default(1) > 1 %}
             hx-get="/contrato/list/items?page={{ (current_page | default(1)) - 1 }}"
-            hx-target="#table-container"
-            hx-swap="outerHTML"
+            hx-target="#table-body"
+            hx-swap="innerHTML"
           {% else %}
             disabled
           {% endif %}
@@ -204,8 +220,8 @@
         <button
           {% if current_page | default(1) < total_pages | default(1) %}
             hx-get="/contrato/list/items?page={{ (current_page | default(1)) + 1 }}"
-            hx-target="#table-container"
-            hx-swap="outerHTML"
+            hx-target="#table-body"
+            hx-swap="innerHTML"
           {% else %}
             disabled
           {% endif %}
@@ -213,9 +229,11 @@
           <i data-lucide="chevron-right" class="w-4 h-4"></i>
         </button>
       </div>
+      {% endif %}
+
     </div>
+    {% endblock pagination %}
   </div>
-{% endblock table %}
 
 
   </div>
