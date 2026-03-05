@@ -140,6 +140,7 @@
         flex flex-col
         gap-1 items-center
     ;
+    transition: width 0.3s ease-in-out, transform 0.3s ease-in-out;
 }
 
 
@@ -148,6 +149,7 @@
         @apply
             flex items-center rounded-radius flex-row
             w-full
+            overflow-hidden
             h-10  pl-2.5
             transition-all duration-200 ease-in-out
             text-on-surface hover:text-on-surface-strong
