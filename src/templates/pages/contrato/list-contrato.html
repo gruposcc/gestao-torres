@@ -89,154 +89,144 @@
     </div>
   </div> {# END DASHBOARDS #}
 
-
-
-
-
   {# TABLE + PAGINAÇÃO #}
-  <div class="flex flex-col flex-1 h-full "
-  {% if current_page == 1 %}
-      hx-get="/contrato/list/items?page={{ current_page }}"
-      hx-target="#table-body"
-      hx-swap="innerHTML"
-      hx-trigger="load once"
-    {% endif %}
+  <div id="table-paged" lass="flex flex-col flex-1 h-full "
   >
 
-  {# O HTMX vai substituir TUDO que estiver dentro deste ID #}
-  <div
-   id="table-container" class="overflow-y-scroll w-full rounded-radius border border-outline transition-all duration-200 ease-in-out flex flex-col bg-surface"
+    {# O HTMX vai substituir TUDO que estiver dentro deste ID #}
+    {% block table %}
+    <div
+    id="table-container" class="overflow-y-scroll w-full rounded-radius border border-outline transition-all duration-200 ease-in-out flex flex-col bg-surface"
 
 
-  >
+    >
 
-    <div class="overflow-x-auto  w-full">
-      <table id="items-table" class="w-full table-fixed text-left text-sm text-on-surface">
-        <colgroup>
-          <col class="w-10 text-center border-r border-outline">
-          <col class="w-100 border-r border-outline">
-          <col class="w-10 text-center border-r border-outline">
-          <col class="w-25 text center border-r border-outline">
-          <col class="w-30 text-center ">
-        </colgroup>
+      <div class="overflow-x-auto  w-full">
+        <table id="items-table" class="w-full table-fixed text-left text-sm text-on-surface">
+          <colgroup>
+            <col class="w-10 text-center border-r border-outline">
+            <col class="w-100 border-r border-outline">
+            <col class="w-10 text-center border-r border-outline">
+            <col class="w-25 text center border-r border-outline">
+            <col class="w-30 text-center ">
+          </colgroup>
 
-        <thead class="border-b border-outline bg-surface-alt text-sm text-on-surface-strong">
-          <tr>
-            <th scope="col" class="py-2 text-center font-semibold border-r border-outline">#</th>
-            <th scope="col" class="py-2 pl-3 font-semibold border-r border-outline">Nome</th>
-            <th scope="col" class="py-2 text-center font-semibold border-r border-outline">Tipo</th>
-            <th scope="col" class="py-2 text-center font-semibold border-r border-outline">Contratos</th>
-            <th scope="col" class="p-2 font-semibold text-center">Ações</th>
-          </tr>
-        </thead>
+          <thead class="border-b border-outline bg-surface-alt text-sm text-on-surface-strong">
+            <tr>
+              <th scope="col" class="py-2 text-center font-semibold border-r border-outline">#</th>
+              <th scope="col" class="py-2 pl-3 font-semibold border-r border-outline">Nome</th>
+              <th scope="col" class="py-2 text-center font-semibold border-r border-outline">Tipo</th>
+              <th scope="col" class="py-2 text-center font-semibold border-r border-outline">Contratos</th>
+              <th scope="col" class="p-2 font-semibold text-center">Ações</th>
+            </tr>
+          </thead>
 
-        <tbody id="table-body" class="divide-y divide-outline dark:divide-outline-dark">
-        {% block items %}
-          {% if items and items|length > 0 %}
-            {% for item in items %}
-              <tr id="cliente-{{item.id}}" class="hover:bg-surface-alt/50 transition-colors">
-                {# Cálculo para manter a numeração correta entre páginas #}
-                <td class="text-center text-xs text-on-surface/50">
-                  {{ ((current_page | default(1) - 1) * 10) + loop.index }}
-                </td>
+          <tbody id="table-body" class="divide-y divide-outline dark:divide-outline-dark">
+          {% block items %}
+            {% if items and items|length > 0 %}
+              {% for item in items %}
+                <tr id="cliente-{{item.id}}" class="hover:bg-surface-alt/50 transition-colors">
+                  {# Cálculo para manter a numeração correta entre páginas #}
+                  <td class="text-center text-xs text-on-surface/50">
+                    {{ ((current_page | default(1) - 1) * 10) + loop.index }}
+                  </td>
 
-                <td class="px-3 py-2">
-                  <span class="block truncate font-medium" title="{{item.name}}">{{item.name}}</span>
-                </td>
+                  <td class="px-3 py-2">
+                    <span class="block truncate font-medium" title="{{item.name}}">{{item.name}}</span>
+                  </td>
 
-                <td class="px-3 py-2 text-center">
-                  <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-outline/20 uppercase">
-                    {{ item.tipo | default('N/A') }}
-                  </span>
-                </td>
+                  <td class="px-3 py-2 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-outline/20 uppercase">
+                      {{ item.tipo | default('N/A') }}
+                    </span>
+                  </td>
 
-                <td class="px-3 py-2 text-center">0</td>
+                  <td class="px-3 py-2 text-center">0</td>
 
-                <td class="px-3 py-2 text-center">
-                    <div class="flex justify-center gap-3">
-                        <button hx-get="/torre/view/{{item.id}}" hx-target="#content" hx-push-url="true"
-                                class="text-on-surface/70 hover:text-secondary transition-colors" title="Editar">
-                            <i data-lucide="pencil" class="w-4 h-4"></i>
-                        </button>
+                  <td class="px-3 py-2 text-center">
+                      <div class="flex justify-center gap-3">
+                          <button hx-get="/torre/view/{{item.id}}" hx-target="#content" hx-push-url="true"
+                                  class="text-on-surface/70 hover:text-secondary transition-colors" title="Editar">
+                              <i data-lucide="pencil" class="w-4 h-4"></i>
+                          </button>
 
-                        <button type="button" @click="$dispatch('open-delete-modal', { id: '{{item.id}}', name: '{{item.name}}' })"
-                                class="text-on-surface/70 hover:text-error transition-colors" title="Excluir">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
+                          <button type="button" @click="$dispatch('open-delete-modal', { id: '{{item.id}}', name: '{{item.name}}' })"
+                                  class="text-on-surface/70 hover:text-error transition-colors" title="Excluir">
+                              <i data-lucide="trash-2" class="w-4 h-4"></i>
+                          </button>
 
-                        <button id="real-delete-{{item.id}}" hx-delete="/cliente/{{item.id}}" hx-target="#cliente-{{item.id}}"
-                                hx-swap="outerHTML" class="hidden"></button>
+                          <button id="real-delete-{{item.id}}" hx-delete="/cliente/{{item.id}}" hx-target="#cliente-{{item.id}}"
+                                  hx-swap="outerHTML" class="hidden"></button>
+                      </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="5" class="py-16">
+                  <div class="flex flex-col items-center justify-center text-on-surface/40 gap-2">
+                    <i data-lucide="search-x" class="w-8 h-8 opacity-20"></i>
+                    <div class="text-center">
+                      <p class="font-medium text-sm">Nenhum contrato encontrado</p>
+                      <p class="text-[11px]">Tente ajustar seus filtros ou cadastre um novo.</p>
                     </div>
+                  </div>
                 </td>
               </tr>
-            {% endfor %}
-          {% else %}
-            <tr>
-              <td colspan="5" class="py-16">
-                <div class="flex flex-col items-center justify-center text-on-surface/40 gap-2">
-                  <i data-lucide="search-x" class="w-8 h-8 opacity-20"></i>
-                  <div class="text-center">
-                    <p class="font-medium text-sm">Nenhum contrato encontrado</p>
-                    <p class="text-[11px]">Tente ajustar seus filtros ou cadastre um novo.</p>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          {% endif %}
-        {% endblock items %}
-        </tbody>
-      </table>
-    </div>
-
-
-    {# PAGINAÇÃO (Dentro do container de substituição do HTMX) #}
-    {% block pagination %}
-    <div id="pagination-controls" hx-swap-oob="true" class="flex items-center justify-between px-4 py-3 bg-surface-alt border-t border-outline text-xs">
-
-      <div class="text-on-surface/70">
-        Exibindo <strong>{{ items|length }}</strong> de <strong>{{ total_count | default(0) }}</strong> itens
+            {% endif %}
+          {% endblock items %}
+          </tbody>
+        </table>
       </div>
 
-      {% if total_pages and total_pages > 1 %}
-      <div class="flex items-center gap-2">
-        {# BOTÃO VOLTAR #}
-        <button
-          {% if current_page | default(1) > 1 %}
-            hx-get="/contrato/list/items?page={{ (current_page | default(1)) - 1 }}"
-            hx-target="#table-body"
-            hx-swap="innerHTML"
-          {% else %}
-            disabled
-          {% endif %}
-          class="p-1 hover:bg-outline/20 rounded disabled:opacity-30 transition-all">
-          <i data-lucide="chevron-left" class="w-4 h-4"></i>
-        </button>
+      {# PAGINAÇÃO (Dentro do container de substituição do HTMX) #}
+      {% block pagination %}
+        <div id="pagination-controls"
+          class="flex items-center justify-between px-4 py-3 bg-surface-alt border-t border-outline text-xs">
 
-        <span class="px-3 py-1 bg-surface rounded border border-outline font-bold">
-            {{ current_page | default(1) }} / {{ total_pages | default(1) }}
-        </span>
+          <div class="text-on-surface/70">
+            Exibindo <strong>{{ items|length }}</strong> de <strong>{{ total_count | default(0) }}</strong> itens
+          </div>
 
-        {# BOTÃO AVANÇAR #}
-        <button
-          {% if current_page | default(1) < total_pages | default(1) %}
-            hx-get="/contrato/list/items?page={{ (current_page | default(1)) + 1 }}"
-            hx-target="#table-body"
-            hx-swap="innerHTML"
-          {% else %}
-            disabled
+          {% if total_pages and total_pages > 1 %}
+          <div class="flex items-center gap-2">
+            {# BOTÃO VOLTAR #}
+            <button
+              {% if current_page | default(1) > 1 %}
+                hx-get="/contrato/list/items?page={{ (current_page | default(1)) - 1 }}"
+                hx-target="#table-paged"
+                hx-swap="innerHTML"
+              {% else %}
+                disabled
+              {% endif %}
+              class="p-1 hover:bg-outline/20 rounded disabled:opacity-30 transition-all">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+
+            <span class="px-3 py-1 bg-surface rounded border border-outline font-bold">
+                {{ current_page | default(1) }} / {{ total_pages | default(1) }}
+            </span>
+
+            {# BOTÃO AVANÇAR #}
+            <button
+              {% if current_page | default(1) < total_pages | default(1) %}
+                hx-get="/contrato/list/items?page={{ (current_page | default(1)) + 1 }}"
+                hx-target="#table-paged"
+                hx-swap="innerHTML"
+              {% else %}
+                disabled
+              {% endif %}
+              class="p-1 hover:bg-outline/20 rounded disabled:opacity-30 transition-all">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
           {% endif %}
-          class="p-1 hover:bg-outline/20 rounded disabled:opacity-30 transition-all">
-          <i data-lucide="chevron-right" class="w-4 h-4"></i>
-        </button>
-      </div>
-      {% endif %}
+        </div>
+      {% endblock pagination %}
 
     </div>
-    {% endblock pagination %}
   </div>
-
-
-  </div>
+  {% endblock table %}
 
 
   {# MODAL EXLUSÂÔ #}{# MODAL EXCLUSÃO #}

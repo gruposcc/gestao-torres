@@ -187,16 +187,23 @@ async def list_contrato(
 ):
     service = ContratoService(db)
     # Pegamos apenas o count total para os cards iniciais
-    _, total_pages, total_count = await service.get_list_paginated(page=1, page_size=1)
+    initial_page = 1
+    default_page_size = 10  # PER PAGE
+
+    items, total_pages, total_count = await service.get_list_paginated(
+        page=initial_page, page_size=default_page_size
+    )
 
     template = "pages/contrato/list-contrato.html"
     page_info = {"title": "Torres SCC - Contratos"}
+
     context = {
         "user": user,
         "page": page_info,
         "contratos_ativos": total_count,  # Passa o valor real para o card
-        "current_page": 1,
+        "current_page": initial_page,
         "total_pages": total_pages,
+        "items": items,
     }
 
     return render_page(request, template, context)
@@ -222,18 +229,19 @@ async def list_contrato_items(request: Request, page: int = 1, db=Depends(get_db
     template = "pages/contrato/list-contrato.html"
 
     # 1. Geramos as respostas para cada bloco usando seu render_chunk
-    res_items = render_chunk(
-        request, "pages/contrato/list-contrato.html", context, block="items"
-    )
-    res_pager = render_chunk(
-        request, "pages/contrato/list-contrato.html", context, block="pagination"
-    )
+    # res_items = render_chunk(
+    #    request, "pages/contrato/list-contrato.html", context, block="items"
+    # )
+    # res_pager = render_chunk(
+    #    request, "pages/contrato/list-contrato.html", context, block="pagination"
+    # )#
 
     # CONVERSÃO CORRETA: memoryview -> bytes -> str
-    html_items = bytes(res_items.body).decode("utf-8")
-    html_pager = bytes(res_pager.body).decode("utf-8")
+    # html_items = bytes(res_items.body).decode("utf-8")
+    # html_pager = bytes(res_pager.body).decode("utf-8")
 
     # Retorna os dois blocos concatenados
     # html_items vai para o hx-target (tbody)
     # html_pager vai para o seu lugar via hx-swap-oob="true"
-    return HTMLResponse(content=f"{html_items}{html_pager}")
+    # return HTMLResponse(content=f"{html_items}{html_pager}")
+    return render_chunk(request, template, context, block="table")
