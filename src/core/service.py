@@ -159,6 +159,8 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
         page: int = 1,
         per_page: int = 10,
         only_enabled=True,
+        sort_by: str = "created_at",  # Coluna padrão
+        order: str = "desc",  # Ordem padrão
     ):
         stmt = select(self.model)
 
@@ -166,6 +168,12 @@ class AbstractModelService(AbstractBaseService, Generic[T]):
             # fix use model.status, use getattr
             # TODO
             stmt = stmt.where(self.model.status == ObjectStatus.ENABLE)  # pyright: ignore[reportAttributeAccessIssue]
+
+        # --- LÓGICA DE ORDENAÇÃO ---
+
+        if hasattr(self.model, sort_by):
+            column = getattr(self.model, sort_by)
+            stmt = stmt.order_by(column.desc() if order == "desc" else column.asc())
 
         # Contagem total para a paginação
         count_stmt = select(func.count()).select_from(stmt.subquery())

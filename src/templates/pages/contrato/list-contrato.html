@@ -137,7 +137,7 @@
 
                   <td class="px-3 py-2 text-center">
                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-outline/20 uppercase">
-                      {{ item.tipo | default('N/A') }}
+                      {{ item.created_at.strftime('%d/%m/%Y')| default('N/A') }}
                     </span>
                   </td>
 
